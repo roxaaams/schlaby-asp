@@ -36,8 +36,6 @@ To create your own data, or more precisely, instances of a scheduling problem, p
    ````
 3. Please note that the file path needs to be given relative to the config directory of the project and that otherwise your config may not be found.
    
-rms: python -m src.data_generator.own_instance_factory -fp data_generation/asp/config_job3_task4_tools0.yaml -bf data_generation/asp/bom_2_10_10_5.json
-
 
 
 ​

@@ -5,7 +5,7 @@
 # (R)   [String]  RL algorithm you want to use - This template is for PPO
 algorithm: ppo
 # (R)   [string]  Path to the file with generated data that to be used for training
-instances_file: asp/config_job3_task4_tools0.pkl
+instances_file: jssp/config_job3_task4_tools0.pkl
 # (O)   [string]  The finished model is saved under this name. Alternatively set to <automatic>, then it will be
                   # replaced with the current DayMonthYearHourMinute
 saved_model_name: example_ppo_agent
@@ -52,7 +52,7 @@ value_layer:  [ 256, 256 ]
 value_activation: 'ReLU'
 # (R)   [int]     Maximum number of instances shown to the agent. Limits the training process. Note that instances may be
                   # multiple times, if total_instances is larger than the number of generated instances
-total_instances: 100
+total_instances: 100_000
 # (R)   [int]     Maximum number of steps that the agent can interact with the env. Limits the training process
 total_timesteps: 3_000_000
 # (R)   [float]   Range between 0 and 1. How much (percentually) of the generated data will be used for training.

@@ -17,7 +17,6 @@ from src.data_generator.task import Task
 class SP(Enum):
     jssp = "_generate_instance_jssp"
     fjssp = "_generate_instance_fjssp"
-    asp = "_generate_instance_asp"
 
     @classmethod
     def is_sp_type_implemented(cls, sp_type: str = "") -> bool:

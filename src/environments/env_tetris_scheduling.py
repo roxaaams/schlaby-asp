@@ -123,10 +123,7 @@ class Env(gym.Env):
         self.tasks = copy.deepcopy(self.data[self.data_idx])
         if self.shuffle:
             np.random.shuffle(self.tasks)
-        # rms: sterge printurile
-        print("tasks", self.tasks)
         self.task_job_mapping = {(task.job_index, task.task_index): i for i, task in enumerate(self.tasks)}
-        print("task_job_mapping", self.task_job_mapping)
 
         # retrieve maximum deadline of the current instance
         max_deadline = max([task.deadline for task in self.tasks])
@@ -151,7 +148,7 @@ class Env(gym.Env):
             selected_machine = self.choose_machine(selected_task)
             self.execute_action(action, selected_task, selected_machine)
         else:
-            # if the action is not valid/executable/schedulable
+            # if the action is not valid/executable/scheduable
             pass
 
         # update variables and track reward
@@ -272,11 +269,6 @@ class Env(gym.Env):
 
         """
         possible_machines = task.machines
-        # rms: sterge printurile
-        print('task: ', task)
-        print('possible_machines: ', possible_machines)
-        print('ends_of_machine_occupancies: ', self.ends_of_machine_occupancies)
-        print('np.full(len(possible_machines), np.inf)', np.full(len(possible_machines), np.inf))
         machine_times = np.where(possible_machines,
                                  self.ends_of_machine_occupancies,
                                  np.full(len(possible_machines), np.inf))

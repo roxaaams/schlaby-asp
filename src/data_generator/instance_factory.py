@@ -29,7 +29,7 @@ DEADLINE_HEURISTIC = 'rand'
 SEED = 0
 
 
-def generate_instances_from_config(config: dict, print_info: bool = True) -> List[List[Task]]:
+def generate_instances_from_config(config: dict, print_info: bool = False) -> List[List[Task]]:
     """
     Generates a list of raw scheduling instances according to the console
 
@@ -161,25 +161,11 @@ def main(config_file_name=None, external_config=None):
     # Assign deadlines in-place
     SPFactory.set_deadlines_to_max_deadline_per_job(instance_list, current_config.get('num_jobs', None))
 
-    # print("instance_list before hashes", instance_list)
-
-
-    # Iterate through the outer list
-    for inner_list in instance_list:
-        # Iterate through the inner list
-        for item in inner_list:
-            print(item.str_info_more())
-
     # compute individual hash for each instance
     SPFactory.compute_and_set_hashes(instance_list)
 
-
     # Write resulting instance data to file
     if current_config.get('write_to_file', False):
-        print("'write_to_file', False")
-        DataHandler.save_instances_data_file(current_config, instance_list)
-    else:
-        print("'write_to_file', True")
         DataHandler.save_instances_data_file(current_config, instance_list)
 
 

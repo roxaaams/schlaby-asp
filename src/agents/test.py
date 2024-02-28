@@ -111,7 +111,6 @@ def test_solver(config: Dict, data_test: List[List[Task]], logger: Logger) -> Di
         instance_hash = instance[0].instance_hash
         # try to load solved_instance by hash
         solved_instance = DataHandler.load_solved_instance_by_hash(instance_hash)
-        print("solved_instance", solved_instance)
         # if no solution exists, compute the solution and write it to file for futures use
         if solved_instance is None:
             assigned_jobs, _ = OrToolSolver.optimize(instance, objective='makespan')
@@ -124,6 +123,7 @@ def test_solver(config: Dict, data_test: List[List[Task]], logger: Logger) -> Di
         env.tasks = solved_instance
         eval_handler.update_episode_solved_with_solver(env)
         log_results(plot_logger=logger, inter_test_idx=None, heuristic='solver', env=env, handler=eval_handler)
+
     return eval_handler.evaluate_test()
 
 
@@ -232,11 +232,9 @@ def test_model_and_heuristic(config: dict, model, data_test: List[List[Task]], l
 
     # test solver and calculate optimality gap
     res = test_solver(config, data_test, logger)
-    # print("res_solver", res)
-    # results.update({'solver': res})
-    
+    results.update({'solver': res})
 
-    # results = EvaluationHandler.add_solver_gap_to_results(results)
+    results = EvaluationHandler.add_solver_gap_to_results(results)
 
     return results
 

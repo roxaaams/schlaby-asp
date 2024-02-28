@@ -99,10 +99,7 @@ class OrToolSolver:
                     # Therefore set it to end_var, so that the tardiness of this subtask is 0 by default
                     tardiness_var = model.NewConstant(0)
                 else:
-                    print("horizon",horizon, " due_date ", due_date)
-                    print("value 1 ", -(horizon - due_date), " value 2 ", 0, " value 3 ", f'tardiness{suffix}')
-                    tardiness_var = model.NewIntVar(-(horizon - due_date), 0, f'tardiness{suffix}')
-                    print("---- dupa newintvar ---")
+                    tardiness_var = model.NewIntVar(- (horizon - due_date), 0, f'tardiness{suffix}')
                     model.Add(tardiness_var == end_var - due_date_const)
 
                 # add to all_tasks
