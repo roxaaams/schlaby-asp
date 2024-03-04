@@ -230,11 +230,12 @@ def test_model_and_heuristic(config: dict, model, data_test: List[List[Task]], l
         res = test_model(heuristic_id=heuristic, **test_kwargs)
         results.update({heuristic: res})
 
-    # test solver and calculate optimality gap
-    res = test_solver(config, data_test, logger)
-    results.update({'solver': res})
-
-    results = EvaluationHandler.add_solver_gap_to_results(results)
+    # rms: comment solver
+#     # test solver and calculate optimality gap
+#     res = test_solver(config, data_test, logger)
+#     results.update({'solver': res})
+#
+#     results = EvaluationHandler.add_solver_gap_to_results(results)
 
     return results
 

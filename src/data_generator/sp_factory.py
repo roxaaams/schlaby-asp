@@ -17,6 +17,7 @@ from src.data_generator.task import Task
 class SP(Enum):
     jssp = "_generate_instance_jssp"
     fjssp = "_generate_instance_fjssp"
+    asp = "_generate_instance_asp"
 
     @classmethod
     def is_sp_type_implemented(cls, sp_type: str = "") -> bool:
@@ -32,7 +33,7 @@ class SPFactory:
     @classmethod
     def generate_instances(cls, num_jobs: int = 2, num_tasks: int = 2, num_machines: int = 2, num_tools: int = 2,
                         num_instances: int = 2, runtimes: List[int] = None, sp_type: str = "jssp",
-                        print_info: bool = False, **kwargs) -> List[List[Task]]:
+                        print_info: bool = False, predecessor_percentage: int = 30, **kwargs) -> List[List[Task]]:
         """
         Creates a list of instances with random values in the range of the input parameters
 
@@ -44,6 +45,7 @@ class SPFactory:
         :param runtimes: list of possible runtimes for tasks
         :param sp_type: Scheduling problem type (e.g. "jssp")
         :param print_info: if True additional info printed to console
+        :param predecessor_percentage: percentage of up to how many subtasks should be generated fer task
 
         :return: List of list of Task instances which together form an instance
 
@@ -167,6 +169,67 @@ class SPFactory:
                     runtime=task[2],
                     _n_machines=num_machines,
                     _n_tools=num_tools
+                )
+                instance.append(task)
+        return instance
+
+    @classmethod
+    def generate_sorted_children_list(cls, j: int, parents, predecessor_percentage: int):
+        max_children = max(1, int(j * predecessor_percentage / 100))
+        size = random.randint(0, max_children)
+        candidate_children = sorted(set(range(j)) - parents.keys())
+        return random.sample(candidate_children, min(size, len(candidate_children)))
+
+
+    @classmethod
+    def _generate_instance_asp(cls, task_combinations: List[Tuple[int]], num_jobs: int, num_tasks: int,
+                              num_machines: int, num_tools: int, predecessor_percentage: int = 30, **kwargs) -> List[Task]:
+        """
+        Generates a  instance
+
+        :param task_combinations: List with all possible tasks
+        :param num_jobs: number of jobs generated in an instance
+        :param num_tasks: number of tasks per job generated in an instance
+        :param num_machines: number of machines available
+        :param num_tools: number of tools available
+        :param kwargs: Unused
+
+        :return: asp instance (List of tasks)
+
+        """
+
+        instance = []
+        # pick n jobs for this instance
+        for j in range(num_jobs):
+            # pick num_tasks tasks for this job
+            parent_indexes = dict()
+            parent_index = -1
+            for t in range(num_tasks):
+                task = list(task_combinations[np.random.randint(0, len(task_combinations) - 1)])
+                max_number_children = max(0, round((t * predecessor_percentage) / 100))
+                print('task index', t, 'predecessor_percentage', predecessor_percentage, 'max_number_children', max_number_children)
+                size = random.randint(0, max_number_children)
+                print('size', size)
+                candidate_children = sorted(set(range(j)) - parent_indexes.keys())
+                print('candidate_children', candidate_children)
+                children = random.sample(candidate_children, min(size, len(candidate_children)))
+                print('children', children)
+                for child in children:
+                        parent_indexes[child] = t
+                if t in parent_indexes:
+                    parent_index = parent_indexes[t]
+                task = Task(
+                    job_index=j,
+                    task_index=t,
+                    machines=list(task[0]),
+                    tools=list(task[1]),
+                    deadline=0,
+                    done=False,
+                    runtime=task[2],
+                    _n_machines=num_machines,
+                    _n_tools=num_tools,
+                    children=children,
+                    parent_index=parent_index
                 )
                 instance.append(task)
         return instance

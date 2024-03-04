@@ -5,6 +5,10 @@
         "sp_type": {
             "type": "string"
         },
+        "predecessor_percentage": {
+            "type": "integer",
+            "maximum": 90
+        },
         "instances_file": {
             "type": "string"
         },
