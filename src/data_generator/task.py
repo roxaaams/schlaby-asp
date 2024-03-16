@@ -65,10 +65,9 @@ class Task:
 
         self.children = children
         self.parent_index = parent_index
-#         print(self.children, self.parent_index)
 
     def __str__(self) -> str:
-        return f"Task - job index {self.job_index} - task index {self.task_index}"
+        return f"Task - job index {self.job_index} - task index {self.task_index} - parent_index {self.parent_index} - children {self.children}"
 
     def str_info(self) -> str:
         return f"Job index {self.job_index}\nTask index {self.task_index}\nMachines {str(self.machines)}"

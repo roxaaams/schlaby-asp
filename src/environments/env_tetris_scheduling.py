@@ -516,7 +516,10 @@ class Env(gym.Env):
         :return: PIL.Image.Image if mode=image, else None
 
         """
+        print("mode", mode)
         if mode == 'human':
+            for task in self.tasks:
+                print(task)
             GanttChartPlotter.get_gantt_chart_image(self.tasks, show_image=True, return_image=False)
         elif mode == 'image':
             return GanttChartPlotter.get_gantt_chart_image(self.tasks)

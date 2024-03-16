@@ -183,7 +183,7 @@ class SPFactory:
 
     @classmethod
     def _generate_instance_asp(cls, task_combinations: List[Tuple[int]], num_jobs: int, num_tasks: int,
-                              num_machines: int, num_tools: int, predecessor_percentage: int = 30, **kwargs) -> List[Task]:
+                              num_machines: int, num_tools: int, predecessor_percentage: int = 90, **kwargs) -> List[Task]:
         """
         Generates a  instance
 
@@ -198,26 +198,24 @@ class SPFactory:
 
         """
 
-        instance = []
+        final_instance = []
         # pick n jobs for this instance
         for j in range(num_jobs):
             # pick num_tasks tasks for this job
             parent_indexes = dict()
-            parent_index = -1
+            instance = []
             for t in range(num_tasks):
                 task = list(task_combinations[np.random.randint(0, len(task_combinations) - 1)])
                 max_number_children = max(0, round((t * predecessor_percentage) / 100))
-                print('task index', t, 'predecessor_percentage', predecessor_percentage, 'max_number_children', max_number_children)
+#                 print('task index', t, 'predecessor_percentage', predecessor_percentage, 'max_number_children', max_number_children)
                 size = random.randint(0, max_number_children)
-                print('size', size)
-                candidate_children = sorted(set(range(j)) - parent_indexes.keys())
-                print('candidate_children', candidate_children)
+#                 print('size', size)
+                candidate_children = sorted(set(range(t)) - parent_indexes.keys())
+#                 print('candidate_children', candidate_children)
                 children = random.sample(candidate_children, min(size, len(candidate_children)))
-                print('children', children)
+#                 print('children', children)
                 for child in children:
-                        parent_indexes[child] = t
-                if t in parent_indexes:
-                    parent_index = parent_indexes[t]
+                    parent_indexes[child] = t
                 task = Task(
                     job_index=j,
                     task_index=t,
@@ -228,11 +226,15 @@ class SPFactory:
                     runtime=task[2],
                     _n_machines=num_machines,
                     _n_tools=num_tools,
-                    children=children,
-                    parent_index=parent_index
+                    children=children
                 )
                 instance.append(task)
-        return instance
+            for t in range(num_tasks):
+                if parent_indexes.get(t) is not None:
+                    instance[t].parent_index = parent_indexes[t]
+
+            final_instance.extend(instance)
+        return final_instance
 
     @classmethod
     def set_deadlines_to_max_deadline_per_job(cls, instances: List[List[Task]], num_jobs: int):
