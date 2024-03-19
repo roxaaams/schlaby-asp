@@ -42,6 +42,7 @@ class Env(gym.Env):
         self.num_steps_max: int = config.get('num_steps_max', self.num_all_tasks)
         self.max_task_index: int = self.num_tasks - 1
         self.max_job_index: int = self.num_jobs - 1
+        self.sp_type = config.get('sp_type')
 
         # retrieve run-dependent settings from config
         self.shuffle: bool = config.get('shuffle', False)
@@ -307,8 +308,15 @@ class Env(gym.Env):
         if task.task_index == 0:
             start_time_of_preceding_task = 0
         else:
-            preceding_task = self.tasks[self.task_job_mapping[(job_id, task.task_index - 1)]]
-            start_time_of_preceding_task = preceding_task.finished
+            if self.sp_type == 'asp':
+                proceeding_tasks = [self.tasks[self.task_job_mapping[(job_id, index)]] for index in task.children]
+                start_time_of_preceding_task = -1
+                for proceeding_task in proceeding_tasks:
+                    if (start_time_of_preceding_task < proceeding_task.finished):
+                        start_time_of_preceding_task = proceeding_task.finished
+            else:
+                preceding_task = self.tasks[self.task_job_mapping[(job_id, task.task_index - 1)]]
+                start_time_of_preceding_task = preceding_task.finished
 
         # check earliest possible time to schedule according to preceding task and needed machine
         start_time = max(start_time_of_preceding_task, self.ends_of_machine_occupancies[machine_id])
@@ -508,7 +516,10 @@ class Env(gym.Env):
         :return: PIL.Image.Image if mode=image, else None
 
         """
+        print("mode", mode)
         if mode == 'human':
+            for task in self.tasks:
+                print(task)
             GanttChartPlotter.get_gantt_chart_image(self.tasks, show_image=True, return_image=False)
         elif mode == 'image':
             return GanttChartPlotter.get_gantt_chart_image(self.tasks)

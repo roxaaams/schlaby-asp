@@ -9,43 +9,27 @@ import random
 from multiprocessing import Process, Manager
 import warnings
 import argparse
+import os
+import json
 
 # Config and data handling imports
-from utils.file_handler.config_handler import ConfigHandler
-from utils.file_handler.data_handler import DataHandler
+from src.utils.file_handler.config_handler import ConfigHandler
+from src.utils.file_handler.data_handler import DataHandler
 
 # Functional imports
 import copy
 import tqdm
 import numpy as np
 from typing import List
-from data_generator.task import Task
-from data_generator.sp_factory import SPFactory
-from agents.heuristic.heuristic_agent import HeuristicSelectionAgent
-from environments.env_tetris_scheduling import Env
+from src.data_generator.task import Task
+from src.data_generator.sp_factory import SPFactory
+from src.agents.heuristic.heuristic_agent import HeuristicSelectionAgent
+from src.environments.env_tetris_scheduling import Env
 
 # constants
 DEADLINE_HEURISTIC = 'rand'
 SEED = 0
 
-
-def generate_instances_from_config(config: dict, print_info: bool = False) -> List[List[Task]]:
-    """
-    Generates a list of raw scheduling instances according to the console
-
-    :param config: Data_generation config
-    :param print_info: True if the created instances should be output to the console
-
-    :return: List of raw scheduling problem instances
-
-    """
-    # Generate instances
-    instances = SPFactory.generate_instances(**config)
-
-    if print_info:
-        print(f"Setups: {len(instances)}")
-
-    return instances
 
 
 def compute_initial_instance_solution(instances: List[List[Task]], config: dict) -> List[List[Task]]:
@@ -143,23 +127,76 @@ def generate_deadlines(instances: List[List[Task]], instance_with_dead_lines: Li
         make_span_list.append(make_span)
 
 
+def dfs_bom(node, job, tasks_mapping_ids, deadline, job_index):
+    for child in node.get('children', []):
+        dfs_bom(child, job, tasks_mapping_ids, deadline - 1, job_index)
+#     if node['parentid']:
+#         parent_index =  node['parentid']
+#     else:
+#         parent_index = None
+    machines = [machine['id'] for machine in node.get('machines', [])]
+    task = Task(job_index=job_index,
+            task_index=len(job),
+#             parent_index=parent_index,
+            children=[tasks_mapping_ids[child['operationid']] for child in node.get('children', [])],
+            quantity=node['quantity'],
+            machines=machines,
+            execution_times=[machine['execution_time'] for machine in node.get('machines', [])],
+            setup_times=[machine['setup_time'] for machine in node.get('machines', [])],
+            deadline=deadline,
+            runtime=0,
+            tools=[],
+            _n_tools=0,
+            _n_machines=len(machines),
+            done=False,
+        )
+    job.append(task)
+    job[-1].task_index = len(job) - 1
+    tasks_mapping_ids[node['operationid']] = len(job) - 1
+
+
+def load_bom_files():
+    instance_list: List[List[Task]] = []
+
+
+    # Define the directory path
+    directory = os.getcwd() + '/data/own_data/ASP-WIDE'
+
+    # List all files in the directory
+    files = os.listdir(directory)
+
+    deadline = 2000
+    # Iterate through the files
+    for job_index, file in enumerate(files):
+        # Check if the file is a regular file (not a directory)
+        if file.endswith('.json') and os.path.isfile(os.path.join(directory, file)) :
+            # Process the file
+            with open(os.path.join(directory, file), 'r') as f:
+                bom_job = json.load(f)
+#                 tasks_mapping_ids = {key: i for i, key in
+#                                 enumerate(bom_job.get('metainfo', { 'operations_list': []}).get('operations_list', [])[::-1])}
+                tasks_mapping_ids = dict()
+                job: List[Task] = []
+                dfs_bom(bom_job, job, tasks_mapping_ids, deadline, job_index)
+#                 for task in job:
+#                     task.parent_index = tasks_mapping_ids[task.parent_index]
+                instance_list.append(job)
+
+    return instance_list
+
 def main(config_file_name=None, external_config=None):
     # get config
     current_config: dict = ConfigHandler.get_config(config_file_name, external_config)
 
-    # set seeds
-    seed = current_config.get('seed', SEED)
-    np.random.seed(seed)
-    random.seed(seed)
-
-    # Generate instances
-    generated_instances: List[List[Task]] = generate_instances_from_config(current_config)
-
     # Create instance list
-    instance_list: List[List[Task]] = compute_initial_instance_solution(generated_instances, current_config)
+    instance_list: List[List[Task]] = load_bom_files()
 
-    # Assign deadlines in-place
-    SPFactory.set_deadlines_to_max_deadline_per_job(instance_list, current_config.get('num_jobs', None))
+#     # Assign deadlines in-place
+#     SPFactory.set_deadlines_to_max_deadline_per_job(instance_list, current_config.get('num_jobs', None))
+#
+    for job in instance_list:
+        for task in job:
+            print(task)
 
     # compute individual hash for each instance
     SPFactory.compute_and_set_hashes(instance_list)

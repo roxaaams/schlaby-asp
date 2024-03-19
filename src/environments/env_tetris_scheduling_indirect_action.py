@@ -220,6 +220,8 @@ class IndirectActionEnv(Env):
             if self.job_task_state[job] == self.num_tasks:  # means that job is done
                 next_tasks.append(None)
             else:
+                # rms:
+                print('self.task_job_mapping', self.task_job_mapping)
                 task_position = self.task_job_mapping[(job, self.job_task_state[job])]
                 next_tasks.append(self.tasks[task_position])
         return next_tasks

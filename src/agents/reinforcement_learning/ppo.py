@@ -280,6 +280,7 @@ class PPO:
         with open(f"{file}.pkl", "rb") as handle:
             data = pickle.load(handle)
 
+        # rms:
         env = data["params"]["env"]
 
         # create PPO object, commit necessary parameters. Update remaining parameters

@@ -35,7 +35,11 @@ To create your own data, or more precisely, instances of a scheduling problem, p
    python -m src.data_generator.instance_factory -fp data_generation/jssp/<your_data_generation_config>.yaml
    ````
 3. Please note that the file path needs to be given relative to the config directory of the project and that otherwise your config may not be found.
-   
+
+   python -m src.data_generator.instance_factory -fp data_generation/aspconfig_job2_task50_tools0.yaml
+
+
+python -m src.data_generator.bom_instance_factory -fp data_generation/asp/config_ASP_WIDE.yaml
 
 
 ​
