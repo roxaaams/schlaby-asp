@@ -1,7 +1,7 @@
 """This file provides the Task class."""
 # Standard package import
 from typing import List
-
+from typing import Dict
 
 class Task:
     """
@@ -40,9 +40,10 @@ class Task:
                  children: List[int] = None,
                  parent_index: int = None,
                  quantity: int = 1,
-                 machines_indexes: List[int] = None,
-                 execution_times: List[int] = None,
-                 setup_times: List[int] = None):
+                 execution_times: Dict[int, int] = None,
+                 setup_times: Dict[int, int] = None,
+                 setup_time: int = None,
+                 should_multiply_quantity_to_execution_times = False ):
 
         # test for correct data type of required and throw type error otherwise
         if not isinstance(job_index, int) or not isinstance(task_index, int):
@@ -73,10 +74,13 @@ class Task:
 
         self.children = children
         self.parent_index = parent_index
-        self.machines_indexes = machines_indexes
-        self.setup_times = setup_times
-        self.execution_times = execution_times
         self.quantity = quantity
+        self.setup_times = setup_times
+        self.setup_time = setup_time
+        self.execution_times = execution_times
+        if should_multiply_quantity_to_execution_times == True:
+            for machine_id in self.execution_times:
+                self.execution_times[machine_id] *= self.quantity
 
     def __str__(self) -> str:
         return f"Task - job index {self.job_index} - task index {self.task_index} - parent_index {self.parent_index} - children {self.children}"

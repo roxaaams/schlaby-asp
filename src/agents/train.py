@@ -69,6 +69,7 @@ def training(config: dict, data_train: List[List[Task]], data_val: List[List[Tas
 
     """
     # create Environment
+
     env, _ = EnvironmentLoader.load(config, data=data_train)
 
     # create Agent model
@@ -97,6 +98,7 @@ def main(config_file_name: dict = None, external_config: dict = None) -> None:
 
     # get config and data
     config = load_config(config_file_name, external_config)
+    #rms
     data = load_data(config)
 
     # create logger and update config
@@ -124,7 +126,7 @@ def main(config_file_name: dict = None, external_config: dict = None) -> None:
     training(config=config, data_train=train_data, data_val=val_data, logger=logger)
 
     # evaluate results
-    final_evaluation(config=config, data_test=test_data, logger=logger)
+#     final_evaluation(config=config, data_test=test_data, logger=logger)
 
 
 def get_perser_args():

@@ -31,7 +31,7 @@ from src.agents.solver import OrToolSolver
 TEST_HEURISTICS: List[str] = ['rand', 'EDD', 'SPT', 'MTR', 'LTR']
 
 
-def get_action(env, model, heuristic_id: str, heuristic_agent: Union[HeuristicSelectionAgent, None]) -> Tuple[int, str]:
+def get_action(env, model, heuristic_id: str, heuristic_agent: Union[HeuristicSelectionAgent, None], sp_type) -> Tuple[int, str]:
     """
     This function determines the next action according to the input model or heuristic
 
@@ -52,7 +52,8 @@ def get_action(env, model, heuristic_id: str, heuristic_agent: Union[HeuristicSe
         action_mode = 'heuristic'
         tasks = env.tasks
         task_mask = mask
-        selected_action = heuristic_agent(tasks, task_mask, heuristic_id)
+        # rms: add sp_type to heuristic_agent
+        selected_action = heuristic_agent(tasks, task_mask, heuristic_id, sp_type)
     else:
         action_mode = 'agent'
         selected_action, _ = model.predict(observation=obs, action_mask=mask)
@@ -60,7 +61,7 @@ def get_action(env, model, heuristic_id: str, heuristic_agent: Union[HeuristicSe
     return selected_action, action_mode
 
 
-def run_episode(env, model, heuristic_id: Union[str, None], handler: EvaluationHandler) -> None:
+def run_episode(env, model, heuristic_id: Union[str, None], handler: EvaluationHandler, sp_type) -> None:
     """
     This function executes one testing episode
 
@@ -81,7 +82,8 @@ def run_episode(env, model, heuristic_id: Union[str, None], handler: EvaluationH
     steps = 0
     while not done:
         steps += 1
-        action, action_mode = get_action(env, model, heuristic_id, heuristic_agent)
+        # rms: add sp_type to heuristic_agent
+        action, action_mode = get_action(env, model, heuristic_id, heuristic_agent, sp_type)
 
         b = env.step(action, action_mode=action_mode)
         total_reward += b[1]
@@ -186,7 +188,8 @@ def test_model(env_config: Dict, data: List[List[Task]], logger: Logger, plot: b
         environment.runs = test_i
 
         # run environment episode
-        run_episode(environment, model, heuristic_id, evaluation_handler)
+        # rms: added env_config['sp_type']
+        run_episode(environment, model, heuristic_id, evaluation_handler, env_config['sp_type'])
 
         # log results. Creating wandb table
         if log_episode:

@@ -1,3 +1,11 @@
+
+# Roxi's Commands:
+
+python -m src.data_generator.bom_instance_factory -fp data_generation/asp/config_ASP_WIDE.yaml
+python -m src.agents.train -fp training/ppo/config_ASP_WIDE.yaml
+python -m src.agents.test -fp testing/ppo/config_ASP_WIDE.yaml
+
+
 # Schlably
 ​
 Schlably is a Python-Based framework for experiments on scheduling problems with Deep Reinforcement Learning (DRL). 
@@ -36,7 +44,7 @@ To create your own data, or more precisely, instances of a scheduling problem, p
    ````
 3. Please note that the file path needs to be given relative to the config directory of the project and that otherwise your config may not be found.
 
-   python -m src.data_generator.instance_factory -fp data_generation/aspconfig_job2_task50_tools0.yaml
+   python -m src.data_generator.instance_factory -fp data_generation/asp/config_job2_task50_tools0.yaml
 
 
 python -m src.data_generator.bom_instance_factory -fp data_generation/asp/config_ASP_WIDE.yaml
@@ -58,6 +66,7 @@ To train your own model, proceed as follows:
 Immediately after training the model will be tested and benchmarked against all heuristics included in the TEST_HEURISTICS constant located in [src/agents/test.py](src/agents/test.py)
 The trained model can be accessed via the experiment_save_path and saved_model_name you specified in the training config.
 
+python -m src.agents.train -fp training/ppo/config_ASP_WIDE.yaml
 
 ​
 ### Testing

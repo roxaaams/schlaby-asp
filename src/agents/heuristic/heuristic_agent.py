@@ -42,8 +42,7 @@ from typing import List
 
 from src.data_generator.task import Task
 
-
-def get_active_task_dict(tasks: List[Task]) -> dict:
+def get_active_task_dict(tasks: List[Task], sp_type) -> dict:
     """
     Helper function to determining the next unfinished task to be processed for each job
 
@@ -56,12 +55,22 @@ def get_active_task_dict(tasks: List[Task]) -> dict:
     """
     active_job_task_dict = {}
     for task_i, task in enumerate(tasks):
-        if not task.done and task.job_index not in active_job_task_dict.keys():
-            active_job_task_dict[task.job_index] = task_i
+        if sp_type != 'asp':
+            if not task.done and task.job_index not in active_job_task_dict.keys():
+                active_job_task_dict[task.job_index] = task_i
+        else:
+            are_children_done = true
+            for task_j, sub_task in enumerate(tasks):
+                if sub_task.task_index in task.get('children', []) and not sub_task.done:
+                    are_children_done = false
+                    return
+            if are_children_done is true and task.job_index not in active_job_task_dict.keys():
+                active_job_task_dict[task.job_index] = task_i
+
     return active_job_task_dict
 
 
-def edd(tasks: List[Task], action_mask: np.array) -> int:
+def edd(tasks: List[Task], action_mask: np.array, sp_type) -> int:
     """
     EDD: earliest due date. Determines the job with the smallest deadline
 
@@ -87,7 +96,7 @@ def edd(tasks: List[Task], action_mask: np.array) -> int:
     return chosen_job
 
 
-def spt(tasks: List[Task], action_mask: np.array) -> int:
+def spt(tasks: List[Task], action_mask: np.array, sp_type) -> int:
     """
     SPT: shortest processing time first. Determines the job of which the next unfinished task has the lowest runtime
 
@@ -113,7 +122,7 @@ def spt(tasks: List[Task], action_mask: np.array) -> int:
     return chosen_job
 
 
-def mtr(tasks: List[Task], action_mask: np.array) -> int:
+def mtr(tasks: List[Task], action_mask: np.array, sp_type) -> int:
     """
     MTR: most tasks remaining. Determines the job with the least completed tasks
 
@@ -143,7 +152,7 @@ def mtr(tasks: List[Task], action_mask: np.array) -> int:
     return chosen_job
 
 
-def ltr(tasks: List[Task], action_mask: np.array) -> int:
+def ltr(tasks: List[Task], action_mask: np.array, sp_type) -> int:
     """
     LTR: least tasks remaining. Determines the job with the most completed tasks
 
@@ -172,7 +181,7 @@ def ltr(tasks: List[Task], action_mask: np.array) -> int:
     return chosen_job
 
 
-def random_task(tasks: List[Task], action_mask: np.array) -> int:
+def random_task(tasks: List[Task], action_mask: np.array, sp_type) -> int:
     """
     Returns a random task
 
@@ -267,7 +276,7 @@ class HeuristicSelectionAgent:
             'LTR': ltr
         }
 
-    def __call__(self, tasks: List, action_mask: np.array, task_selection: str) -> int:
+    def __call__(self, tasks: List, action_mask: np.array, task_selection: str, sp_type = None) -> int:
         """
         Selects the next heuristic function according to the heuristic passed as string abbreviation
         and the assignment in the task_selections dictionary
@@ -281,6 +290,6 @@ class HeuristicSelectionAgent:
         """
         choose_task = self.task_selections[task_selection]
 
-        chosen_task = choose_task(tasks, action_mask)
+        chosen_task = choose_task(tasks, action_mask, sp_type)
 
         return chosen_task

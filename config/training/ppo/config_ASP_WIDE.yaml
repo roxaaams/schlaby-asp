@@ -2,6 +2,8 @@
 ###                         Training                                       ###
 ##############################################################################
 
+# (R) [str] Type of your scheduling problem - this template is for the asp
+sp_type: asp
 # (R)   [String]  RL algorithm you want to use - This template is for PPO
 algorithm: ppo
 # (R)   [string]  Path to the file with generated data that to be used for training

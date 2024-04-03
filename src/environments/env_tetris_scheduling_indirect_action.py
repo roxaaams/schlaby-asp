@@ -134,14 +134,22 @@ class IndirectActionEnv(Env):
 
         # load new instance every run
         self.data_idx = self.runs % len(self.data)
+        # rms: recompute self.num_tasks, self.max_runtime, self.max_deadline for ASP case
+        if self.sp_type == 'asp':
+            self.num_jobs, self.num_tasks, self.max_runtime, self.max_deadline = self.get_instance_info(self.data_idx)
+            self.max_task_index: int = self.num_tasks - 1
+            self.num_all_tasks: int = self.num_jobs * self.num_tasks
+            self.tardiness: numpy.ndarray = np.zeros(self.num_all_tasks, dtype=int)
         self.tasks = copy.deepcopy(self.data[self.data_idx])
         if self.shuffle:
             np.random.shuffle(self.tasks)
         self.task_job_mapping = {(task.job_index, task.task_index): i for i, task in enumerate(self.tasks)}
 
         # retrieve maximum deadline of the current instance
-        max_deadline = max([task.deadline for task in self.tasks])
-        self.max_deadline = max_deadline if max_deadline > 0 else 1
+        # rms: only do this if not ASP
+        if self.sp_type != 'asp':
+            max_deadline = max([task.deadline for task in self.tasks])
+            self.max_deadline = max_deadline if max_deadline > 0 else 1
 
         return self.state_obs
 
@@ -220,8 +228,6 @@ class IndirectActionEnv(Env):
             if self.job_task_state[job] == self.num_tasks:  # means that job is done
                 next_tasks.append(None)
             else:
-                # rms:
-                print('self.task_job_mapping', self.task_job_mapping)
                 task_position = self.task_job_mapping[(job, self.job_task_state[job])]
                 next_tasks.append(self.tasks[task_position])
         return next_tasks

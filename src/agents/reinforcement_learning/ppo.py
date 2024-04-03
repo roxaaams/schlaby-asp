@@ -175,7 +175,6 @@ class PolicyNetwork(nn.Module):
         logits = self.policy_net(observation)
 
         dist = Categorical(logits=logits)
-        
         return dist
 
 

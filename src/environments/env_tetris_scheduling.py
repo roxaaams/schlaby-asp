@@ -121,14 +121,22 @@ class Env(gym.Env):
 
         # load new instance every run
         self.data_idx = self.runs % len(self.data)
+        # rms: recompute self.num_tasks, self.max_runtime, self.max_deadline for ASP case
+        if self.sp_type == 'asp':
+            self.num_jobs, self.num_tasks, self.max_runtime, self.max_deadline = self.get_instance_info(self.data_idx)
+            self.max_task_index: int = self.num_tasks - 1
+            self.num_all_tasks: int = self.num_jobs * self.num_tasks
+            self.tardiness: numpy.ndarray = np.zeros(self.num_all_tasks, dtype=int)
         self.tasks = copy.deepcopy(self.data[self.data_idx])
         if self.shuffle:
             np.random.shuffle(self.tasks)
         self.task_job_mapping = {(task.job_index, task.task_index): i for i, task in enumerate(self.tasks)}
 
         # retrieve maximum deadline of the current instance
-        max_deadline = max([task.deadline for task in self.tasks])
-        self.max_deadline = max_deadline if max_deadline > 0 else 1
+        # rms: only do this if not ASP
+        if self.sp_type != 'asp':
+            max_deadline = max([task.deadline for task in self.tasks])
+            self.max_deadline = max_deadline if max_deadline > 0 else 1
 
         return self.state_obs
 
@@ -178,13 +186,13 @@ class Env(gym.Env):
         self.num_steps += 1
         return observation, reward, done, infos
 
-    def get_instance_info(self) -> (int, int, int, int):
+    def get_instance_info(self, index = 0) -> (int, int, int, int):
         """
         Retrieves info about the instance size and configuration from an instance sample
         :return: (number of jobs, number of tasks and the maximum runtime) of this datapoint
         """
         num_jobs, num_tasks, max_runtime, max_deadline = 0, 0, 0, 0
-        for task in self.data[0]:
+        for task in self.data[index]:
             num_jobs = task.job_index if task.job_index > num_jobs else num_jobs
             num_tasks = task.task_index if task.task_index > num_tasks else num_tasks
             max_runtime = task.runtime if task.runtime > max_runtime else max_runtime
@@ -258,6 +266,7 @@ class Env(gym.Env):
         selected_task = self.tasks[task_idx]
         return task_idx, selected_task
 
+    # rms: aici trebuie modificat pentru ASP: timpi diferiti: trebuie sa iau masina care incepe cel mai devreme si termina cel mai devreme
     def choose_machine(self, task: Task) -> int:
         """
         This function performs the logic, with which the machine is chosen (in the case of the flexible JSSP)
@@ -273,7 +282,22 @@ class Env(gym.Env):
         machine_times = np.where(possible_machines,
                                  self.ends_of_machine_occupancies,
                                  np.full(len(possible_machines), np.inf))
-        return int(np.argmin(machine_times))
+        # rms: choose machine with earliest starting time and also shortest execute_time
+        if self.sp_type == 'asp':
+            earliest_finishing_time = np.inf
+            machine_index = int(np.argmin(machine_times))
+
+            # Iterate over each machine
+            for i in (0, len(machine_times) - 1):
+                if machine_times[i] != np.inf:
+                    current_earliest_finishing_time = task.execution_times[i] + task.setup_times[i] + machine_times[i]
+                    if current_earliest_finishing_time < earliest_finishing_time:
+                        earliest_finishing_time = current_earliest_finishing_time
+                        machine_index = i
+
+            return machine_index
+        else:
+            return int(np.argmin(machine_times))
 
     def get_action_mask(self) -> np.array:
         """
@@ -349,7 +373,13 @@ class Env(gym.Env):
             if min_possible_start_time > start_time:
                 start_time = min_possible_start_time
 
-        end_time = start_time + task.runtime
+
+        end_time = start_time
+        # rms: foloseste timpul de setare si executie a masinii respective pentru asp
+        if self.sp_type == 'asp':
+            end_time = end_time + task.execution_times[machine_id] + task.setup_times[machine_id]
+        else:
+            end_time = end_time + task.runtime
 
         # update machine occupancy and job_task_state
         self.ends_of_machine_occupancies[machine_id] = end_time
@@ -457,7 +487,6 @@ class Env(gym.Env):
         """
         for i, task in enumerate(self.tasks):
             # if task has not the highest index -> continue
-
             if task.task_index == self.max_task_index:
                 # if job=last task of the job done, punish possible completion
                 # after deadline -> 0 if done before deadline
