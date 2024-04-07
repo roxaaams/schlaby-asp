@@ -42,7 +42,31 @@ from typing import List
 
 from src.data_generator.task import Task
 
-def get_active_task_dict(tasks: List[Task], sp_type) -> dict:
+def get_active_task_dict_asp(tasks: List[Task]) -> dict:
+    """
+    Helper function to determining the next unfinished task to be processed for each job
+
+    :param tasks: List of task objects, so one instance
+
+    :return: Dictionary containing the next tasks to be processed for each job
+
+    Would be an empty dictionary if all tasks were completed
+
+    """
+    active_task_dict = {}
+    for task_i, task in enumerate(tasks):
+        are_children_done = True
+        for task_j, sub_task in enumerate(tasks):
+            if sub_task.task_index in task.children:
+                if not sub_task.done:
+                    are_children_done = False
+
+        if not task.done and are_children_done is True and task.task_index not in active_task_dict.keys():
+            active_task_dict[task.task_index] = 1
+
+    return active_task_dict
+
+def get_active_task_dict(tasks: List[Task]) -> dict:
     """
     Helper function to determining the next unfinished task to be processed for each job
 
@@ -55,22 +79,74 @@ def get_active_task_dict(tasks: List[Task], sp_type) -> dict:
     """
     active_job_task_dict = {}
     for task_i, task in enumerate(tasks):
-        if sp_type != 'asp':
-            if not task.done and task.job_index not in active_job_task_dict.keys():
-                active_job_task_dict[task.job_index] = task_i
-        else:
-            are_children_done = true
-            for task_j, sub_task in enumerate(tasks):
-                if sub_task.task_index in task.get('children', []) and not sub_task.done:
-                    are_children_done = false
-                    return
-            if are_children_done is true and task.job_index not in active_job_task_dict.keys():
-                active_job_task_dict[task.job_index] = task_i
+        if not task.done and task.job_index not in active_job_task_dict.keys():
+            active_job_task_dict[task.job_index] = task_i
 
     return active_job_task_dict
 
+def edd_asp(tasks: List[Task], action_mask: np.array) -> int:
+    """
+    EDD: earliest due date. Determines the task with the smallest deadline
 
-def edd(tasks: List[Task], action_mask: np.array, sp_type) -> int:
+    :param tasks: List of task objects, so one instance
+    :param action_mask: Action mask from the environment that is to receive the action selected by this heuristic
+
+    :return: Index of the task selected according to the heuristic
+
+    """
+
+    possible_tasks = get_active_task_dict_asp(tasks)
+    task_index = -1
+    earliest_due_date = np.inf
+    for i, task in enumerate(tasks):
+        if task.task_index in possible_tasks.keys() and task.deadline < earliest_due_date and not task.done:
+            earliest_due_date = task.deadline
+            task_index = i
+    return task_index
+
+
+def mpo_asp(tasks: List[Task], action_mask: np.array) -> int:
+    """
+    MPO (Maximal Predecessor Operations Rule): Determines the task with the highest number of predecessors.
+
+    :param tasks: List of task objects, so one instance
+    :param action_mask: Action mask from the environment that is to receive the action selected by this heuristic
+
+    :return: Index of the task selected according to the heuristic
+
+    """
+
+    possible_tasks = get_active_task_dict_asp(tasks)
+    task_index = 0
+    max_number_children = 0
+    for i, task in enumerate(tasks):
+        if task.task_index in possible_tasks.keys():
+            if len(task.children) > max_number_children:
+                max_number_children = len(task.children)
+                task_index = task.task_index
+    return task_index
+
+def spt_asp(tasks: List[Task], action_mask: np.array) -> int:
+    """
+    SPT: shortest processing time first. Determines the unfinished task has the lowest runtime for ASP
+
+    :param tasks: List of task objects, so one instance
+    :param action_mask: Action mask from the environment that is to receive the action selected by this heuristic
+
+    :return: Index of the task selected according to the heuristic
+
+    """
+    possible_tasks = get_active_task_dict_asp(tasks)
+    task_index = -1
+    shortest_processing_time = np.inf
+    for i, task in enumerate(tasks):
+        if not task.done and task.task_index in possible_tasks.keys():
+            if task.runtime < shortest_processing_time:
+                shortest_processing_time = task.runtime
+                task_index = i
+    return task_index
+
+def edd(tasks: List[Task], action_mask: np.array) -> int:
     """
     EDD: earliest due date. Determines the job with the smallest deadline
 
@@ -95,8 +171,7 @@ def edd(tasks: List[Task], action_mask: np.array, sp_type) -> int:
         chosen_job = np.argmin(deadlines)
     return chosen_job
 
-
-def spt(tasks: List[Task], action_mask: np.array, sp_type) -> int:
+def spt(tasks: List[Task], action_mask: np.array) -> int:
     """
     SPT: shortest processing time first. Determines the job of which the next unfinished task has the lowest runtime
 
@@ -122,7 +197,7 @@ def spt(tasks: List[Task], action_mask: np.array, sp_type) -> int:
     return chosen_job
 
 
-def mtr(tasks: List[Task], action_mask: np.array, sp_type) -> int:
+def mtr(tasks: List[Task], action_mask: np.array) -> int:
     """
     MTR: most tasks remaining. Determines the job with the least completed tasks
 
@@ -152,7 +227,7 @@ def mtr(tasks: List[Task], action_mask: np.array, sp_type) -> int:
     return chosen_job
 
 
-def ltr(tasks: List[Task], action_mask: np.array, sp_type) -> int:
+def ltr(tasks: List[Task], action_mask: np.array) -> int:
     """
     LTR: least tasks remaining. Determines the job with the most completed tasks
 
@@ -181,7 +256,7 @@ def ltr(tasks: List[Task], action_mask: np.array, sp_type) -> int:
     return chosen_job
 
 
-def random_task(tasks: List[Task], action_mask: np.array, sp_type) -> int:
+def random_task(tasks: List[Task], action_mask: np.array) -> int:
     """
     Returns a random task
 
@@ -273,10 +348,13 @@ class HeuristicSelectionAgent:
             'EDD': edd,
             'SPT': spt,
             'MTR': mtr,
-            'LTR': ltr
+            'LTR': ltr,
+            'EDD_ASP': edd_asp,
+            'SPT_ASP': spt_asp,
+            'MPO_ASP': mpo_asp
         }
 
-    def __call__(self, tasks: List, action_mask: np.array, task_selection: str, sp_type = None) -> int:
+    def __call__(self, tasks: List, action_mask: np.array, task_selection: str) -> int:
         """
         Selects the next heuristic function according to the heuristic passed as string abbreviation
         and the assignment in the task_selections dictionary
@@ -285,11 +363,11 @@ class HeuristicSelectionAgent:
         :param action_mask: Action mask from the environment that is to receive the action selected by this heuristic
         :param task_selection: Heuristic string abbreviation (e.g. EDD)
 
-        :return: Index of the job selected according to the heuristic
+        :return: Index of the job or task selected according to the heuristic
 
         """
         choose_task = self.task_selections[task_selection]
 
-        chosen_task = choose_task(tasks, action_mask, sp_type)
+        chosen_task = choose_task(tasks, action_mask)
 
         return chosen_task

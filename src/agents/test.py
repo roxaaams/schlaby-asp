@@ -52,8 +52,7 @@ def get_action(env, model, heuristic_id: str, heuristic_agent: Union[HeuristicSe
         action_mode = 'heuristic'
         tasks = env.tasks
         task_mask = mask
-        # rms: add sp_type to heuristic_agent
-        selected_action = heuristic_agent(tasks, task_mask, heuristic_id, sp_type)
+        selected_action = heuristic_agent(tasks, task_mask, heuristic_id)
     else:
         action_mode = 'agent'
         selected_action, _ = model.predict(observation=obs, action_mask=mask)
@@ -85,7 +84,11 @@ def run_episode(env, model, heuristic_id: Union[str, None], handler: EvaluationH
         # rms: add sp_type to heuristic_agent
         action, action_mode = get_action(env, model, heuristic_id, heuristic_agent, sp_type)
 
-        b = env.step(action, action_mode=action_mode)
+        # rms: next step should be taken based on the task_idx in case of asp
+        if sp_type == 'asp' and action_mode == 'heuristic':
+            b = env.step(action=0, action_mode=action_mode, task_idx=action)
+        else:
+            b = env.step(action, action_mode=action_mode)
         total_reward += b[1]
         done = b[2]
 

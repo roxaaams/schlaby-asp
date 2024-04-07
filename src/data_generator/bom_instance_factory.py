@@ -129,9 +129,9 @@ def generate_deadlines(instances: List[List[Task]], instance_with_dead_lines: Li
         make_span_list.append(make_span)
 
 
-def dfs_bom(node, sorted_top, tasks_mapping_ids, deadline, job_index):
+def dfs_bom(node, sorted_top, tasks_mapping_ids, deadline, job_index, filename):
     for child in node.get('children', []):
-        dfs_bom(child, sorted_top, tasks_mapping_ids, deadline - 1, job_index)
+        dfs_bom(child, sorted_top, tasks_mapping_ids, deadline - 1, job_index, filename)
 #     if node['parentid']:
 #         parent_index =  node['parentid']
 #     else:
@@ -150,6 +150,8 @@ def dfs_bom(node, sorted_top, tasks_mapping_ids, deadline, job_index):
 
     task = Task(job_index=job_index,
             task_index=len(sorted_top),
+            task_id=node['operationid'],
+            filename=filename,
 #             parent_index=parent_index,
             children=[tasks_mapping_ids[child['operationid']] for child in node.get('children', [])],
             quantity=node['quantity'],
@@ -161,8 +163,8 @@ def dfs_bom(node, sorted_top, tasks_mapping_ids, deadline, job_index):
             setup_time=max_setup,
             tools=[],
             _n_tools=0,
+            done=0,
             _n_machines=len(machines),
-            done=False,
             should_multiply_quantity_to_execution_times=True,
         )
     sorted_top.append(task)
@@ -199,7 +201,7 @@ def load_bom_files():
                 deadline = get_job_deadline(bom_job['start_date'], bom_job['delivery_date'])
                 tasks_mapping_ids = dict()
                 sorted_top: List[Task] = []
-                dfs_bom(bom_job, sorted_top, tasks_mapping_ids, deadline, 0)
+                dfs_bom(bom_job, sorted_top, tasks_mapping_ids, deadline, 0, filename=file)
 #                 for task in job:
 #                     task.parent_index = tasks_mapping_ids[task.parent_index]
                 instance_list.append(sorted_top)

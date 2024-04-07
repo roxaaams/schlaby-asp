@@ -69,8 +69,19 @@ class IndirectActionEnv(Env):
         selected_job_vector = self.to_one_hot(action, self.num_jobs)
         self.action_history.append(action)
 
+        # rms: check if task_idx was set in args from heuristics
+        selected_task_id = -1
+        if 'task_idx' in kwargs.keys():
+          selected_task_id = kwargs['task_idx']
+
+        # rms: check if sp_type = asp to assign given task_idx from args to selected_task_id
+        if action_mode == 'heuristic' and self.sp_type == 'asp':
+            selected_task = self.get_selected_task_by_idx(selected_task_id)
+            selected_machine = self.choose_machine(selected_task)
+            self.execute_action(0, selected_task, selected_machine)
+
         # check if the action is valid/executable
-        if self.check_valid_job_action(selected_job_vector, self.last_mask):
+        elif self.check_valid_job_action(selected_job_vector, self.last_mask):
             # if the action is valid/executable/schedulable
             selected_task_id, selected_task = self.get_selected_task(action)
             selected_machine = self.choose_machine(selected_task)
@@ -146,10 +157,8 @@ class IndirectActionEnv(Env):
         self.task_job_mapping = {(task.job_index, task.task_index): i for i, task in enumerate(self.tasks)}
 
         # retrieve maximum deadline of the current instance
-        # rms: only do this if not ASP
-        if self.sp_type != 'asp':
-            max_deadline = max([task.deadline for task in self.tasks])
-            self.max_deadline = max_deadline if max_deadline > 0 else 1
+        max_deadline = max([task.deadline for task in self.tasks])
+        self.max_deadline = max_deadline if max_deadline > 0 else 1
 
         return self.state_obs
 
@@ -225,7 +234,7 @@ class IndirectActionEnv(Env):
         """returns the next tasks that can be scheduled"""
         next_tasks = []
         for job in range(self.num_jobs):
-            if self.job_task_state[job] == self.num_tasks:  # means that job is done
+            if self.job_task_state[job] >= self.num_tasks:  # means that job is done
                 next_tasks.append(None)
             else:
                 task_position = self.task_job_mapping[(job, self.job_task_state[job])]

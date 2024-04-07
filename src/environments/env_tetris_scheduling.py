@@ -253,6 +253,19 @@ class Env(gym.Env):
         """
         return np.sum(job_action == job_mask) >= 1
 
+    # rms: in case we already know the task_index from the heuristics for ASP
+    def get_selected_task_by_idx(self, task_idx: int) -> Task:
+        """
+        Helper Function to get the selected task (next possible task) only by the job index
+
+        :param job_idx: job index
+
+        :return: Index of the task in the task list and the selected task
+
+        """
+        selected_task = self.tasks[task_idx]
+        return selected_task
+
     def get_selected_task(self, job_idx: int) -> Tuple[int, Task]:
         """
         Helper Function to get the selected task (next possible task) only by the job index
@@ -288,7 +301,7 @@ class Env(gym.Env):
             machine_index = int(np.argmin(machine_times))
 
             # Iterate over each machine
-            for i in (0, len(machine_times) - 1):
+            for i in range(len(machine_times)):
                 if machine_times[i] != np.inf:
                     current_earliest_finishing_time = task.execution_times[i] + task.setup_times[i] + machine_times[i]
                     if current_earliest_finishing_time < earliest_finishing_time:
@@ -332,11 +345,12 @@ class Env(gym.Env):
         if task.task_index == 0:
             start_time_of_preceding_task = 0
         else:
+            # rms: handle asp case
             if self.sp_type == 'asp':
                 proceeding_tasks = [self.tasks[self.task_job_mapping[(job_id, index)]] for index in task.children]
                 start_time_of_preceding_task = -1
                 for proceeding_task in proceeding_tasks:
-                    if (start_time_of_preceding_task < proceeding_task.finished):
+                    if start_time_of_preceding_task < proceeding_task.finished:
                         start_time_of_preceding_task = proceeding_task.finished
             else:
                 preceding_task = self.tasks[self.task_job_mapping[(job_id, task.task_index - 1)]]

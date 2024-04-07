@@ -32,7 +32,8 @@ class Task:
     :param execution_times:
     :param setup_times:
     """
-    def __init__(self, job_index: int, task_index: int = None, machines: List[int] = None,
+    def __init__(self, job_index: int,
+                 task_index: int = None, machines: List[int] = None,
                  tools: List[int] = None, deadline: int = None, instance_hash: int = None, done: bool = None,
                  runtime: int = None, started: int = None, finished: int = None, selected_machine: int = None,
                  _n_machines: int = None, _n_tools: int = None, _feasible_machine_from_instance_init: int = None,
@@ -43,7 +44,9 @@ class Task:
                  execution_times: Dict[int, int] = None,
                  setup_times: Dict[int, int] = None,
                  setup_time: int = None,
-                 should_multiply_quantity_to_execution_times = False ):
+                 should_multiply_quantity_to_execution_times = False,
+                 task_id = None,
+                 filename = None):
 
         # test for correct data type of required and throw type error otherwise
         if not isinstance(job_index, int) or not isinstance(task_index, int):
@@ -72,6 +75,8 @@ class Task:
         self._feasible_machine_from_instance_init = _feasible_machine_from_instance_init
         self._feasible_order_index_from_instance_init = _feasible_order_index_from_instance_init
 
+        self.task_id = task_id
+        self.filename = filename
         self.children = children
         self.parent_index = parent_index
         self.quantity = quantity
@@ -81,6 +86,7 @@ class Task:
         if should_multiply_quantity_to_execution_times == True:
             for machine_id in self.execution_times:
                 self.execution_times[machine_id] *= self.quantity
+                self.runtime = int(runtime * quantity)
 
     def __str__(self) -> str:
         return f"Task - job index {self.job_index} - task index {self.task_index} - parent_index {self.parent_index} - children {self.children}"
