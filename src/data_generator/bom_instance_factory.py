@@ -32,110 +32,9 @@ from src.environments.env_tetris_scheduling import Env
 DEADLINE_HEURISTIC = 'rand'
 SEED = 0
 
-
-
-def compute_initial_instance_solution(instances: List[List[Task]], config: dict) -> List[List[Task]]:
-    """
-    Initializes multiple processes (optional) to generate deadlines for the raw scheduling problem instances
-
-    :param instances: List of raw scheduling problem instances
-    :param config: Data_generation config
-
-    :return: List of scheduling problems instances with set deadlines
-
-    """
-    # Get configured number of processes
-    num_processes: int = config.get('num_processes', 1)
-
-    if num_processes > len(instances):
-        num_processes = len(instances)
-        warnings.warn('num_processes was set to num_instances.'
-                      'The number of processes may not exceed the number of instances which need to be generated.',
-                      category=RuntimeWarning)
-
-    # Multiprocess case
-    manager = Manager()
-    instance_list = manager.list()
-    make_span_list = manager.list()
-    processes = []
-
-    # split instances for multiprocessing
-    features_dataset = np.array_split(instances, num_processes)
-
-    for process_id in tqdm.tqdm(range(num_processes), desc="Compute deadlines"):
-        args = (features_dataset[process_id], instance_list, make_span_list, config)
-        p = Process(target=generate_deadlines, args=args)
-        p.start()
-        processes.append(p)
-
-    for p in processes:
-        p.join()
-    return list(instance_list)
-
-
-def generate_deadlines(instances: List[List[Task]], instance_with_dead_lines: List[List[Task]],
-                       make_span_list: List[List[int]], config: dict) -> None:
-    """
-    Generates suitable deadlines for the input instances
-
-    :param instances: List of raw scheduling problem instances
-    :param instance_with_dead_lines: manager.list() (Only in Multi-process case)
-    :param make_span_list: manager.list() (Only in Multi-process case)
-    :param config: Data_generation config
-
-    :return: None
-
-    """
-    heuristic_agent = HeuristicSelectionAgent()
-    make_span = []
-    np.random.seed(config.get('seed', SEED))
-    for i, instance in enumerate(instances):
-        # create env
-        env = Env(config, [instance])
-
-        done = False
-        total_reward = 0
-        t = 0
-        runtimes = [task.runtime for task in instance]
-        # run agent on environment and collect rewards until done
-        while not done:
-            tasks = env.tasks
-            task_mask = env.get_action_mask()
-
-            action = heuristic_agent(tasks, task_mask, DEADLINE_HEURISTIC)
-            b = env.step(action)
-            total_reward += b[1]
-            done = b[2]
-            t += 1
-
-        tasks = env.tasks
-
-        # start_times = env.scheduling
-        make_span.append(env.get_makespan())
-        # actions.sort()
-        for task_j, task in enumerate(tasks):
-            task.deadline = task.finished
-            task._deadline = task.finished
-            task.runtime = runtimes[task_j]
-            task._run_time_left = runtimes[task_j]
-            task.running = 0
-            task.done = 0
-            task._started_in_generation = copy.copy(task.started)
-            task.started = 0
-            task.finished = 0
-            task._optimal_machine = int(task.selected_machine)
-
-        instance_with_dead_lines.append(tasks)
-        make_span_list.append(make_span)
-
-
 def dfs_bom(node, sorted_top, tasks_mapping_ids, deadline, job_index, filename):
     for child in node.get('children', []):
         dfs_bom(child, sorted_top, tasks_mapping_ids, deadline - 1, job_index, filename)
-#     if node['parentid']:
-#         parent_index =  node['parentid']
-#     else:
-#         parent_index = None
     machines = [0] * 31
     execution_times = {}
     setup_times = {}
@@ -152,7 +51,7 @@ def dfs_bom(node, sorted_top, tasks_mapping_ids, deadline, job_index, filename):
             task_index=len(sorted_top),
             task_id=node['operationid'],
             filename=filename,
-#             parent_index=parent_index,
+            parent_index=node['parentid'],
             children=[tasks_mapping_ids[child['operationid']] for child in node.get('children', [])],
             quantity=node['quantity'],
             machines=machines,
@@ -185,7 +84,7 @@ def load_bom_files():
 
 
     # Define the directory path
-    directory = os.getcwd() + '/data/own_data/ASP-WIDE'
+    directory = os.getcwd() + '/data/own_data/ASP-SIMPLE'
 
     # List all files in the directory
     files = os.listdir(directory)
@@ -202,8 +101,9 @@ def load_bom_files():
                 tasks_mapping_ids = dict()
                 sorted_top: List[Task] = []
                 dfs_bom(bom_job, sorted_top, tasks_mapping_ids, deadline, 0, filename=file)
-#                 for task in job:
-#                     task.parent_index = tasks_mapping_ids[task.parent_index]
+                for task in sorted_top:
+                    if task.parent_index:
+                        task.parent_index = tasks_mapping_ids[task.parent_index]
                 instance_list.append(sorted_top)
     return instance_list
 
@@ -214,9 +114,6 @@ def main(config_file_name=None, external_config=None):
     # Create instance list
     instance_list: List[List[Task]] = load_bom_files()
 
-#     # Assign deadlines in-place
-#     SPFactory.set_deadlines_to_max_deadline_per_job(instance_list, current_config.get('num_jobs', None))
-# #
 #     for job in instance_list:
 #         for task in job:
 #             print(task)

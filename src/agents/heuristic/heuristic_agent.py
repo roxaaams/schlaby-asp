@@ -39,8 +39,27 @@ Add a heuristic that returns zeros (this is not a practical example!)
 """
 import numpy as np
 from typing import List
+import random
 
 from src.data_generator.task import Task
+
+def get_active_task_dict(tasks: List[Task]) -> dict:
+    """
+    Helper function to determining the next unfinished task to be processed for each job
+
+    :param tasks: List of task objects, so one instance
+
+    :return: Dictionary containing the next tasks to be processed for each job
+
+    Would be an empty dictionary if all tasks were completed
+
+    """
+    active_job_task_dict = {}
+    for task_i, task in enumerate(tasks):
+        if not task.done and task.job_index not in active_job_task_dict.keys():
+            active_job_task_dict[task.job_index] = task_i
+
+    return active_job_task_dict
 
 def get_active_task_dict_asp(tasks: List[Task]) -> dict:
     """
@@ -66,23 +85,64 @@ def get_active_task_dict_asp(tasks: List[Task]) -> dict:
 
     return active_task_dict
 
-def get_active_task_dict(tasks: List[Task]) -> dict:
-    """
-    Helper function to determining the next unfinished task to be processed for each job
+def is_leaf(task: Task):
+    return len(task.children) == 0 and task.parent_index
 
-    :param tasks: List of task objects, so one instance
+def compute_paths(tasks: List[Task], task: Task, path, duration, visited, critical_path):
+    visited[task.task_index] = True
+    path.append(task.task_index)
 
-    :return: Dictionary containing the next tasks to be processed for each job
+    # Compute the length (cumulative processing # time) of each path determined in step 4.1.
+    duration += task.runtime
 
-    Would be an empty dictionary if all tasks were completed
+    # 4.3 a: Determine the critical (the largest cumulative processing time) path
+    if is_leaf(task) and duration > critical_path[1]:
+        critical_path = (path, duration)
+        return
 
-    """
-    active_job_task_dict = {}
-    for task_i, task in enumerate(tasks):
-        if not task.done and task.job_index not in active_job_task_dict.keys():
-            active_job_task_dict[task.job_index] = task_i
+    for _, index_subtask in enumerate(task.children):
+        if index_subtask in visited and tasks[index_subtask].deleted == False:
+            compute_paths(tasks, tasks[index_subtask], path, duration, visited, critical_path)
+            path.pop()
+            visited[index_subtask] = False
 
-    return active_job_task_dict
+
+def letsa(tasks: List[Task], action_mask: np.array, feasible_tasks, visited, critical_path, max_deadline):
+    start_task_index = feasible_tasks.get()
+    # 4.1 For each operation in the feasible list formulate all possible network paths.
+    compute_paths(tasks, tasks[start_task_index], [], 0, visited, critical_path)
+
+    # 4.3 b Select the operation Je of the critical path that also belongs to the feasible list F.
+    # in this case it is the first operation, which also belongs to F, that is selected for scheduling.
+
+    # 4.4 Set its tentative completion time Ce equal to: (i) the starting time of operation Je from the
+    # partial schedule (constraint 2.2 of (PI)), (ii) the due-date De if operation c is the last
+    # operation of the final assembly Pe (constraint 2.4 of (PI).
+    completion_time = 0
+    if not tasks[start_task_index].parent_index:
+        completion_time = max_deadline
+    else:
+        # ??? Choose the earliest starting time of all successors Jc
+        completion_time = max_deadline
+        parent_start_task_index = tasks[start_task_index].parent_index
+        if parent_start_task_index and tasks[parent_start_task_index].done and tasks[parent_start_task_index].started < completion_time:
+            completion_time = tasks[parent_start_task_index].started # - EPSILON
+    # 4.5 Compute the starting time based on the available machines that can produce the operation Jc
+    # 4.6 Schedule operation Jc at the latest available starting time Sc on the corresponding machine
+
+    # rms: NOTE: instead of scheduling right away, skip it now, follow the next steps and only at the end return the index of the start of operation to be scheduled
+    # 4.7 Delete operation Jc from the operation network.
+    tasks[start_task_index].deleted = True
+    # 4.8 Add all operations Ji such that di = Jc, to the feasible list.
+    # Also check is the operation was not added in the list
+    # Priority is given to the predecessor in the critical path while updating the list of feasible operations
+    if len(critical_path[0]) > 1 and not tasks[critical_path[0][1]].done:
+        feasible_tasks.put(critical_path[0][1])
+    for _, sub_task_index in enumerate(tasks[start_task_index].children):
+        if not tasks[sub_task_index].done:
+            feasible_tasks.put(sub_task_index)
+    return start_task_index, int(completion_time)
+
 
 def edd_asp(tasks: List[Task], action_mask: np.array) -> int:
     """
@@ -126,6 +186,28 @@ def mpo_asp(tasks: List[Task], action_mask: np.array) -> int:
                 task_index = task.task_index
     return task_index
 
+
+def lpo_asp(tasks: List[Task], action_mask: np.array) -> int:
+    """
+    LPO (Least Predecessor Operations Rule): Determines the task with the least number of predecessors.
+
+    :param tasks: List of task objects, so one instance
+    :param action_mask: Action mask from the environment that is to receive the action selected by this heuristic
+
+    :return: Index of the task selected according to the heuristic
+
+    """
+
+    possible_tasks = get_active_task_dict_asp(tasks)
+    task_index = 0
+    min_number_children = np.inf
+    for i, task in enumerate(tasks):
+        if task.task_index in possible_tasks.keys():
+            if len(task.children) < min_number_children:
+                min_number_children = len(task.children)
+                task_index = task.task_index
+    return task_index
+
 def spt_asp(tasks: List[Task], action_mask: np.array) -> int:
     """
     SPT: shortest processing time first. Determines the unfinished task has the lowest runtime for ASP
@@ -145,6 +227,20 @@ def spt_asp(tasks: List[Task], action_mask: np.array) -> int:
                 shortest_processing_time = task.runtime
                 task_index = i
     return task_index
+
+def random_task_asp(tasks: List[Task], action_mask: np.array) -> int:
+    """
+    Returns a random task
+
+    :param tasks: Not needed
+    :param action_mask: Action mask from the environment that is to receive the action selected by this heuristic
+
+    :return: Index of the job selected according to the heuristic
+
+    """
+    possible_tasks = get_active_task_dict_asp(tasks)
+    random_task = random.choice(list(possible_tasks.keys()))
+    return random_task
 
 def edd(tasks: List[Task], action_mask: np.array) -> int:
     """
@@ -315,7 +411,6 @@ def choose_first_machine(chosen_task, machine_mask) -> int:
     valid_machines = machine_mask[1][idx_valid_machine]
     return valid_machines[0]
 
-
 class HeuristicSelectionAgent:
     """
     This class can be used to get the next task according to the heuristic passed as string abbreviation (e.g. EDD).
@@ -351,10 +446,13 @@ class HeuristicSelectionAgent:
             'LTR': ltr,
             'EDD_ASP': edd_asp,
             'SPT_ASP': spt_asp,
-            'MPO_ASP': mpo_asp
+            'MPO_ASP': mpo_asp,
+            'LPO_ASP': lpo_asp,
+            'rand_asp': random_task_asp,
+            'LETSA': letsa
         }
 
-    def __call__(self, tasks: List, action_mask: np.array, task_selection: str) -> int:
+    def __call__(self, tasks: List, action_mask: np.array, task_selection: str, feasible_tasks = None, visited = None, critical_path = None, max_deadline = None):
         """
         Selects the next heuristic function according to the heuristic passed as string abbreviation
         and the assignment in the task_selections dictionary
@@ -368,6 +466,10 @@ class HeuristicSelectionAgent:
         """
         choose_task = self.task_selections[task_selection]
 
-        chosen_task = choose_task(tasks, action_mask)
-
-        return chosen_task
+        chosen_task = None
+        if task_selection == 'LETSA':
+            chosen_task, completion_time = choose_task(tasks, action_mask, feasible_tasks, visited, critical_path, max_deadline)
+            return chosen_task, completion_time
+        else:
+            chosen_task = choose_task(tasks, action_mask)
+            return chosen_task

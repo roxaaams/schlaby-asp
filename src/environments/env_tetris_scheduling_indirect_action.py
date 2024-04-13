@@ -6,6 +6,7 @@ from numpy import ndarray
 
 from src.data_generator.task import Task
 from src.environments.env_tetris_scheduling import Env
+from src.models.machine import Machine
 
 
 class IndirectActionEnv(Env):
@@ -71,15 +72,18 @@ class IndirectActionEnv(Env):
 
         # rms: check if task_idx was set in args from heuristics
         selected_task_id = -1
-        if 'task_idx' in kwargs.keys():
-          selected_task_id = kwargs['task_idx']
-
         # rms: check if sp_type = asp to assign given task_idx from args to selected_task_id
         if action_mode == 'heuristic' and self.sp_type == 'asp':
+            if 'task_idx' in kwargs.keys():
+                selected_task_id = kwargs['task_idx']
             selected_task = self.get_selected_task_by_idx(selected_task_id)
-            selected_machine = self.choose_machine(selected_task)
-            self.execute_action(0, selected_task, selected_machine)
-
+            if not 'completion_time' in kwargs.keys():
+                selected_machine = self.choose_machine(selected_task)
+                self.execute_action(0, selected_task, selected_machine)
+            else:
+                original_completion_time = kwargs['completion_time']
+                machine_id, start_time, end_time = self.choose_machine_using_completion_time(selected_task, original_completion_time)
+                self.execute_action_with_given_interval(0, selected_task, machine_id, start_time, end_time)
         # check if the action is valid/executable
         elif self.check_valid_job_action(selected_job_vector, self.last_mask):
             # if the action is valid/executable/schedulable
@@ -132,6 +136,10 @@ class IndirectActionEnv(Env):
         self.tardiness = np.zeros(self.num_all_tasks, dtype=int)
         self.makespan = 0
         self.ends_of_machine_occupancies = np.zeros(self.num_machines, dtype=int)
+         # rms: need some kind of schedule dict with start_date and end_date
+        self.machines = dict()
+        for i in range(self.num_machines):
+            self.machines[i] = Machine()
         self.tool_occupancies = [[] for _ in range(self.num_tools)]
         self.job_task_state = np.zeros(self.num_jobs, dtype=int)
         self.action_history = []

@@ -5,6 +5,10 @@ python -m src.data_generator.bom_instance_factory -fp data_generation/asp/config
 python -m src.agents.train -fp training/ppo/config_ASP_WIDE.yaml
 python -m src.agents.test -fp testing/ppo/config_ASP_WIDE.yaml
 
+python -m src.data_generator.bom_instance_factory -fp data_generation/asp/config_ASP_SIMPLE.yaml
+python -m src.agents.train -fp training/ppo/config_ASP_SIMPLE.yaml
+python -m src.agents.test -fp testing/ppo/config_ASP_SIMPLE.yaml
+
 
 # Schlably
 ​

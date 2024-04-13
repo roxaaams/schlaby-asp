@@ -26,12 +26,12 @@ from src.utils.file_handler.model_handler import ModelHandler
 from src.data_generator.task import Task
 from src.agents.train_test_utility_functions import get_agent_class_from_config, load_config, load_data
 from src.agents.solver import OrToolSolver
+from src.models.setqueue import SetQueue
 
 # constants
 TEST_HEURISTICS: List[str] = ['rand', 'EDD', 'SPT', 'MTR', 'LTR']
 
-
-def get_action(env, model, heuristic_id: str, heuristic_agent: Union[HeuristicSelectionAgent, None], sp_type) -> Tuple[int, str]:
+def get_action(env, model, heuristic_id: str, heuristic_agent: Union[HeuristicSelectionAgent, None], sp_type, feasible_tasks, visited, max_deadline):
     """
     This function determines the next action according to the input model or heuristic
 
@@ -47,17 +47,24 @@ def get_action(env, model, heuristic_id: str, heuristic_agent: Union[HeuristicSe
         "You have to pass an agent model XOR a heuristic id to solve the scheduling problem"
     obs = env.state_obs
     mask = env.get_action_mask()
+    completion_time = None
 
     if heuristic_id:
         action_mode = 'heuristic'
         tasks = env.tasks
         task_mask = mask
-        selected_action = heuristic_agent(tasks, task_mask, heuristic_id)
+        # rms: init values for LETSA heuristic
+        # critical_path is assigned to [] at every while iteration
+        critical_path = ([], 0)
+        if heuristic_id == 'LETSA':
+            selected_action, completion_time = heuristic_agent(tasks, task_mask, heuristic_id, feasible_tasks, visited, critical_path, max_deadline)
+        else:
+            selected_action = heuristic_agent(tasks, task_mask, heuristic_id, feasible_tasks, visited, critical_path)
     else:
         action_mode = 'agent'
         selected_action, _ = model.predict(observation=obs, action_mask=mask)
 
-    return selected_action, action_mode
+    return selected_action, action_mode, completion_time
 
 
 def run_episode(env, model, heuristic_id: Union[str, None], handler: EvaluationHandler, sp_type) -> None:
@@ -77,16 +84,29 @@ def run_episode(env, model, heuristic_id: Union[str, None], handler: EvaluationH
 
     heuristic_agent = HeuristicSelectionAgent() if heuristic_id else None
 
+    # rms: we need to init these values for LETSA heuristic before the while loop as in the original algorithm
+    feasible_tasks = SetQueue()
+    visited = dict()
+    max_deadline = -1
+    for task in env.tasks:
+        if not task.parent_index:
+            feasible_tasks.put(task.task_index)
+        if max_deadline < task.deadline:
+            max_deadline = task.deadline
+
     # run agent on environment and collect rewards until done
     steps = 0
     while not done:
         steps += 1
-        # rms: add sp_type to heuristic_agent
-        action, action_mode = get_action(env, model, heuristic_id, heuristic_agent, sp_type)
+        # rms: add sp_type to heuristic_agent and other values for LETSA heuristic
+        action, action_mode, completion_time = get_action(env, model, heuristic_id, heuristic_agent, sp_type, feasible_tasks, visited, max_deadline)
 
         # rms: next step should be taken based on the task_idx in case of asp
         if sp_type == 'asp' and action_mode == 'heuristic':
-            b = env.step(action=0, action_mode=action_mode, task_idx=action)
+            if heuristic_id == 'LETSA':
+                b = env.step(action=0, action_mode=action_mode, task_idx=action, completion_time=completion_time)
+            else:
+                b = env.step(action=0, action_mode=action_mode, task_idx=action)
         else:
             b = env.step(action, action_mode=action_mode)
         total_reward += b[1]
@@ -183,6 +203,8 @@ def test_model(env_config: Dict, data: List[List[Task]], logger: Logger, plot: b
 
     # create evaluation handler
     evaluation_handler = EvaluationHandler()
+
+    print('len(data)', len(data))
 
     for test_i in range(len(data)):
 
