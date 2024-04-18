@@ -15,19 +15,19 @@ venv.bak/
 # Weight and Biases
 wandb/*
 
-# Generated data
-data/*
-
-data/instances/*
-!data/instances
-!data/instances/jssp
-!data/instances/fjssp
-data/instances/jssp/*
-data/instances/fjssp/*
-!data/instances/jssp/config_job3_task4_tools0.pkl
-!data/instances/fjssp/config_job3_task4_tools0.pkl
-!data/benchmark_instances
-!data/benchmark_instances/*
+## Generated data
+#data
+#
+#data/instances/*
+#!data/instances
+#!data/instances/jssp
+#!data/instances/fjssp
+#data/instances/jssp/*
+#data/instances/fjssp/*
+#!data/instances/jssp/config_job3_task4_tools0.pkl
+#!data/instances/fjssp/config_job3_task4_tools0.pkl
+#!data/benchmark_instances
+#!data/benchmark_instances/*
 
 data/logs/*
 !data/logs/.gitkeep
