@@ -84,7 +84,12 @@ def load_bom_files():
 
 
     # Define the directory path
-    directory = os.getcwd() + '/data/own_data/ASP-SIMPLE'
+#     directory = os.getcwd() + '/data/own_data/ASP-SIMPLE-COMBINE-FRIGORIFICE'
+    directory = os.getcwd() + '/data/own_data/ASP-SIMPLE-GEAMURI-TERMOPAN'
+#     directory = os.getcwd() + '/data/own_data/ASP-SIMPLE'
+#     directory = os.getcwd() + '/data/own_data/ASP-WIDE'
+#     directory = os.getcwd() + '/data/own_data/ASP-DEEP'
+
 
     # List all files in the directory
     files = os.listdir(directory)

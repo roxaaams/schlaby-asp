@@ -81,6 +81,7 @@ class IndirectActionEnv(Env):
                 selected_machine = self.choose_machine(selected_task)
                 self.execute_action(0, selected_task, selected_machine)
             else:
+                # rms: specific to LETSA
                 original_completion_time = kwargs['completion_time']
                 machine_id, start_time, end_time = self.choose_machine_using_completion_time(selected_task, original_completion_time)
                 self.execute_action_with_given_interval(0, selected_task, machine_id, start_time, end_time)
@@ -98,16 +99,22 @@ class IndirectActionEnv(Env):
         action_mask = self.get_action_mask()
         infos = {'mask': action_mask}
         observation = self.state_obs
-        reward = self.compute_reward()
+        if action_mode == 'heuristic' and self.sp_type == 'asp' and 'completion_time' in kwargs.keys():
+            reward = self.compute_reward(use_letsa=True)
+        else:
+            reward = self.compute_reward()
         self.reward_history.append(reward)
 
         done = self.check_done()
         if done:
             episode_reward_sum = np.sum(self.reward_history)
-            makespan = self.get_makespan()
+            if action_mode == 'heuristic' and self.sp_type == 'asp' and 'completion_time' in kwargs.keys():
+                makespan = self.get_makespan(use_letsa=True)
+            else:
+                makespan = self.get_makespan()
             tardiness = self.calculate_tardiness()
 
-            self.episodes_makespans.append(self.get_makespan())
+            self.episodes_makespans.append(makespan)
             self.episodes_rewards.append(np.mean(self.reward_history))
 
             self.logging_rewards.append(episode_reward_sum)

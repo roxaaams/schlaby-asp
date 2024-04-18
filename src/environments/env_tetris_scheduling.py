@@ -491,7 +491,7 @@ class Env(gym.Env):
         task.selected_machine = machine_id
         task.done = True
 
-    def compute_reward(self) -> Any:
+    def compute_reward(self, use_letsa=False) -> Any:
         """
         Calculates the reward that will later be returned to the agent. Uses the self.reward_strategy string to
         discriminate between different reward strategies. Default is 'dense_reward'.
@@ -501,8 +501,10 @@ class Env(gym.Env):
         """
         if self.reward_strategy == 'dense_makespan_reward':
             # dense reward for makespan optimization according to https://arxiv.org/pdf/2010.12367.pdf
-            reward = self.makespan - self.get_makespan()
-            self.makespan = self.get_makespan()
+            reward = self.makespan - self.get_makespan(use_letsa)
+            if use_letsa == True:
+                print('self.get_makespan(use_letsa=True)', self.get_makespan(use_letsa))
+            self.makespan = self.get_makespan(use_letsa)
         elif self.reward_strategy == 'sparse_makespan_reward':
             reward = self.sparse_makespan_reward()
         elif self.reward_strategy == 'mr2_reward':
@@ -598,10 +600,20 @@ class Env(gym.Env):
 
         return t_tardiness
 
-    def get_makespan(self):
+    def get_makespan(self, use_letsa=False):
         """
         Returns the current makespan (the time the latest of all scheduled tasks finishes)
         """
+        if use_letsa == True:
+            earliest_start_time = np.inf
+            latest_end_time = 0
+            for task in self.tasks:
+                if task.done == True:
+                    earliest_start_time = min(earliest_start_time, task.started)
+                    latest_end_time = max(latest_end_time, task.finished)
+
+            return latest_end_time - earliest_start_time
+
         return np.max(self.ends_of_machine_occupancies)
 
     def log_intermediate_step(self) -> None:

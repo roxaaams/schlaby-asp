@@ -59,7 +59,7 @@ def get_action(env, model, heuristic_id: str, heuristic_agent: Union[HeuristicSe
         if heuristic_id == 'LETSA':
             selected_action, completion_time = heuristic_agent(tasks, task_mask, heuristic_id, feasible_tasks, visited, critical_path, max_deadline)
         else:
-            selected_action = heuristic_agent(tasks, task_mask, heuristic_id, feasible_tasks, visited, critical_path)
+            selected_action = heuristic_agent(tasks, task_mask, heuristic_id)
     else:
         action_mode = 'agent'
         selected_action, _ = model.predict(observation=obs, action_mask=mask)
@@ -114,7 +114,10 @@ def run_episode(env, model, heuristic_id: Union[str, None], handler: EvaluationH
 
     # store episode in object
     mean_reward = total_reward / steps
-    handler.record_environment_episode(env, mean_reward)
+    if sp_type == 'asp' and action_mode == 'heuristic' and heuristic_id == 'LETSA':
+        handler.record_environment_episode(env, mean_reward, use_letsa=True)
+    else:
+        handler.record_environment_episode(env, mean_reward)
 
 
 def test_solver(config: Dict, data_test: List[List[Task]], logger: Logger) -> Dict:
@@ -204,8 +207,6 @@ def test_model(env_config: Dict, data: List[List[Task]], logger: Logger, plot: b
     # create evaluation handler
     evaluation_handler = EvaluationHandler()
 
-    print('len(data)', len(data))
-
     for test_i in range(len(data)):
 
         # create env
@@ -291,6 +292,7 @@ def main(external_config=None):
     # get config and data
     config = load_config(config_file_path, external_config)
     data = load_data(config)
+    print('Filename', data[0][0].filename)
 
     # Random seed for numpy as given by config
     np.random.seed(config['seed'])

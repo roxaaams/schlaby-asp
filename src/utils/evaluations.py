@@ -21,7 +21,7 @@ class EvaluationHandler:
         self.actions_list = []
         self.tasks_list = []
 
-    def record_environment_episode(self, env, total_reward) -> None:
+    def record_environment_episode(self, env, total_reward, use_letsa=False) -> None:
         """
         Stores all necessary environment parameters from the recent episode
 
@@ -32,7 +32,7 @@ class EvaluationHandler:
 
         """
         # append data from test run to list
-        self.makespan.append(env.get_makespan())
+        self.makespan.append(env.get_makespan(use_letsa))
         self.rewards.append(total_reward)
         self.tardiness.append(sum(env.tardiness))
         self.tardiness_max.append(max(env.tardiness))
