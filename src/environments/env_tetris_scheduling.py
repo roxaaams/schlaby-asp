@@ -83,7 +83,7 @@ class Env(gym.Env):
         self.logging_tardinesses: List = []
 
         # action_space: idx_job
-        self.action_space: spaces.Discrete = spaces.Discrete(self.num_jobs)
+        self.action_space: spaces.Discrete = spaces.Discrete(self.num_tasks)
 
         # initial observation
         self._state_obs: List = self.reset()

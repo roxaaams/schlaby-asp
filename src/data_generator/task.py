@@ -95,3 +95,6 @@ class Task:
 
     def str_info(self) -> str:
         return f"Job index {self.job_index}\nTask index {self.task_index}\nMachines {str(self.machines)}"
+
+    def str_schedule_info(self) -> str:
+        return f"Job index {self.job_index} Task index {self.task_index}  parent_index {self.parent_index} Selected Machine {str(self.selected_machine)} Start {str(self.started)} Finish {str(self.finished)}"

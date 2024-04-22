@@ -181,7 +181,7 @@ def mpo_asp(tasks: List[Task], action_mask: np.array) -> int:
     max_number_children = 0
     for i, task in enumerate(tasks):
         if task.task_index in possible_tasks.keys():
-            if len(task.children) > max_number_children:
+            if len(task.children) >= max_number_children:
                 max_number_children = len(task.children)
                 task_index = task.task_index
     return task_index

@@ -32,9 +32,9 @@ from src.environments.env_tetris_scheduling import Env
 DEADLINE_HEURISTIC = 'rand'
 SEED = 0
 
-def dfs_bom(node, sorted_top, tasks_mapping_ids, deadline, job_index, filename):
+def dfs_bom(node, sorted_top, tasks_mapping_ids, deadline, job_index, filename, quantity):
     for child in node.get('children', []):
-        dfs_bom(child, sorted_top, tasks_mapping_ids, deadline - 1, job_index, filename)
+        dfs_bom(child, sorted_top, tasks_mapping_ids, deadline - 1, job_index, filename, quantity * node['quantity'])
     machines = [0] * 31
     execution_times = {}
     setup_times = {}
@@ -53,7 +53,7 @@ def dfs_bom(node, sorted_top, tasks_mapping_ids, deadline, job_index, filename):
             filename=filename,
             parent_index=node['parentid'],
             children=[tasks_mapping_ids[child['operationid']] for child in node.get('children', [])],
-            quantity=node['quantity'],
+            quantity=node['quantity'] * quantity,
             machines=machines,
             execution_times=execution_times,
             setup_times=setup_times,
@@ -85,7 +85,8 @@ def load_bom_files():
 
     # Define the directory path
 #     directory = os.getcwd() + '/data/own_data/ASP-SIMPLE-COMBINE-FRIGORIFICE'
-    directory = os.getcwd() + '/data/own_data/ASP-SIMPLE-GEAMURI-TERMOPAN'
+    directory = os.getcwd() + '/data/own_data/ASP-COMBINE-FRIGORIFICE-MAI-PUTINE-MASINI'
+#     directory = os.getcwd() + '/data/own_data/ASP-SIMPLE-GEAMURI-TERMOPAN'
 #     directory = os.getcwd() + '/data/own_data/ASP-SIMPLE'
 #     directory = os.getcwd() + '/data/own_data/ASP-WIDE'
 #     directory = os.getcwd() + '/data/own_data/ASP-DEEP'
@@ -105,7 +106,7 @@ def load_bom_files():
                 deadline = get_job_deadline(bom_job['start_date'], bom_job['delivery_date'])
                 tasks_mapping_ids = dict()
                 sorted_top: List[Task] = []
-                dfs_bom(bom_job, sorted_top, tasks_mapping_ids, deadline, 0, filename=file)
+                dfs_bom(bom_job, sorted_top, tasks_mapping_ids, deadline, 0, filename=file, quantity=1)
                 for task in sorted_top:
                     if task.parent_index:
                         task.parent_index = tasks_mapping_ids[task.parent_index]
@@ -121,7 +122,7 @@ def main(config_file_name=None, external_config=None):
 
 #     for job in instance_list:
 #         for task in job:
-#             print(task)
+#             print(task.quantity, task.parent_index, task.task_index, task.task_id)
 
     # compute individual hash for each instance
     SPFactory.compute_and_set_hashes(instance_list)

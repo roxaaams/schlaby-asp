@@ -56,19 +56,25 @@ class IndirectActionEnv(Env):
         if 'action_mode' in kwargs.keys():
             action_mode = kwargs['action_mode']
 
-        if action_mode == 'agent':
+        if action_mode == 'agent' and self.sp_type != 'asp':
             # get selected action via indirect action mapping
             next_tasks = self.get_next_tasks()
             next_runtimes = copy.deepcopy([task.runtime if task is not None else np.inf for task in next_tasks])
             next_runtimes = np.array(next_runtimes) / self.max_runtime
             action = np.argmin(abs(next_runtimes - (action/9)))
-        elif action_mode == 'heuristic':
+        else:
             # action remains the same
             pass
 
         # transform and store action
-        selected_job_vector = self.to_one_hot(action, self.num_jobs)
-        self.action_history.append(action)
+        selected_task_vector = None
+        selected_job_vector = None
+        if self.sp_type == 'asp':
+            selected_task_vector = self.to_one_hot(action, self.num_tasks)
+            self.action_history.append(action)
+        else:
+            selected_job_vector = self.to_one_hot(action, self.num_jobs)
+            self.action_history.append(action)
 
         # rms: check if task_idx was set in args from heuristics
         selected_task_id = -1
@@ -79,12 +85,21 @@ class IndirectActionEnv(Env):
             selected_task = self.get_selected_task_by_idx(selected_task_id)
             if not 'completion_time' in kwargs.keys():
                 selected_machine = self.choose_machine(selected_task)
+                # rms: job = 0 since we only have one job
                 self.execute_action(0, selected_task, selected_machine)
             else:
-                # rms: specific to LETSA
+                # rms: LETSA specific
                 original_completion_time = kwargs['completion_time']
                 machine_id, start_time, end_time = self.choose_machine_using_completion_time(selected_task, original_completion_time)
+                # rms: job = 0 since we only have one job
                 self.execute_action_with_given_interval(0, selected_task, machine_id, start_time, end_time)
+        # rms: since now we select the task instead of job, then we need to get the machine directly as in ASP
+        # rms: check if the task is a valid one (not planned and his children all planned)
+        elif action_mode == 'agent' and self.sp_type == 'asp' and self.check_valid_task_action(action):
+            selected_task = self.get_selected_task_by_idx(action)
+            selected_machine = self.choose_machine(selected_task)
+            # rms: job = 0 since we only have one job
+            self.execute_action(0, selected_task, selected_machine)
         # check if the action is valid/executable
         elif self.check_valid_job_action(selected_job_vector, self.last_mask):
             # if the action is valid/executable/schedulable
@@ -96,7 +111,11 @@ class IndirectActionEnv(Env):
             pass
 
         # update variables and track reward
-        action_mask = self.get_action_mask()
+        # rms: action_mask either job_mask or task_mask
+        if self.sp_type == 'asp':
+            action_mask = self.get_action_mask(is_asp=True)
+        else:
+            action_mask = self.get_action_mask()
         infos = {'mask': action_mask}
         observation = self.state_obs
         if action_mode == 'heuristic' and self.sp_type == 'asp' and 'completion_time' in kwargs.keys():
@@ -227,31 +246,64 @@ class IndirectActionEnv(Env):
         self._state_obs = observation
         return self._state_obs
 
-    def get_action_mask(self) -> np.array:
+    def check_valid_task_action(self, task):
+        done = True
+        for sub_task_index in self.tasks[task].children:
+            if not self.tasks[sub_task_index].done:
+                done = False
+                break
+        if done == True and not self.tasks[task].done:
+            return True
+        return False
+
+
+    def get_action_mask(self, is_asp=False) -> np.array:
         """
         Get Action mask
         In this environment, we always treat all actions as valid, because the interaction logic accepts it. Note that
         we only allow non-masked algorithms.
-        The heuristics, however, still need the job mask.
+        The heuristics, however, still need the job mask OR task_mask.
         0 -> available
         1 -> not available
 
         :return: Action mask
 
         """
-        job_mask = np.where(self.job_task_state < self.num_tasks,
-                            np.ones(self.num_jobs, dtype=int), np.zeros(self.num_jobs, dtype=int))
+        if is_asp == False:
+            job_mask = np.where(self.job_task_state < self.num_tasks,
+                                np.ones(self.num_jobs, dtype=int), np.zeros(self.num_jobs, dtype=int))
+            self.last_mask = job_mask
+            return job_mask
+        else:
+            task_mask = [1] * self.num_tasks
+            for task in self.tasks:
+               done = True
+               for sub_task_index in task.children:
+                    if not self.tasks[sub_task_index].done:
+                        done = False
+               if done == True and not task.done:
+                    task_mask[task.task_index] = 0
 
-        self.last_mask = job_mask
-        return job_mask
+            return task_mask
+
 
     def get_next_tasks(self):
         """returns the next tasks that can be scheduled"""
+        # rms: apply the same logic with checking if the sub_Tasks were planned or not and same for the task before appending the task to next_Tasks
         next_tasks = []
-        for job in range(self.num_jobs):
-            if self.job_task_state[job] >= self.num_tasks:  # means that job is done
-                next_tasks.append(None)
-            else:
-                task_position = self.task_job_mapping[(job, self.job_task_state[job])]
-                next_tasks.append(self.tasks[task_position])
+        if self.sp_type == 'asp':
+            for task in self.tasks:
+               done = True
+               for sub_task_index in task.children:
+                    if not self.tasks[sub_task_index].done:
+                        done = False
+               if done == True and not task.done:
+                    next_tasks.append(self.tasks[task.task_index])
+        else:
+            for job in range(self.num_jobs):
+                if self.job_task_state[job] >= self.num_tasks:  # means that job is done
+                    next_tasks.append(None)
+                else:
+                    task_position = self.task_job_mapping[(job, self.job_task_state[job])]
+                    next_tasks.append(self.tasks[task_position])
         return next_tasks

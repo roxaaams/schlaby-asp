@@ -109,6 +109,7 @@ def run_episode(env, model, heuristic_id: Union[str, None], handler: EvaluationH
                 b = env.step(action=0, action_mode=action_mode, task_idx=action)
         else:
             b = env.step(action, action_mode=action_mode)
+
         total_reward += b[1]
         done = b[2]
 
@@ -225,6 +226,9 @@ def test_model(env_config: Dict, data: List[List[Task]], logger: Logger, plot: b
         if plot:
             environment.render()
 
+        for task in environment.tasks:
+            print(task.str_schedule_info())
+
     # return episode results, using EvaluationHandler properties and function
     return evaluation_handler.evaluate_test()
 
@@ -251,11 +255,13 @@ def test_model_and_heuristic(config: dict, model, data_test: List[List[Task]], l
                    'plot': plot_ganttchart, 'log_episode': log_episode}
 
     # test agent
+    print('agent')
     res = test_model(model=model, **test_kwargs)
     results.update({'agent': res})
 
     # test heuristics
     for heuristic in config.get('test_heuristics', TEST_HEURISTICS):
+        print('heuristic', heuristic)
         res = test_model(heuristic_id=heuristic, **test_kwargs)
         results.update({heuristic: res})
 
