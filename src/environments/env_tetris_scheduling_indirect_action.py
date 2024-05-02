@@ -216,8 +216,11 @@ class IndirectActionEnv(Env):
         # (4) processing time of respective next task on job (-1 if job is done)
         operation_time_of_next_task_per_job = np.zeros(self.num_jobs)
         # (5) machine used for next task (altered for FJJSP compatability to one-hot encoded multibinary representation)
+        # rms: this should be at task level instead of job
         machines_for_next_task_per_job = np.zeros((self.num_jobs, self.num_machines))
         # (6) time passed at any given moment. Not really applicable to the offline scheduling case.
+
+        # rms: remaining processing time for all tasks, instead of a task per job
 
         # feature assembly
         next_tasks = self.get_next_tasks()
@@ -225,16 +228,23 @@ class IndirectActionEnv(Env):
             if task.done:
                 pass
             if not task.done:
+                # rms: complete with the specific execution time per machine not with task.runtime
                 remaining_processing_times_on_machines[np.argwhere(task.machines)] += task.runtime
+                # rms: task.something should be either max_runtime, average_runtime and weighted_average_runtime
+            
                 remaining_processing_times_per_job[task.job_index] += task.runtime
                 if task.task_index == next_tasks[task.job_index]:  # next task of the job
                     operation_time_of_next_task_per_job[task.job_index] += task.runtime
+                    # rms: machines_for_next_task_per_job[task.job_index] = (machines_for_next_task_per_job[task.job_index] + task.machines) % 2
                     machines_for_next_task_per_job[task.job_index] = task.machines
+                    # rms: add a counter here
 
         # normalization
+        # rms: print this to see if the obtained values are between 0 and 1
         remaining_processing_times_on_machines /= (self.num_jobs * self.max_runtime)
         remaining_processing_times_per_job /= (self.num_tasks * self.max_runtime)
-        operation_time_of_next_task_per_job /= self.max_runtime
+        # rms: divide this by the counter from above multiplied by self.max_runtime  to have the value between 0 and 1
+        operation_time_of_next_task_per_job /= self.max_runtime 
 
         observation = np.concatenate([
             remaining_processing_times_on_machines,
@@ -275,14 +285,15 @@ class IndirectActionEnv(Env):
             self.last_mask = job_mask
             return job_mask
         else:
-            task_mask = [1] * self.num_tasks
+            # rms: smething seems strange with the 0 and 1 meanings, so I changed now the 0 and 1 order
+            task_mask = [0] * self.num_tasks
             for task in self.tasks:
                done = True
                for sub_task_index in task.children:
                     if not self.tasks[sub_task_index].done:
                         done = False
                if done == True and not task.done:
-                    task_mask[task.task_index] = 0
+                    task_mask[task.task_index] = 1
 
             return task_mask
 

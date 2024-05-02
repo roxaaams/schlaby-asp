@@ -142,10 +142,8 @@ class Env(gym.Env):
         self.task_job_mapping = {(task.job_index, task.task_index): i for i, task in enumerate(self.tasks)}
 
         # retrieve maximum deadline of the current instance
-        # rms: only do this if not ASP
-        if self.sp_type != 'asp':
-            max_deadline = max([task.deadline for task in self.tasks])
-            self.max_deadline = max_deadline if max_deadline > 0 else 1
+        max_deadline = max([task.deadline for task in self.tasks])
+        self.max_deadline = max_deadline if max_deadline > 0 else 1
 
         return self.state_obs
 
