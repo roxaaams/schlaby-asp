@@ -40,6 +40,8 @@ Add a heuristic that returns zeros (this is not a practical example!)
 import numpy as np
 from typing import List
 import random
+import copy
+
 
 from src.data_generator.task import Task
 
@@ -88,8 +90,10 @@ def get_active_task_dict_asp(tasks: List[Task]) -> dict:
 def is_leaf(task: Task):
     return len(task.children) == 0 and task.parent_index
 
-def compute_paths(tasks: List[Task], task: Task, path, duration, visited, critical_path):
-    visited[task.task_index] = True
+critical_path = ([], 0)
+
+def compute_paths(tasks: List[Task], task: Task, path, duration, visited):
+    global critical_path
     path.append(task.task_index)
 
     # Compute the length (cumulative processing # time) of each path determined in step 4.1.
@@ -97,20 +101,20 @@ def compute_paths(tasks: List[Task], task: Task, path, duration, visited, critic
 
     # 4.3 a: Determine the critical (the largest cumulative processing time) path
     if is_leaf(task) and duration > critical_path[1]:
-        critical_path = (path, duration)
+        critical_path = (copy.deepcopy(path), duration)
         return
 
     for _, index_subtask in enumerate(task.children):
-        if index_subtask in visited and tasks[index_subtask].deleted == False:
-            compute_paths(tasks, tasks[index_subtask], path, duration, visited, critical_path)
-            path.pop()
-            visited[index_subtask] = False
+        compute_paths(tasks, tasks[index_subtask], path, duration, visited)
+        path.pop()
+#             visited[index_subtask] = False
 
-
-def letsa(tasks: List[Task], action_mask: np.array, feasible_tasks, visited, critical_path, max_deadline):
+def letsa(tasks: List[Task], action_mask: np.array, feasible_tasks, visited, max_deadline):
     start_task_index = feasible_tasks.get()
+    global critical_path
+    critical_path = ([], 0)
     # 4.1 For each operation in the feasible list formulate all possible network paths.
-    compute_paths(tasks, tasks[start_task_index], [], 0, visited, critical_path)
+    compute_paths(tasks, tasks[start_task_index], [], 0, visited)
 
     # 4.3 b Select the operation Je of the critical path that also belongs to the feasible list F.
     # in this case it is the first operation, which also belongs to F, that is selected for scheduling.
@@ -452,7 +456,7 @@ class HeuristicSelectionAgent:
             'LETSA': letsa
         }
 
-    def __call__(self, tasks: List, action_mask: np.array, task_selection: str, feasible_tasks = None, visited = None, critical_path = None, max_deadline = None):
+    def __call__(self, tasks: List, action_mask: np.array, task_selection: str, feasible_tasks = None, visited = None, max_deadline = None):
         """
         Selects the next heuristic function according to the heuristic passed as string abbreviation
         and the assignment in the task_selections dictionary
@@ -468,7 +472,7 @@ class HeuristicSelectionAgent:
 
         chosen_task = None
         if task_selection == 'LETSA':
-            chosen_task, completion_time = choose_task(tasks, action_mask, feasible_tasks, visited, critical_path, max_deadline)
+            chosen_task, completion_time = choose_task(tasks, action_mask, feasible_tasks, visited, max_deadline)
             return chosen_task, completion_time
         else:
             chosen_task = choose_task(tasks, action_mask)

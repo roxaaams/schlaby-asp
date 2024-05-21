@@ -126,7 +126,8 @@ def main(config_file_name: dict = None, external_config: dict = None) -> None:
     training(config=config, data_train=train_data, data_val=val_data, logger=logger)
 
     # evaluate results
-#     final_evaluation(config=config, data_test=test_data, logger=logger)
+    # rms: changed from test_data to train_data
+#     final_evaluation(config=config, data_test=train_data, logger=logger)
 
 
 def get_perser_args():

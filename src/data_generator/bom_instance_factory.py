@@ -13,6 +13,9 @@ import os
 import json
 import itertools
 from datetime import datetime
+import random
+import copy
+
 
 # Config and data handling imports
 from src.utils.file_handler.config_handler import ConfigHandler
@@ -31,6 +34,8 @@ from src.environments.env_tetris_scheduling import Env
 # constants
 DEADLINE_HEURISTIC = 'rand'
 SEED = 0
+SHOULD_GENERATE_SIMILAR_INSTANCES = True
+SIMILAR_INSTANCES_NUMBER = 496
 
 def dfs_bom(node, sorted_top, tasks_mapping_ids, deadline, job_index, filename, quantity):
     for child in node.get('children', []):
@@ -40,12 +45,15 @@ def dfs_bom(node, sorted_top, tasks_mapping_ids, deadline, job_index, filename, 
     setup_times = {}
     max_runtime = 0
     max_setup = 0
+    average_runtime = 0
     for machine in node.get('machines', []):
         machines[machine['id']] = 1
         execution_times[machine['id']] = machine['execution_time']
         max_runtime = machine['execution_time'] if max_runtime < machine['execution_time'] else max_runtime
         setup_times[machine['id']] = machine['setup_time']
         max_setup =  machine['setup_time'] if max_setup < machine['setup_time'] else max_setup
+        average_runtime = average_runtime + machine['execution_time']
+    average_runtime = int(average_runtime / len(node.get('machines', [])))
 
     task = Task(job_index=job_index,
             task_index=len(sorted_top),
@@ -59,6 +67,7 @@ def dfs_bom(node, sorted_top, tasks_mapping_ids, deadline, job_index, filename, 
             setup_times=setup_times,
             deadline=deadline,
             runtime=max_runtime,
+            average_runtime=average_runtime,
             setup_time=max_setup,
             tools=[],
             _n_tools=0,
@@ -85,10 +94,10 @@ def load_bom_files():
 
     # Define the directory path
 #     directory = os.getcwd() + '/data/own_data/ASP-SIMPLE-COMBINE-FRIGORIFICE'
-    directory = os.getcwd() + '/data/own_data/ASP-COMBINE-FRIGORIFICE-MAI-PUTINE-MASINI'
+#     directory = os.getcwd() + '/data/own_data/ASP-COMBINE-FRIGORIFICE-MAI-PUTINE-MASINI'
 #     directory = os.getcwd() + '/data/own_data/ASP-SIMPLE-GEAMURI-TERMOPAN'
 #     directory = os.getcwd() + '/data/own_data/ASP-SIMPLE'
-#     directory = os.getcwd() + '/data/own_data/ASP-WIDE'
+    directory = os.getcwd() + '/data/own_data/ASP-WIDE'
 #     directory = os.getcwd() + '/data/own_data/ASP-DEEP'
 
 
@@ -111,6 +120,58 @@ def load_bom_files():
                     if task.parent_index:
                         task.parent_index = tasks_mapping_ids[task.parent_index]
                 instance_list.append(sorted_top)
+
+    if SHOULD_GENERATE_SIMILAR_INSTANCES is True:
+        original_list_length = len(instance_list)
+#         for i in range(original_list_length):
+#             for task in instance_list[i]:
+#                  max_runtime = 0
+#                  max_setup = 0
+#                  average_runtime = 0
+#                  for machine_id in range(len(task.machines)):
+#                     machine_op_type = random.randint(0, 1)
+#                     # 0- should add new machine if not existing, 1 - should modify current current machine times
+#                     if machine_op_type == 0:
+#                         if task.machines[machine_id] == 0:
+#                             task.machines[machine_id] = 1
+#                             task.execution_times[machine_id] = random.randint(10, task.runtime)
+#                             task.setup_times[machine_id] = random.randint(10, task.setup_time)
+#                     else:
+#                         task.execution_times[machine_id] = random.randint(10, task.runtime)
+#                         task.setup_times[machine_id] = random.randint(10, task.setup_time)
+#                     max_runtime = max(max_runtime, task.execution_times[machine_id])
+#                     max_setup = max(max_setup, task.setup_times[machine_id])
+#                     average_runtime += task.execution_times[machine_id]
+#                  task.runtime = max_runtime
+#                  task.average_runtime = int(average_runtime / len(task.machines))
+#                  task.setup_time = max_setup
+        for i in range(SIMILAR_INSTANCES_NUMBER):
+            instance_index = random.randint(0, original_list_length - 1)
+            new_instance = copy.deepcopy(instance_list[instance_index])
+            for task in new_instance:
+                max_runtime = 0
+                max_setup = 0
+                average_runtime = 0
+                for machine_id in range(len(task.machines)):
+                   machine_op_type = random.randint(0, 1)
+                   # 0- should add new machine if not existing, 1 - should modify current current machine times
+                   if machine_op_type == 0:
+                       if task.machines[machine_id] == 0:
+                           task.machines[machine_id] = 1
+                           task.execution_times[machine_id] = random.randint(10, task.runtime)
+                           task.setup_times[machine_id] = random.randint(10, task.setup_time)
+                   else:
+                        task.execution_times[machine_id] = random.randint(10, task.runtime)
+                        task.setup_times[machine_id] = random.randint(10, task.setup_time)
+                   max_runtime = max(max_runtime, task.execution_times[machine_id])
+                   max_setup = max(max_setup, task.setup_times[machine_id])
+                   average_runtime += task.execution_times[machine_id]
+                task.runtime = max_runtime
+                task.average_runtime = int(average_runtime / len(task.machines))
+                task.setup_time = max_setup
+
+            instance_list.append(new_instance)
+
     return instance_list
 
 def main(config_file_name=None, external_config=None):
@@ -122,7 +183,7 @@ def main(config_file_name=None, external_config=None):
 
 #     for job in instance_list:
 #         for task in job:
-#             print(task.quantity, task.parent_index, task.task_index, task.task_id)
+#             print(task.quantity, task.parent_index, task.task_index, task.task_id, task.runtime, task.average_runtime)
 
     # compute individual hash for each instance
     SPFactory.compute_and_set_hashes(instance_list)

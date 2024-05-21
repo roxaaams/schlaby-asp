@@ -31,6 +31,7 @@ class Task:
     :param machines_indexes: indexes of machines
     :param execution_times:
     :param setup_times:
+    :param average_runtime:
     """
     def __init__(self, job_index: int,
                  task_index: int = None, machines: List[int] = None,
@@ -47,7 +48,8 @@ class Task:
                  should_multiply_quantity_to_execution_times = False,
                  task_id = None,
                  filename = None,
-                 deleted = False):
+                 deleted = False,
+                 average_runtime = None):
 
         # test for correct data type of required and throw type error otherwise
         if not isinstance(job_index, int) or not isinstance(task_index, int):
@@ -89,6 +91,7 @@ class Task:
                 self.execution_times[machine_id] *= self.quantity
                 self.runtime = int(runtime * quantity)
         self.deleted = deleted
+        self.average_runtime = average_runtime
 
     def __str__(self) -> str:
         return f"Task - job index {self.job_index} - task index {self.task_index} - parent_index {self.parent_index} - children {self.children}"
@@ -97,4 +100,8 @@ class Task:
         return f"Job index {self.job_index}\nTask index {self.task_index}\nMachines {str(self.machines)}"
 
     def str_schedule_info(self) -> str:
-        return f"Job index {self.job_index} Task index {self.task_index}  parent_index {self.parent_index} Selected Machine {str(self.selected_machine)} Start {str(self.started)} Finish {str(self.finished)}"
+        return f"Task index {self.task_index}  parent_index {self.parent_index} Selected Machine {str(self.selected_machine)} Start {str(self.started)} Finish {str(self.finished)}"
+
+    def str_schedule_info_short(self) -> str:
+        return f"{self.task_index} {self.parent_index} {str(self.selected_machine)} {str(self.started)} {str(self.finished)}"
+

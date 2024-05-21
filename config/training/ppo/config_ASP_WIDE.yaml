@@ -41,20 +41,20 @@ clip_range: 0.2
 # (O)   [float]   Entropy loss coefficient for the total loss calculation
 ent_coef: 0.0
 # (O)   [float]   Learning rate for the network updates
-learning_rate: 0.002
+learning_rate: 0.002 # 0.002
 # (O) List[int] List with dimension for the hidden layers (length of list = number of hidden layers) used in the policy net
 policy_layer:  [ 256, 256 ]
 # (O) [str] String for the activation function of the policy net
             # Note, the activation function has to be from the torch.nn module (e.g. ReLU)
-policy_activation: 'ReLU'
+policy_activation: 'Tanh' # 'ReLU'
 # (O) List[int] List with dimension for the hidden layers (length of list = number of hidden layers) used in the value net
 value_layer:  [ 256, 256 ]
 # (O) [str] String for the activation function of the value net
             # Note, the activation function has to be from the torch.nn module (e.g. ReLU)
-value_activation: 'ReLU'
+value_activation: 'Tanh' #'ReLU'
 # (R)   [int]     Maximum number of instances shown to the agent. Limits the training process. Note that instances may be
                   # multiple times, if total_instances is larger than the number of generated instances
-total_instances: 500
+total_instances: 2000
 # (R)   [int]     Maximum number of steps that the agent can interact with the env. Limits the training process
 total_timesteps: 3_000_000
 # (R)   [float]   Range between 0 and 1. How much (percentually) of the generated data will be used for training.
@@ -67,6 +67,7 @@ intermediate_test_interval: 1_000
 
 # --- env (Environment) parameter ---
 # (R)   [str]     Environment you want to use. The vanilla case is env_tetris_scheduling.
+#environment: env_tetris_scheduling
 environment: env_tetris_scheduling_indirect_action
 # (O)   [int]     Maximum number of steps the agent can take before the env interrupts the episode.
                   # Should be greater than the minimum number of agent actions required to solve the problem.
@@ -74,18 +75,19 @@ environment: env_tetris_scheduling_indirect_action
                   # implemented
 num_steps_max: 90
 # (O)   [int]     After this number of episodes, the env prints the last episode result in the console
-log_interval: 2
+log_interval: 10
 # (O)   [bool]    All initial task instances are shuffled before being returned to the agent as observation
 shuffle: False
 # (O)   [str]     The reward strategy determines, how the reward is computed. Default is 'dense_makespan_reward'
 reward_strategy: dense_makespan_reward
+#reward_strategy: sparse_makespan_reward
 # (O)   [int]     The reward scale is a float by which the reward is multiplied to increase/decrease the reward signal
                   # strength
 reward_scale: 1
 
 # --- benchmarking
 # (R)   List[str] List of all heuristics and algorithms against which to benchmark
-test_heuristics: ['rand', 'EDD', 'SPT', 'MTR', 'LTR']
+test_heuristics:  ['LETSA', 'EDD_ASP', 'MPO_ASP', 'LPO_ASP', 'SPT_ASP', 'rand_asp']
 # (O)   [str]     Metric name in the final evaluation table which summarizes the training success best. See
                   # EvaluationHandler.evaluate_test() in utils.evaluations for suitable metrics or add one.
                   # In a wandb hyperparameter sweep this will be usable as objective metric.

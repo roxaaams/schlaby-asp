@@ -35,8 +35,8 @@ class Env(gym.Env):
         # import data containing all instances
         self.data: List[List[Task]] = data  # is later shuffled before input into the environment
 
-        # get number of jobs, tasks, tools, machines and runtimes from input data
-        self.num_jobs, self.num_tasks, self.max_runtime, self.max_deadline = self.get_instance_info()
+        # get number of jobs, tasks, tools, machines and runtimes from input data, and setup time
+        self.num_jobs, self.num_tasks, self.max_runtime, self.max_deadline, self.max_setup_time, self.max_sum_runtime_setup_pair = self.get_instance_info()
         self.num_machines: int = copy.copy(self.data[0][0]._n_machines)
         self.num_tools: int = copy.copy(self.data[0][0]._n_tools)
         self.num_all_tasks: int = self.num_jobs * self.num_tasks
@@ -57,10 +57,6 @@ class Env(gym.Env):
         self.tool_occupancies: List[List] = [[] for _ in range(self.num_tools)]  # stores tool use intervals
         self.job_task_state: numpy.ndarray = np.zeros(self.num_jobs, dtype=int)
         self.task_job_mapping: dict = {}
-        # rms: need some kind of schedule dict with start_date and end_date
-        self.machines = dict()
-        for i in range(self.num_machines):
-            self.machines[i] = Machine()
 
         # initialize info which is not reset
         self.runs: int = -2  # counts runs (episodes/dones).  -1 because reset is called twice before start
@@ -97,6 +93,21 @@ class Env(gym.Env):
         self.reward_scale = config.get('reward_scale', 1)
         self.mr2_reward_buffer: List[List] = [[] for _ in range(len(data))]  # needed for m2r reward only
 
+        # rms: need some kind of schedule dict with start_date and end_date
+        self.machines = dict()
+        self.machines_counter = dict()
+        for i in range(self.num_machines):
+            self.machines[i] = Machine()
+            self.machines_counter[i] = 0
+
+        # rms: mapping of many machines are used
+        for task in self.tasks:
+            for index in range(len(task.machines)):
+                if task.machines[index] == 1:
+                    self.machines_counter[index] += 1
+
+        self.critical_path = ([], 0)
+
     def reset(self) -> List[float]:
         """
         - Resets the episode information trackers
@@ -128,15 +139,23 @@ class Env(gym.Env):
         self.data_idx = self.runs % len(self.data)
         # rms: recompute self.num_tasks, self.max_runtime, self.max_deadline for ASP case
         if self.sp_type == 'asp':
-            self.num_jobs, self.num_tasks, self.max_runtime, self.max_deadline = self.get_instance_info(self.data_idx)
+            self.num_jobs, self.num_tasks, self.max_runtime, self.max_deadline, self.max_setup_time, self.max_sum_runtime_setup_pair = self.get_instance_info(self.data_idx)
             self.max_task_index: int = self.num_tasks - 1
             self.num_all_tasks: int = self.num_jobs * self.num_tasks
             self.tardiness: numpy.ndarray = np.zeros(self.num_all_tasks, dtype=int)
         self.tasks = copy.deepcopy(self.data[self.data_idx])
         # rms: need some kind of schedule dict with start_date and end_date
         self.machines = dict()
+        self.machines_counter = dict()
         for i in range(self.num_machines):
             self.machines[i] = Machine()
+            self.machines_counter[i] = 0
+
+        # rms: mapping of many machines are used
+        for task in self.tasks:
+            for index in range(len(task.machines)):
+                if task.machines[index] == 1:
+                    self.machines_counter[index] += 1
         if self.shuffle:
             np.random.shuffle(self.tasks)
         self.task_job_mapping = {(task.job_index, task.task_index): i for i, task in enumerate(self.tasks)}
@@ -144,6 +163,7 @@ class Env(gym.Env):
         # retrieve maximum deadline of the current instance
         max_deadline = max([task.deadline for task in self.tasks])
         self.max_deadline = max_deadline if max_deadline > 0 else 1
+        self.critical_path = ([], 0)
 
         return self.state_obs
 
@@ -198,13 +218,18 @@ class Env(gym.Env):
         Retrieves info about the instance size and configuration from an instance sample
         :return: (number of jobs, number of tasks and the maximum runtime) of this datapoint
         """
-        num_jobs, num_tasks, max_runtime, max_deadline = 0, 0, 0, 0
+        num_jobs, num_tasks, max_runtime, max_deadline, max_setup_time, max_sum_runtime_setup_pair = 0, 0, 0, 0, 0, 0
         for task in self.data[index]:
             num_jobs = task.job_index if task.job_index > num_jobs else num_jobs
             num_tasks = task.task_index if task.task_index > num_tasks else num_tasks
             max_runtime = task.runtime if task.runtime > max_runtime else max_runtime
             max_deadline = task.deadline if task.deadline > max_deadline else max_deadline
-        return num_jobs + 1, num_tasks + 1, max_runtime, max_deadline
+            max_setup_time = task.setup_time if task.setup_time else max_setup_time
+            for machine_index in range(len(task.machines)):
+                if task.machines[machine_index] == 1:
+                    max_sum_runtime_setup_pair = max(max_sum_runtime_setup_pair, task.execution_times[machine_index] + task.setup_times[machine_index])
+
+        return num_jobs + 1, num_tasks + 1, max_runtime, max_deadline, max_setup_time, max_sum_runtime_setup_pair
 
     @property
     def state_obs(self) -> List[float]:
@@ -500,11 +525,11 @@ class Env(gym.Env):
         if self.reward_strategy == 'dense_makespan_reward':
             # dense reward for makespan optimization according to https://arxiv.org/pdf/2010.12367.pdf
             reward = self.makespan - self.get_makespan(use_letsa)
-            if use_letsa == True:
-                print('self.get_makespan(use_letsa=True)', self.get_makespan(use_letsa))
+#             if use_letsa == True:
+#                 print('self.get_makespan(use_letsa=True)', self.get_makespan(use_letsa))
             self.makespan = self.get_makespan(use_letsa)
         elif self.reward_strategy == 'sparse_makespan_reward':
-            reward = self.sparse_makespan_reward()
+            reward = self.sparse_makespan_reward(use_letsa)
         elif self.reward_strategy == 'mr2_reward':
             reward = self.mr2_reward()
         else:
@@ -514,7 +539,7 @@ class Env(gym.Env):
 
         return reward
 
-    def sparse_makespan_reward(self) -> int:
+    def sparse_makespan_reward(self, use_letsa=False) -> int:
         """
         Computes the reward based on the final makespan at the end of the episode. Else 0.
 
@@ -524,7 +549,7 @@ class Env(gym.Env):
         if not self.check_done():
             reward = 0
         else:
-            reward = self.get_makespan()
+            reward = self.get_makespan(use_letsa)
 
         return reward
 
@@ -655,8 +680,6 @@ class Env(gym.Env):
         """
         print("mode", mode)
         if mode == 'human':
-            for task in self.tasks:
-                print(task)
             GanttChartPlotter.get_gantt_chart_image(self.tasks, show_image=True, return_image=False)
         elif mode == 'image':
             return GanttChartPlotter.get_gantt_chart_image(self.tasks)

@@ -55,9 +55,8 @@ def get_action(env, model, heuristic_id: str, heuristic_agent: Union[HeuristicSe
         task_mask = mask
         # rms: init values for LETSA heuristic
         # critical_path is assigned to [] at every while iteration
-        critical_path = ([], 0)
         if heuristic_id == 'LETSA':
-            selected_action, completion_time = heuristic_agent(tasks, task_mask, heuristic_id, feasible_tasks, visited, critical_path, max_deadline)
+            selected_action, completion_time = heuristic_agent(tasks, task_mask, heuristic_id, feasible_tasks, visited, max_deadline)
         else:
             selected_action = heuristic_agent(tasks, task_mask, heuristic_id)
     else:
@@ -120,6 +119,10 @@ def run_episode(env, model, heuristic_id: Union[str, None], handler: EvaluationH
     else:
         handler.record_environment_episode(env, mean_reward)
 
+#     if action_mode != 'heuristic':
+#         for task in env.tasks:
+#             print(task.str_schedule_info())
+
 
 def test_solver(config: Dict, data_test: List[List[Task]], logger: Logger) -> Dict:
     """
@@ -175,7 +178,7 @@ def log_results(plot_logger: Logger, inter_test_idx: Union[int, None], heuristic
     measures = {'total_reward': handler.rewards[-1], 'makespan': handler.makespan[-1],
                 'tardiness': handler.tardiness[-1]}
 
-    gantt_chart = env.render(mode="image")
+#     gantt_chart = env.render(mode="image")
     # Log chart as table
     if heuristic:
         plot_logger.add_row_to_wandb_table(heuristic, gantt_chart, **measures)
@@ -207,6 +210,7 @@ def test_model(env_config: Dict, data: List[List[Task]], logger: Logger, plot: b
 
     # create evaluation handler
     evaluation_handler = EvaluationHandler()
+    print('Heuristic_ID or none if agent', heuristic_id )
 
     for test_i in range(len(data)):
 
@@ -216,18 +220,23 @@ def test_model(env_config: Dict, data: List[List[Task]], logger: Logger, plot: b
 
         # run environment episode
         # rms: added env_config['sp_type']
+
         run_episode(environment, model, heuristic_id, evaluation_handler, env_config['sp_type'])
+        if (heuristic_id == 'LETSA' or heuristic_id == None) and test_i == 0:
+            for task in environment.tasks:
+                print(task.str_schedule_info_short())
 
-        # log results. Creating wandb table
-        if log_episode:
-            log_results(logger, intermediate_test_idx, heuristic_id, environment, evaluation_handler)
 
-        # plot results
-        if plot:
-            environment.render()
 
-        for task in environment.tasks:
-            print(task.str_schedule_info())
+
+#         # log results. Creating wandb table
+#         if log_episode:
+#             log_results(logger, intermediate_test_idx, heuristic_id, environment, evaluation_handler)
+
+        # rms: do not plot results
+#         # plot results
+#         if plot:
+#             environment.render()
 
     # return episode results, using EvaluationHandler properties and function
     return evaluation_handler.evaluate_test()
@@ -261,7 +270,6 @@ def test_model_and_heuristic(config: dict, model, data_test: List[List[Task]], l
 
     # test heuristics
     for heuristic in config.get('test_heuristics', TEST_HEURISTICS):
-        print('heuristic', heuristic)
         res = test_model(heuristic_id=heuristic, **test_kwargs)
         results.update({heuristic: res})
 
@@ -298,7 +306,6 @@ def main(external_config=None):
     # get config and data
     config = load_config(config_file_path, external_config)
     data = load_data(config)
-    print('Filename', data[0][0].filename)
 
     # Random seed for numpy as given by config
     np.random.seed(config['seed'])

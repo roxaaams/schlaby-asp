@@ -82,6 +82,8 @@ class GanttChartPlotter:
         """
         # Set important variables
         # Overall makespan of the schedule (+ 1 so that the Gantt Chart x-axis is complete)
+        for task in tasks:
+            print('task_id', task.task_index, 'finished', task.finished)
         makespan: int = max([task.finished for task in tasks]) + 1 \
             if overall_makespan is None else overall_makespan
         # Number of machines available in the schedule
