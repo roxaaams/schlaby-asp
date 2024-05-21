@@ -103,7 +103,7 @@ class IndirectActionEnv(Env):
                                 selected_machine = machine_index
 
             elif self.should_determine_task_index == True:
-                action = int(action * self.num_tasks)
+                action = int((action/9) * self.num_tasks)
         else:
             # action remains the same
             pass
