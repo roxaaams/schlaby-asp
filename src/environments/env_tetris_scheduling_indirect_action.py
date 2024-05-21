@@ -101,9 +101,10 @@ class IndirectActionEnv(Env):
                                 min_diff = diff
                                 selected_task_id = task.task_index
                                 selected_machine = machine_index
-
             elif self.should_determine_task_index == True:
-                action = int((action/9) * self.num_tasks)
+                action = int((action/9) * (self.num_tasks - 1))
+#                 if selected_task_id == action:
+#                     print('equal')
         else:
             # action remains the same
             pass
@@ -137,9 +138,9 @@ class IndirectActionEnv(Env):
                 # rms: job = 0 since we only have one job
                 self.execute_action_with_given_interval(0, selected_task, machine_id, start_time, end_time)
         # rms: since now we select the task instead of job, then we need to get the machine directly as in ASP
-        # rms: check if the task is a valid one (not planned and his children all planned)
         elif  action_mode == 'agent' and self.sp_type == 'asp' and self.should_use_machine_task_pair == True:
              self.execute_action(0, self.tasks[selected_task_id], selected_machine)
+        # rms: check if the task is a valid one (not planned and his children all planned)
         elif action_mode == 'agent' and self.sp_type == 'asp' and self.check_valid_task_action(action):
             selected_task = self.get_selected_task_by_idx(action)
             selected_machine = self.choose_machine(selected_task)
