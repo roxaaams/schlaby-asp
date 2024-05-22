@@ -70,7 +70,7 @@ class IndirectActionEnv(Env):
         if action_mode == 'agent':
             # get selected action via indirect action mapping
             next_tasks = self.get_next_tasks()
-            if self.should_use_machine_task_pair == False:
+            if self.should_use_machine_task_pair == False and self.should_determine_task_index == False:
                 # rms: search the closest avr_runtime from next tasks and then scale it.
                 # this should return the index and use it later when executing the action
                 next_runtimes = copy.deepcopy([task.runtime if task is not None else np.inf for task in next_tasks])
@@ -84,9 +84,9 @@ class IndirectActionEnv(Env):
                         if diff <= min_diff:
                             min_diff = diff
                             min_index = next_tasks[i].task_index
-#                 print('action', action/9, 'next_runtimes', next_runtimes)
+                new_action = int((action/9) * (self.num_tasks - 1))
                 action = min_index
-            elif self.should_use_machine_task_pair == True:
+            elif self.should_use_machine_task_pair == True and self.should_determine_task_index == False:
                 min_diff = np.inf
 
                 for task in next_tasks:
@@ -95,16 +95,12 @@ class IndirectActionEnv(Env):
                             term_one = (task.execution_times[machine_index] + task.setup_times[machine_index]) / self.max_sum_runtime_setup_pair
                             term_two = (action/9)
                             diff = abs(term_one - term_two)
-#                             if term_one >= 0.9:
-#                                 print('term 1:', term_one, ', term 2:', term_two)
                             if diff < min_diff:
                                 min_diff = diff
                                 selected_task_id = task.task_index
                                 selected_machine = machine_index
-            elif self.should_determine_task_index == True:
+            elif self.should_use_machine_task_pair == False and self.should_determine_task_index == True:
                 action = int((action/9) * (self.num_tasks - 1))
-#                 if selected_task_id == action:
-#                     print('equal')
         else:
             # action remains the same
             pass
@@ -138,12 +134,13 @@ class IndirectActionEnv(Env):
                 # rms: job = 0 since we only have one job
                 self.execute_action_with_given_interval(0, selected_task, machine_id, start_time, end_time)
         # rms: since now we select the task instead of job, then we need to get the machine directly as in ASP
-        elif  action_mode == 'agent' and self.sp_type == 'asp' and self.should_use_machine_task_pair == True:
+        elif  action_mode == 'agent' and self.sp_type == 'asp' and self.should_use_machine_task_pair == True and self.should_determine_task_index == False:
              self.execute_action(0, self.tasks[selected_task_id], selected_machine)
         # rms: check if the task is a valid one (not planned and his children all planned)
-        elif action_mode == 'agent' and self.sp_type == 'asp' and self.check_valid_task_action(action):
+        elif action_mode == 'agent' and self.sp_type == 'asp' and self.should_use_machine_task_pair == False and self.should_determine_task_index == True and self.check_valid_task_action(action):
             selected_task = self.get_selected_task_by_idx(action)
             selected_machine = self.choose_machine(selected_task)
+            print('task: ', action, ' machine: ', selected_machine)
             # rms: job = 0 since we only have one job
             self.execute_action(0, selected_task, selected_machine)
         # check if the action is valid/executable

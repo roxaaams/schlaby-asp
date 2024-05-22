@@ -509,6 +509,7 @@ class Env(gym.Env):
             self.tool_occupancies[int(needed_tool[0])].append([start_time, end_time])
 
         # update job and task
+        print('start_time: ', start_time, ' end_time: ', end_time)
         task.started = start_time
         task.finished = end_time
         task.selected_machine = machine_id
