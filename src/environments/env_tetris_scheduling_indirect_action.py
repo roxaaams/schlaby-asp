@@ -34,7 +34,8 @@ class IndirectActionEnv(Env):
         super(IndirectActionEnv, self).__init__(config, data)
 
         # overwrite action space to predicting a processing time normalized to [0, 1]
-        self.action_space: spaces.Discrete = spaces.Discrete(10)
+#         self.action_space: spaces.Discrete = spaces.Discrete(10)
+        self.action_space: spaces.Discrete = spaces.Discrete(self.num_tasks)
 
         # overwrite observation space
         observation_shape = np.array(self.state_obs).shape
@@ -81,10 +82,9 @@ class IndirectActionEnv(Env):
                 for i in range(len(next_tasks)):
                     if next_runtimes[i] != np.inf:
                         diff = abs(next_runtimes[i] - (action/9))
-                        if diff <= min_diff:
+                        if diff < min_diff:
                             min_diff = diff
                             min_index = next_tasks[i].task_index
-                new_action = int((action/9) * (self.num_tasks - 1))
                 action = min_index
             elif self.should_use_machine_task_pair == True and self.should_determine_task_index == False:
                 min_diff = np.inf
@@ -100,7 +100,15 @@ class IndirectActionEnv(Env):
                                 selected_task_id = task.task_index
                                 selected_machine = machine_index
             elif self.should_use_machine_task_pair == False and self.should_determine_task_index == True:
-                action = int((action/9) * (self.num_tasks - 1))
+#                 action = int((action/9) * (self.num_tasks - 1))
+                min_diff = np.inf
+                for task in next_tasks:
+                    diff = abs(task.task_index - action)
+                    if diff < min_diff:
+                        min_diff = diff
+                        selected_task_id = task.task_index
+                    elif diff == min_diff:
+                        pass
         else:
             # action remains the same
             pass
@@ -138,7 +146,7 @@ class IndirectActionEnv(Env):
              self.execute_action(0, self.tasks[selected_task_id], selected_machine)
         # rms: check if the task is a valid one (not planned and his children all planned)
         elif action_mode == 'agent' and self.sp_type == 'asp' and self.should_use_machine_task_pair == False and self.should_determine_task_index == True and self.check_valid_task_action(action):
-            selected_task = self.get_selected_task_by_idx(action)
+            selected_task = self.get_selected_task_by_idx(selected_task_id)
             selected_machine = self.choose_machine(selected_task)
             print('task: ', action, ' machine: ', selected_machine)
             # rms: job = 0 since we only have one job
@@ -366,15 +374,12 @@ class IndirectActionEnv(Env):
                         weight_down += machines_counter_dynamic[index]
                 weighted_average_runtime = weight_up / weight_down
 
-                if task.task_index in next_tasks:
-                    task_status[task.task_index] = 0.5
-                    operation_time_per_tasks[task.task_index] = weighted_average_runtime
-#                     operation_time_per_tasks[task.task_index] = task.runtime
-
-                else:
-                    task_status[task.task_index] = 1
-                    operation_time_per_tasks[task.task_index] = weighted_average_runtime
-#                     operation_time_per_tasks[task.task_index] = task.runtime
+                # rms: first assume that the task is not yet part of the next task that can be scheduled right away
+                task_status[task.task_index] = 1
+                for next_task in next_tasks:
+                    if next_task.task_index == task.task_index:
+                        task_status[task.task_index] = 0.5
+                operation_time_per_tasks[task.task_index] = weighted_average_runtime
 
                 # rms: variant 2 state
                 max_completion_time_per_child = 0
