@@ -145,7 +145,7 @@ class IndirectActionEnv(Env):
         elif  action_mode == 'agent' and self.sp_type == 'asp' and self.should_use_machine_task_pair == True and self.should_determine_task_index == False:
              self.execute_action(0, self.tasks[selected_task_id], selected_machine)
         # rms: check if the task is a valid one (not planned and his children all planned)
-        elif action_mode == 'agent' and self.sp_type == 'asp' and self.should_use_machine_task_pair == False and self.should_determine_task_index == True and self.check_valid_task_action(action):
+        elif action_mode == 'agent' and self.sp_type == 'asp' and self.should_use_machine_task_pair == False and self.should_determine_task_index == True:
             selected_task = self.get_selected_task_by_idx(selected_task_id)
             selected_machine = self.choose_machine(selected_task)
             print('task: ', action, ' machine: ', selected_machine)

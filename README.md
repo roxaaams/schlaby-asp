@@ -1,9 +1,60 @@
 
+# Commands to run:
+
+1. For training: 
+
+Make sure this line is not commented in src/data_generator/bom_instance_factory.py
+
+directory = os.getcwd() + '/data/own_data/ASP-WIDE'
+
+Then, run the following:
+
+python -m src.data_generator.bom_instance_factory -fp data_generation/asp/config_ASP_WIDE.yaml
+python -m src.agents.train -fp training/ppo/config_ASP_WIDE.yaml
+
+2. For testing:
+
+Make sure this line is not commented in src/data_generator/bom_instance_factory.py
+
+directory = os.getcwd() + '/data/own_data/ASP-WIDE'
+
+Also, to modify the instances from ASP-WIDE (not just generate new ones based on them), make sure that the following in  src/data_generator/bom_instance_factory.py is not commented.
+
+
+#         for i in range(original_list_length):
+#             for task in instance_list[i]:
+#                  max_runtime = 0
+#                  max_setup = 0
+#                  average_runtime = 0
+#                  for machine_id in range(len(task.machines)):
+#                     machine_op_type = random.randint(0, 1)
+#                     # 0- should add new machine if not existing, 1 - should modify current current machine times
+#                     if machine_op_type == 0:
+#                         if task.machines[machine_id] == 0:
+#                             task.machines[machine_id] = 1
+#                             task.execution_times[machine_id] = random.randint(10, task.runtime)
+#                             task.setup_times[machine_id] = random.randint(10, task.setup_time)
+#                     else:
+#                         task.execution_times[machine_id] = random.randint(10, task.runtime)
+#                         task.setup_times[machine_id] = random.randint(10, task.setup_time)
+#                     max_runtime = max(max_runtime, task.execution_times[machine_id])
+#                     max_setup = max(max_setup, task.setup_times[machine_id])
+#                     average_runtime += task.execution_times[machine_id]
+#                  task.runtime = max_runtime
+#                  task.average_runtime = int(average_runtime / len(task.machines))
+#                  task.setup_time = max_setup
+
+Then, run the following:
+
+python -m src.data_generator.bom_instance_factory -fp data_generation/asp/config_ASP_WIDE_TESTING.yaml
+python -m src.agents.test -fp testing/ppo/config_ASP_WIDE_TESTING.yaml
+
 # Roxi's Commands:
 
 python -m src.data_generator.bom_instance_factory -fp data_generation/asp/config_ASP_WIDE.yaml
 python -m src.agents.train -fp training/ppo/config_ASP_WIDE.yaml
 python -m src.agents.test -fp testing/ppo/config_ASP_WIDE.yaml
+
 
 python -m src.data_generator.bom_instance_factory -fp data_generation/asp/config_ASP_SIMPLE.yaml
 python -m src.agents.train -fp training/ppo/config_ASP_SIMPLE.yaml
@@ -11,7 +62,6 @@ python -m src.agents.test -fp testing/ppo/config_ASP_SIMPLE.yaml
 
 
 python -m src.data_generator.bom_instance_factory -fp data_generation/asp/config_ASP_WIDE_TESTING.yaml
-
 
 
 python -m src.data_generator.bom_instance_factory -fp data_generation/asp/config_ASP-COMBINE-FRIGORIFICE-MAI-PUTINE-MASINI.yaml
