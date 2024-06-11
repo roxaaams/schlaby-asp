@@ -212,6 +212,38 @@ def lpo_asp(tasks: List[Task], action_mask: np.array) -> int:
                 task_index = task.task_index
     return task_index
 
+def mpo_root_asp(tasks: List[Task], action_mask: np.array) -> int:
+    possible_tasks = get_active_task_dict_asp(tasks)
+    task_index = 0
+    max_number_children = -1
+    for i, task in enumerate(tasks):
+        if task.task_index in possible_tasks.keys():
+            remaining_tasks_count = 0
+            task_successor_index = task.parent_index
+            while task_successor_index is not None:
+                remaining_tasks_count += 1
+                task_successor_index = tasks[task_successor_index].parent_index
+            if max_number_children < remaining_tasks_count:
+                max_number_children = remaining_tasks_count
+                task_index = task.task_index
+    return task_index
+
+def lpo_root_asp(tasks: List[Task], action_mask: np.array) -> int:
+    possible_tasks = get_active_task_dict_asp(tasks)
+    task_index = 0
+    min_number_children = np.inf
+    for i, task in enumerate(tasks):
+        if task.task_index in possible_tasks.keys():
+            remaining_tasks_count = 0
+            task_successor_index = task.parent_index
+            while task_successor_index is not None:
+                remaining_tasks_count += 1
+                task_successor_index = tasks[task_successor_index].parent_index
+            if min_number_children > remaining_tasks_count:
+                min_number_children = remaining_tasks_count
+                task_index = task.task_index
+    return task_index
+
 def spt_asp(tasks: List[Task], action_mask: np.array) -> int:
     """
     SPT: shortest processing time first. Determines the unfinished task has the lowest runtime for ASP
@@ -452,6 +484,8 @@ class HeuristicSelectionAgent:
             'SPT_ASP': spt_asp,
             'MPO_ASP': mpo_asp,
             'LPO_ASP': lpo_asp,
+            'LPO_ROOT_ASP': lpo_root_asp,
+            'MPO_ROOT_ASP': mpo_root_asp,
             'rand_asp': random_task_asp,
             'LETSA': letsa
         }

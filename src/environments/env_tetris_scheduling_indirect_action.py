@@ -148,7 +148,6 @@ class IndirectActionEnv(Env):
         elif action_mode == 'agent' and self.sp_type == 'asp' and self.should_use_machine_task_pair == False and self.should_determine_task_index == True:
             selected_task = self.get_selected_task_by_idx(selected_task_id)
             selected_machine = self.choose_machine(selected_task)
-            print('task: ', action, ' machine: ', selected_machine)
             # rms: job = 0 since we only have one job
             self.execute_action(0, selected_task, selected_machine)
         # check if the action is valid/executable
