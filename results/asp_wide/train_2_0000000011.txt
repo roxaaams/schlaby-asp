@@ -1,0 +1,1173 @@
+0000000011
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 10/400
+Average performance since last log: mean reward=-0.55, mean makespan=27677.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+20 instances played! Last instance seen: 20/400
+Average performance since last log: mean reward=-0.47, mean makespan=23694.7, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 1000 and after 25 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.42, mean makespan=21201.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+30 instances played! Last instance seen: 30/400
+Average performance since last log: mean reward=-0.57, mean makespan=28488.7, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+40 instances played! Last instance seen: 40/400
+Average performance since last log: mean reward=-0.51, mean makespan=25302.0, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 2000 and after 49 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.42, mean makespan=21201.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+50 instances played! Last instance seen: 50/400
+Average performance since last log: mean reward=-0.52, mean makespan=25892.6, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+60 instances played! Last instance seen: 60/400
+Average performance since last log: mean reward=-0.56, mean makespan=27971.2, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+70 instances played! Last instance seen: 70/400
+Average performance since last log: mean reward=-0.57, mean makespan=28616.8, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 3000 and after 74 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.46, mean makespan=23143.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+80 instances played! Last instance seen: 80/400
+Average performance since last log: mean reward=-0.51, mean makespan=25714.5, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+90 instances played! Last instance seen: 90/400
+Average performance since last log: mean reward=-0.49, mean makespan=24725.0, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 4000 and after 98 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.46, mean makespan=23143.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+100 instances played! Last instance seen: 100/400
+Average performance since last log: mean reward=-0.56, mean makespan=27824.3, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+110 instances played! Last instance seen: 110/400
+Average performance since last log: mean reward=-0.49, mean makespan=24519.7, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+120 instances played! Last instance seen: 120/400
+Average performance since last log: mean reward=-0.76, mean makespan=38049.6, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 5000 and after 122 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.67, mean makespan=33450.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+130 instances played! Last instance seen: 130/400
+Average performance since last log: mean reward=-0.5, mean makespan=24993.1, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+140 instances played! Last instance seen: 140/400
+Average performance since last log: mean reward=-0.49, mean makespan=24474.4, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 6000 and after 147 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.67, mean makespan=33450.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+150 instances played! Last instance seen: 150/400
+Average performance since last log: mean reward=-0.54, mean makespan=26982.3, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+160 instances played! Last instance seen: 160/400
+Average performance since last log: mean reward=-0.52, mean makespan=26014.9, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 7000 and after 171 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.4, mean makespan=19904.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+170 instances played! Last instance seen: 170/400
+Average performance since last log: mean reward=-0.48, mean makespan=24215.8, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+180 instances played! Last instance seen: 180/400
+Average performance since last log: mean reward=-0.61, mean makespan=30525.5, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+190 instances played! Last instance seen: 190/400
+Average performance since last log: mean reward=-0.55, mean makespan=27730.1, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 8000 and after 196 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.4, mean makespan=19904.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+200 instances played! Last instance seen: 200/400
+Average performance since last log: mean reward=-0.57, mean makespan=28722.8, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+210 instances played! Last instance seen: 210/400
+Average performance since last log: mean reward=-0.52, mean makespan=25962.1, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 9000 and after 220 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.42, mean makespan=21079.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+220 instances played! Last instance seen: 220/400
+Average performance since last log: mean reward=-0.64, mean makespan=31801.4, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+230 instances played! Last instance seen: 230/400
+Average performance since last log: mean reward=-0.49, mean makespan=24325.1, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+240 instances played! Last instance seen: 240/400
+Average performance since last log: mean reward=-0.86, mean makespan=43116.1, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 10000 and after 244 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.42, mean makespan=21079.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+250 instances played! Last instance seen: 250/400
+Average performance since last log: mean reward=-0.59, mean makespan=29507.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+260 instances played! Last instance seen: 260/400
+Average performance since last log: mean reward=-0.49, mean makespan=24557.8, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 11000 and after 269 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.4, mean makespan=19904.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+270 instances played! Last instance seen: 270/400
+Average performance since last log: mean reward=-0.58, mean makespan=29031.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+280 instances played! Last instance seen: 280/400
+Average performance since last log: mean reward=-0.76, mean makespan=38109.9, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+290 instances played! Last instance seen: 290/400
+Average performance since last log: mean reward=-0.57, mean makespan=28500.0, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 12000 and after 293 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.4, mean makespan=19904.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+300 instances played! Last instance seen: 300/400
+Average performance since last log: mean reward=-0.58, mean makespan=29027.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+310 instances played! Last instance seen: 310/400
+Average performance since last log: mean reward=-0.54, mean makespan=27215.6, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 13000 and after 318 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.42, mean makespan=21201.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+320 instances played! Last instance seen: 320/400
+Average performance since last log: mean reward=-0.6, mean makespan=29796.6, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+330 instances played! Last instance seen: 330/400
+Average performance since last log: mean reward=-0.58, mean makespan=28959.7, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+340 instances played! Last instance seen: 340/400
+Average performance since last log: mean reward=-0.59, mean makespan=29651.8, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 14000 and after 342 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.42, mean makespan=21201.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+350 instances played! Last instance seen: 350/400
+Average performance since last log: mean reward=-0.54, mean makespan=27137.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+360 instances played! Last instance seen: 360/400
+Average performance since last log: mean reward=-0.55, mean makespan=27390.1, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 15000 and after 366 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.42, mean makespan=21201.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+370 instances played! Last instance seen: 370/400
+Average performance since last log: mean reward=-0.53, mean makespan=26747.7, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+380 instances played! Last instance seen: 380/400
+Average performance since last log: mean reward=-0.56, mean makespan=27985.1, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 16000 and after 391 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.42, mean makespan=21201.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+390 instances played! Last instance seen: 390/400
+Average performance since last log: mean reward=-0.44, mean makespan=21854.6, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+400 instances played! Last instance seen: 0/400
+Average performance since last log: mean reward=-0.51, mean makespan=25570.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+410 instances played! Last instance seen: 10/400
+Average performance since last log: mean reward=-0.61, mean makespan=30525.2, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 17000 and after 415 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.41, mean makespan=20337.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+420 instances played! Last instance seen: 20/400
+Average performance since last log: mean reward=-0.5, mean makespan=24981.4, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+430 instances played! Last instance seen: 30/400
+Average performance since last log: mean reward=-0.56, mean makespan=27936.1, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 18000 and after 440 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.41, mean makespan=20337.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+440 instances played! Last instance seen: 40/400
+Average performance since last log: mean reward=-0.51, mean makespan=25686.8, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+450 instances played! Last instance seen: 50/400
+Average performance since last log: mean reward=-0.51, mean makespan=25571.8, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+460 instances played! Last instance seen: 60/400
+Average performance since last log: mean reward=-0.56, mean makespan=27906.9, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 19000 and after 464 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+470 instances played! Last instance seen: 70/400
+Average performance since last log: mean reward=-0.54, mean makespan=27120.6, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+480 instances played! Last instance seen: 80/400
+Average performance since last log: mean reward=-0.49, mean makespan=24334.2, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 20000 and after 488 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+490 instances played! Last instance seen: 90/400
+Average performance since last log: mean reward=-0.53, mean makespan=26480.8, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+500 instances played! Last instance seen: 100/400
+Average performance since last log: mean reward=-0.51, mean makespan=25382.9, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+510 instances played! Last instance seen: 110/400
+Average performance since last log: mean reward=-0.49, mean makespan=24438.1, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 21000 and after 513 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+520 instances played! Last instance seen: 120/400
+Average performance since last log: mean reward=-0.77, mean makespan=38715.2, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+530 instances played! Last instance seen: 130/400
+Average performance since last log: mean reward=-0.5, mean makespan=25196.2, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 22000 and after 537 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+540 instances played! Last instance seen: 140/400
+Average performance since last log: mean reward=-0.5, mean makespan=25096.6, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+550 instances played! Last instance seen: 150/400
+Average performance since last log: mean reward=-0.51, mean makespan=25526.2, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 23000 and after 561 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+560 instances played! Last instance seen: 160/400
+Average performance since last log: mean reward=-0.47, mean makespan=23709.7, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+570 instances played! Last instance seen: 170/400
+Average performance since last log: mean reward=-0.49, mean makespan=24662.8, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+580 instances played! Last instance seen: 180/400
+Average performance since last log: mean reward=-0.61, mean makespan=30326.5, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 24000 and after 586 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+590 instances played! Last instance seen: 190/400
+Average performance since last log: mean reward=-0.55, mean makespan=27742.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+600 instances played! Last instance seen: 200/400
+Average performance since last log: mean reward=-0.56, mean makespan=27851.8, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 25000 and after 610 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+610 instances played! Last instance seen: 210/400
+Average performance since last log: mean reward=-0.49, mean makespan=24394.2, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+620 instances played! Last instance seen: 220/400
+Average performance since last log: mean reward=-0.67, mean makespan=33322.3, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+630 instances played! Last instance seen: 230/400
+Average performance since last log: mean reward=-0.46, mean makespan=23243.8, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 26000 and after 635 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+640 instances played! Last instance seen: 240/400
+Average performance since last log: mean reward=-0.95, mean makespan=47585.4, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+650 instances played! Last instance seen: 250/400
+Average performance since last log: mean reward=-0.58, mean makespan=28912.5, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 27000 and after 659 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+660 instances played! Last instance seen: 260/400
+Average performance since last log: mean reward=-0.52, mean makespan=26137.6, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+670 instances played! Last instance seen: 270/400
+Average performance since last log: mean reward=-0.63, mean makespan=31336.6, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+680 instances played! Last instance seen: 280/400
+Average performance since last log: mean reward=-0.68, mean makespan=34044.0, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 28000 and after 683 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+690 instances played! Last instance seen: 290/400
+Average performance since last log: mean reward=-0.56, mean makespan=28215.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+700 instances played! Last instance seen: 300/400
+Average performance since last log: mean reward=-0.58, mean makespan=28767.0, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 29000 and after 708 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+710 instances played! Last instance seen: 310/400
+Average performance since last log: mean reward=-0.52, mean makespan=25823.7, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+720 instances played! Last instance seen: 320/400
+Average performance since last log: mean reward=-0.62, mean makespan=30878.2, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+730 instances played! Last instance seen: 330/400
+Average performance since last log: mean reward=-0.6, mean makespan=30106.2, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 30000 and after 732 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+740 instances played! Last instance seen: 340/400
+Average performance since last log: mean reward=-0.58, mean makespan=29118.1, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+750 instances played! Last instance seen: 350/400
+Average performance since last log: mean reward=-0.49, mean makespan=24466.9, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 31000 and after 757 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+760 instances played! Last instance seen: 360/400
+Average performance since last log: mean reward=-0.59, mean makespan=29466.7, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+770 instances played! Last instance seen: 370/400
+Average performance since last log: mean reward=-0.56, mean makespan=28024.1, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 32000 and after 781 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+780 instances played! Last instance seen: 380/400
+Average performance since last log: mean reward=-0.55, mean makespan=27713.7, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+790 instances played! Last instance seen: 390/400
+Average performance since last log: mean reward=-0.47, mean makespan=23424.4, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+800 instances played! Last instance seen: 0/400
+Average performance since last log: mean reward=-0.52, mean makespan=25817.0, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 33000 and after 805 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+810 instances played! Last instance seen: 10/400
+Average performance since last log: mean reward=-0.59, mean makespan=29718.3, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+820 instances played! Last instance seen: 20/400
+Average performance since last log: mean reward=-0.46, mean makespan=22953.3, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 34000 and after 830 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+830 instances played! Last instance seen: 30/400
+Average performance since last log: mean reward=-0.53, mean makespan=26372.9, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+840 instances played! Last instance seen: 40/400
+Average performance since last log: mean reward=-0.51, mean makespan=25259.1, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+850 instances played! Last instance seen: 50/400
+Average performance since last log: mean reward=-0.51, mean makespan=25551.4, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 35000 and after 854 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+860 instances played! Last instance seen: 60/400
+Average performance since last log: mean reward=-0.57, mean makespan=28702.6, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+870 instances played! Last instance seen: 70/400
+Average performance since last log: mean reward=-0.56, mean makespan=28029.6, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 36000 and after 879 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+880 instances played! Last instance seen: 80/400
+Average performance since last log: mean reward=-0.5, mean makespan=25075.2, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+890 instances played! Last instance seen: 90/400
+Average performance since last log: mean reward=-0.48, mean makespan=24201.9, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+900 instances played! Last instance seen: 100/400
+Average performance since last log: mean reward=-0.53, mean makespan=26549.9, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 37000 and after 903 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+910 instances played! Last instance seen: 110/400
+Average performance since last log: mean reward=-0.49, mean makespan=24431.7, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+920 instances played! Last instance seen: 120/400
+Average performance since last log: mean reward=-0.73, mean makespan=36703.0, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 38000 and after 927 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+930 instances played! Last instance seen: 130/400
+Average performance since last log: mean reward=-0.51, mean makespan=25453.4, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+940 instances played! Last instance seen: 140/400
+Average performance since last log: mean reward=-0.53, mean makespan=26535.7, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+950 instances played! Last instance seen: 150/400
+Average performance since last log: mean reward=-0.52, mean makespan=26134.5, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 39000 and after 952 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+960 instances played! Last instance seen: 160/400
+Average performance since last log: mean reward=-0.49, mean makespan=24679.3, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+970 instances played! Last instance seen: 170/400
+Average performance since last log: mean reward=-0.5, mean makespan=25071.2, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 40000 and after 976 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+980 instances played! Last instance seen: 180/400
+Average performance since last log: mean reward=-0.59, mean makespan=29558.6, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+990 instances played! Last instance seen: 190/400
+Average performance since last log: mean reward=-0.58, mean makespan=28873.2, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 41000 and after 1000 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1000 instances played! Last instance seen: 200/400
+Average performance since last log: mean reward=-0.54, mean makespan=27131.3, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1010 instances played! Last instance seen: 210/400
+Average performance since last log: mean reward=-0.5, mean makespan=24980.8, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1020 instances played! Last instance seen: 220/400
+Average performance since last log: mean reward=-0.6, mean makespan=30181.1, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 42000 and after 1025 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1030 instances played! Last instance seen: 230/400
+Average performance since last log: mean reward=-0.51, mean makespan=25335.9, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1040 instances played! Last instance seen: 240/400
+Average performance since last log: mean reward=-1.0, mean makespan=49816.7, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 43000 and after 1049 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1050 instances played! Last instance seen: 250/400
+Average performance since last log: mean reward=-0.61, mean makespan=30606.6, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1060 instances played! Last instance seen: 260/400
+Average performance since last log: mean reward=-0.52, mean makespan=25761.8, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1070 instances played! Last instance seen: 270/400
+Average performance since last log: mean reward=-0.59, mean makespan=29651.3, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 44000 and after 1074 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1080 instances played! Last instance seen: 280/400
+Average performance since last log: mean reward=-0.71, mean makespan=35499.6, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1090 instances played! Last instance seen: 290/400
+Average performance since last log: mean reward=-0.55, mean makespan=27364.8, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 45000 and after 1098 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1100 instances played! Last instance seen: 300/400
+Average performance since last log: mean reward=-0.51, mean makespan=25731.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1110 instances played! Last instance seen: 310/400
+Average performance since last log: mean reward=-0.58, mean makespan=28799.8, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1120 instances played! Last instance seen: 320/400
+Average performance since last log: mean reward=-0.63, mean makespan=31401.0, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 46000 and after 1122 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1130 instances played! Last instance seen: 330/400
+Average performance since last log: mean reward=-0.59, mean makespan=29571.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1140 instances played! Last instance seen: 340/400
+Average performance since last log: mean reward=-0.59, mean makespan=29645.1, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 47000 and after 1147 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1150 instances played! Last instance seen: 350/400
+Average performance since last log: mean reward=-0.5, mean makespan=24810.6, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1160 instances played! Last instance seen: 360/400
+Average performance since last log: mean reward=-0.58, mean makespan=28772.0, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 48000 and after 1171 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1170 instances played! Last instance seen: 370/400
+Average performance since last log: mean reward=-0.56, mean makespan=28207.8, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1180 instances played! Last instance seen: 380/400
+Average performance since last log: mean reward=-0.54, mean makespan=27082.8, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1190 instances played! Last instance seen: 390/400
+Average performance since last log: mean reward=-0.44, mean makespan=22164.5, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 49000 and after 1196 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1200 instances played! Last instance seen: 0/400
+Average performance since last log: mean reward=-0.49, mean makespan=24361.1, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1210 instances played! Last instance seen: 10/400
+Average performance since last log: mean reward=-0.55, mean makespan=27269.6, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 50000 and after 1220 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1220 instances played! Last instance seen: 20/400
+Average performance since last log: mean reward=-0.48, mean makespan=23976.7, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1230 instances played! Last instance seen: 30/400
+Average performance since last log: mean reward=-0.54, mean makespan=26788.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1240 instances played! Last instance seen: 40/400
+Average performance since last log: mean reward=-0.53, mean makespan=26551.1, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 51000 and after 1244 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1250 instances played! Last instance seen: 50/400
+Average performance since last log: mean reward=-0.49, mean makespan=24725.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1260 instances played! Last instance seen: 60/400
+Average performance since last log: mean reward=-0.52, mean makespan=26036.7, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 52000 and after 1269 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1270 instances played! Last instance seen: 70/400
+Average performance since last log: mean reward=-0.58, mean makespan=28772.9, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1280 instances played! Last instance seen: 80/400
+Average performance since last log: mean reward=-0.52, mean makespan=25805.2, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1290 instances played! Last instance seen: 90/400
+Average performance since last log: mean reward=-0.48, mean makespan=23798.0, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 53000 and after 1293 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1300 instances played! Last instance seen: 100/400
+Average performance since last log: mean reward=-0.53, mean makespan=26724.7, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1310 instances played! Last instance seen: 110/400
+Average performance since last log: mean reward=-0.47, mean makespan=23687.8, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 54000 and after 1318 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1320 instances played! Last instance seen: 120/400
+Average performance since last log: mean reward=-0.72, mean makespan=36169.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1330 instances played! Last instance seen: 130/400
+Average performance since last log: mean reward=-0.49, mean makespan=24275.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1340 instances played! Last instance seen: 140/400
+Average performance since last log: mean reward=-0.54, mean makespan=27218.1, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 55000 and after 1342 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1350 instances played! Last instance seen: 150/400
+Average performance since last log: mean reward=-0.5, mean makespan=25026.5, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1360 instances played! Last instance seen: 160/400
+Average performance since last log: mean reward=-0.5, mean makespan=25083.2, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 56000 and after 1366 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1370 instances played! Last instance seen: 170/400
+Average performance since last log: mean reward=-0.47, mean makespan=23613.5, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1380 instances played! Last instance seen: 180/400
+Average performance since last log: mean reward=-0.59, mean makespan=29411.2, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 57000 and after 1391 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1390 instances played! Last instance seen: 190/400
+Average performance since last log: mean reward=-0.58, mean makespan=29149.9, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1400 instances played! Last instance seen: 200/400
+Average performance since last log: mean reward=-0.56, mean makespan=28041.1, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1410 instances played! Last instance seen: 210/400
+Average performance since last log: mean reward=-0.48, mean makespan=23886.8, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 58000 and after 1415 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1420 instances played! Last instance seen: 220/400
+Average performance since last log: mean reward=-0.67, mean makespan=33260.5, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1430 instances played! Last instance seen: 230/400
+Average performance since last log: mean reward=-0.48, mean makespan=23771.3, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 59000 and after 1440 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1440 instances played! Last instance seen: 240/400
+Average performance since last log: mean reward=-0.95, mean makespan=47385.9, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1450 instances played! Last instance seen: 250/400
+Average performance since last log: mean reward=-0.6, mean makespan=30233.3, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1460 instances played! Last instance seen: 260/400
+Average performance since last log: mean reward=-0.52, mean makespan=26243.3, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 60000 and after 1464 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1470 instances played! Last instance seen: 270/400
+Average performance since last log: mean reward=-0.52, mean makespan=25804.1, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1480 instances played! Last instance seen: 280/400
+Average performance since last log: mean reward=-0.71, mean makespan=35419.7, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 61000 and after 1488 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1490 instances played! Last instance seen: 290/400
+Average performance since last log: mean reward=-0.56, mean makespan=27944.3, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1500 instances played! Last instance seen: 300/400
+Average performance since last log: mean reward=-0.54, mean makespan=27070.7, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1510 instances played! Last instance seen: 310/400
+Average performance since last log: mean reward=-0.53, mean makespan=26263.3, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 62000 and after 1513 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1520 instances played! Last instance seen: 320/400
+Average performance since last log: mean reward=-0.58, mean makespan=29102.3, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1530 instances played! Last instance seen: 330/400
+Average performance since last log: mean reward=-0.58, mean makespan=29190.0, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 63000 and after 1537 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1540 instances played! Last instance seen: 340/400
+Average performance since last log: mean reward=-0.58, mean makespan=28989.1, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1550 instances played! Last instance seen: 350/400
+Average performance since last log: mean reward=-0.51, mean makespan=25256.0, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 64000 and after 1561 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1560 instances played! Last instance seen: 360/400
+Average performance since last log: mean reward=-0.53, mean makespan=26343.8, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1570 instances played! Last instance seen: 370/400
+Average performance since last log: mean reward=-0.53, mean makespan=26744.8, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1580 instances played! Last instance seen: 380/400
+Average performance since last log: mean reward=-0.56, mean makespan=28083.5, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 65000 and after 1586 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1590 instances played! Last instance seen: 390/400
+Average performance since last log: mean reward=-0.5, mean makespan=25215.8, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1600 instances played! Last instance seen: 0/400
+Average performance since last log: mean reward=-0.51, mean makespan=25269.1, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 66000 and after 1610 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1610 instances played! Last instance seen: 10/400
+Average performance since last log: mean reward=-0.58, mean makespan=28938.1, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1620 instances played! Last instance seen: 20/400
+Average performance since last log: mean reward=-0.49, mean makespan=24647.3, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1630 instances played! Last instance seen: 30/400
+Average performance since last log: mean reward=-0.57, mean makespan=28571.9, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 67000 and after 1635 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1640 instances played! Last instance seen: 40/400
+Average performance since last log: mean reward=-0.54, mean makespan=26866.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1650 instances played! Last instance seen: 50/400
+Average performance since last log: mean reward=-0.55, mean makespan=27546.2, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 68000 and after 1659 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1660 instances played! Last instance seen: 60/400
+Average performance since last log: mean reward=-0.53, mean makespan=26564.9, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1670 instances played! Last instance seen: 70/400
+Average performance since last log: mean reward=-0.55, mean makespan=27457.4, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1680 instances played! Last instance seen: 80/400
+Average performance since last log: mean reward=-0.48, mean makespan=24213.6, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 69000 and after 1683 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1690 instances played! Last instance seen: 90/400
+Average performance since last log: mean reward=-0.46, mean makespan=22981.5, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1700 instances played! Last instance seen: 100/400
+Average performance since last log: mean reward=-0.52, mean makespan=26173.7, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 70000 and after 1708 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1710 instances played! Last instance seen: 110/400
+Average performance since last log: mean reward=-0.52, mean makespan=25890.5, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1720 instances played! Last instance seen: 120/400
+Average performance since last log: mean reward=-0.72, mean makespan=35899.4, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1730 instances played! Last instance seen: 130/400
+Average performance since last log: mean reward=-0.49, mean makespan=24288.2, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 71000 and after 1732 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1740 instances played! Last instance seen: 140/400
+Average performance since last log: mean reward=-0.52, mean makespan=25958.2, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1750 instances played! Last instance seen: 150/400
+Average performance since last log: mean reward=-0.52, mean makespan=25974.8, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 72000 and after 1757 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1760 instances played! Last instance seen: 160/400
+Average performance since last log: mean reward=-0.5, mean makespan=24914.3, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1770 instances played! Last instance seen: 170/400
+Average performance since last log: mean reward=-0.47, mean makespan=23560.6, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 73000 and after 1781 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1780 instances played! Last instance seen: 180/400
+Average performance since last log: mean reward=-0.62, mean makespan=31060.4, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1790 instances played! Last instance seen: 190/400
+Average performance since last log: mean reward=-0.54, mean makespan=27130.3, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1800 instances played! Last instance seen: 200/400
+Average performance since last log: mean reward=-0.63, mean makespan=31271.0, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 74000 and after 1805 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1810 instances played! Last instance seen: 210/400
+Average performance since last log: mean reward=-0.5, mean makespan=25033.5, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1820 instances played! Last instance seen: 220/400
+Average performance since last log: mean reward=-0.65, mean makespan=32347.2, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 75000 and after 1830 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1830 instances played! Last instance seen: 230/400
+Average performance since last log: mean reward=-0.48, mean makespan=23822.5, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1840 instances played! Last instance seen: 240/400
+Average performance since last log: mean reward=-0.97, mean makespan=48576.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1850 instances played! Last instance seen: 250/400
+Average performance since last log: mean reward=-0.59, mean makespan=29522.4, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 76000 and after 1854 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1860 instances played! Last instance seen: 260/400
+Average performance since last log: mean reward=-0.53, mean makespan=26692.3, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1870 instances played! Last instance seen: 270/400
+Average performance since last log: mean reward=-0.55, mean makespan=27551.0, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 77000 and after 1879 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1880 instances played! Last instance seen: 280/400
+Average performance since last log: mean reward=-0.67, mean makespan=33487.4, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1890 instances played! Last instance seen: 290/400
+Average performance since last log: mean reward=-0.54, mean makespan=26829.8, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1900 instances played! Last instance seen: 300/400
+Average performance since last log: mean reward=-0.52, mean makespan=26191.8, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 78000 and after 1903 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1910 instances played! Last instance seen: 310/400
+Average performance since last log: mean reward=-0.51, mean makespan=25556.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1920 instances played! Last instance seen: 320/400
+Average performance since last log: mean reward=-0.62, mean makespan=31000.6, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 79000 and after 1927 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1930 instances played! Last instance seen: 330/400
+Average performance since last log: mean reward=-0.57, mean makespan=28637.4, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1940 instances played! Last instance seen: 340/400
+Average performance since last log: mean reward=-0.6, mean makespan=30079.3, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1950 instances played! Last instance seen: 350/400
+Average performance since last log: mean reward=-0.52, mean makespan=26153.4, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 80000 and after 1952 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1960 instances played! Last instance seen: 360/400
+Average performance since last log: mean reward=-0.55, mean makespan=27519.5, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1970 instances played! Last instance seen: 370/400
+Average performance since last log: mean reward=-0.54, mean makespan=27010.5, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 81000 and after 1976 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1980 instances played! Last instance seen: 380/400
+Average performance since last log: mean reward=-0.54, mean makespan=27127.9, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+1990 instances played! Last instance seen: 390/400
+Average performance since last log: mean reward=-0.5, mean makespan=25045.1, mean tardiness=0.0
+#####
+##### INTERMEDIATE TEST after step 82000 and after 2000 instances... 
+#####
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.48, mean makespan=24075.0, mean tardiness=0.0
+TRAINING DONE

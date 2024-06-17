@@ -55,7 +55,7 @@ def final_evaluation(config: dict, data_test: List[List[Task]], logger: Logger):
     logger.write_to_wandb_summary(evaluation_results)
 
 
-def training(config: dict, data_train: List[List[Task]], data_val: List[List[Task]], logger: Logger) -> None:
+def training(config: dict, data_train: List[List[Task]], data_val: List[List[Task]], logger: Logger, binary_features = None) -> None:
     """
     Handles the actual training process.
     Including creating the environment, agent and intermediate_test object. Then the agent learning process is started
@@ -70,7 +70,7 @@ def training(config: dict, data_train: List[List[Task]], data_val: List[List[Tas
     """
     # create Environment
 
-    env, _ = EnvironmentLoader.load(config, data=data_train)
+    env, _ = EnvironmentLoader.load(config, binary_features, data=data_train, binary_features=binary_features)
 
     # create Agent model
     agent = get_agent_class_from_config(config)(env=env, config=config, logger=logger)
@@ -78,20 +78,21 @@ def training(config: dict, data_train: List[List[Task]], data_val: List[List[Tas
     # create IntermediateTest class to save new optimum model every <n_test_steps> steps
     inter_test = intermediate_test.IntermediateTest(env_config=config,
                                                     n_test_steps=config.get('intermediate_test_interval'),
-                                                    data=data_val, logger=logger)
+                                                    data=data_val, logger=logger, binary_features=binary_features)
 
     # Actual "learning" or "training" phase
     agent.learn(total_instances=config['total_instances'], total_timesteps=config['total_timesteps'],
                 intermediate_test=inter_test)
 
 
-def main(config_file_name: dict = None, external_config: dict = None) -> None:
+def main(config_file_name: dict = None, external_config: dict = None, binary_features = None) -> None:
     """
     Main function to train an agent in a scheduling-problem environment.
 
     :param config_file_name: path to the training config you want to use for training
         (relative path from config/ folder)
     :param external_config: dictionary that can be passed to overwrite the config file elements
+    :param binary_features:
 
     :return: None
     """
@@ -123,7 +124,7 @@ def main(config_file_name: dict = None, external_config: dict = None) -> None:
                               file_path=DATA_DIRECTORY / config['instances_file']
                               )
     # training
-    training(config=config, data_train=train_data, data_val=val_data, logger=logger)
+    training(config=config, data_train=train_data, data_val=val_data, logger=logger, binary_features=binary_features)
 
     # evaluate results
     # rms: changed from test_data to train_data
@@ -138,6 +139,9 @@ def get_perser_args():
     parser.add_argument('-fp', '--config_file_path', type=str, required=True,
                         help='Path to config file you want to use for training')
 
+    parser.add_argument('-bf', '--binary_features', type=str, required=True,
+                            help='Binary list of features')
+
     args = parser.parse_args()
 
     return args
@@ -145,8 +149,10 @@ def get_perser_args():
 
 if __name__ == "__main__":
 
-    # get config_file from terminal input
+    # get config_file and binary_features from terminal input
     parse_args = get_perser_args()
     config_file_path = parse_args.config_file_path
+    binary_features = parse_args.binary_features
+    print(binary_features)
 
-    main(config_file_name=config_file_path)
+    main(config_file_name=config_file_path, binary_features=binary_features)

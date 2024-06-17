@@ -29,9 +29,9 @@ class IndirectActionEnv(Env):
     :param data: Scheduling problem to be solved, so a list of instances
 
     """
-    def __init__(self, config: dict, data: List[List[Task]]):
+    def __init__(self, config: dict, data: List[List[Task]], binary_features):
 
-        super(IndirectActionEnv, self).__init__(config, data)
+        super(IndirectActionEnv, self).__init__(config, data, binary_features)
 
         # overwrite action space to predicting a processing time normalized to [0, 1]
 #         self.action_space: spaces.Discrete = spaces.Discrete(10)
@@ -42,6 +42,7 @@ class IndirectActionEnv(Env):
         self.observation_space = spaces.Box(low=-1, high=1, shape=observation_shape)
         self.should_use_machine_task_pair = False
         self.should_determine_task_index = True
+
 
 #         for task in self.tasks:
 #             min_runtime = np.inf
@@ -74,8 +75,15 @@ class IndirectActionEnv(Env):
             if self.should_use_machine_task_pair == False and self.should_determine_task_index == False:
                 # rms: search the closest avr_runtime from next tasks and then scale it.
                 # this should return the index and use it later when executing the action
+                #DZ: min-max scaling
                 next_runtimes = copy.deepcopy([task.runtime if task is not None else np.inf for task in next_tasks])
-                next_runtimes = np.array(next_runtimes) / self.max_runtime
+                #next_runtimes = np.array(next_runtimes) / self.max_runtime
+                next_runtimes = np.array(next_runtimes)
+                if max(next_runtimes)-min(next_runtimes) != 0:
+                    next_runtimes = (next_runtimes-min(next_runtimes))/(max(next_runtimes)-min(next_runtimes))
+                else:
+                    next_runtimes /= max(next_runtimes)
+                #print("Step next_runtimes=",next_runtimes)
                 # rms: this must be modified: for loop tasks and choose the min diff between the runtime si action
                 min_diff = np.inf
                 min_index = 0
@@ -261,9 +269,7 @@ class IndirectActionEnv(Env):
         return len(self.tasks[task_index].children) == 0 and self.tasks[task_index].parent_index != None
 
     def compute_paths(self, task_index, path, duration):
-#         print('visited', visited)
         path.append(task_index)
-#         print('path', path)
 
         # Compute the length (cumulative processing # time) of each path determined in step 4.1.
         if not self.tasks[task_index].done:
@@ -272,20 +278,12 @@ class IndirectActionEnv(Env):
             duration += (self.tasks[task_index].finished - self.tasks[task_index].started)
 
         # 4.3 a: Determine the critical (the largest cumulative processing time) path
-#         print('self.is_leaf(task_index)', self.is_leaf(task_index))
-#         print('duration', duration)
-#         print('critical_path[1]', critical_path[1])
         if self.is_leaf(task_index) and duration > self.critical_path[1]:
             self.critical_path = (copy.deepcopy(path), duration)
-#             print('update critical_path', self.critical_path)
             return
         for index_subtask in self.tasks[task_index].children:
-#             print('in for loop')
-#                 print('in for loop before self.compute_paths', path)
             self.compute_paths(index_subtask, path, duration)
-#                 print('in for loop before self.compute_paths', path)
             path.pop()
-#         print('task_index', task_index, 'critical_path', critical_path)
 
     @property
     def state_obs(self) -> ndarray:
@@ -300,68 +298,63 @@ class IndirectActionEnv(Env):
 
         next_tasks = self.get_next_tasks()
 
-
+        features = {}
         #  sum of all task processing times still to be processed on each machine
-        remaining_processing_times_on_machines = np.zeros(self.num_machines)
-        task_status =  np.zeros(len(self.tasks))
+        features['remaining_processing_times_on_machines'] = np.zeros(self.num_machines)
+        features['task_status'] =  np.zeros(len(self.tasks))
         # rms: estimated processing time per operation (EPT),
-        operation_time_per_tasks = np.zeros(len(self.tasks))
+        features['operation_time_per_tasks'] = np.zeros(len(self.tasks))
         # rms: estimated completion time per operation
-        completion_time_per_task =  np.zeros(len(self.tasks))
+        features['completion_time_per_task'] =  np.zeros(len(self.tasks))
         # rms: estimated remaining processing time per operation
-        estimated_remaining_processing_time_per_task = np.zeros(len(self.tasks))
+        features['estimated_remaining_processing_time_per_task'] = np.zeros(len(self.tasks))
         # rms: estimated) processing time for the next operation = estimated processing time for the next operation (successor of the current operation
-        estimated_remaining_processing_time_per_successor_task = np.zeros(len(self.tasks))
+        features['estimated_remaining_processing_time_per_successor_task'] = np.zeros(len(self.tasks))
 #         assignations =  np.zeros(len(self.tasks))
         # rms: remaining operations count = the number of operations on the branch from the current node(operation) to the roo
-        remaining_tasks_count = np.zeros(len(self.tasks))
+        features['remaining_tasks_count'] = np.zeros(len(self.tasks))
         # rms: assignations
-#         mat_machine_op = np.zeros((len(self.tasks), self.num_machines))
+        features['mat_machine_op'] = np.zeros((len(self.tasks), self.num_machines))
 
         # rms: machine bottleneck feature = ”number of unscheduled operations per machine” or ”total duration (sum of processing times) of unscheduled operations per machine
         # rms: mapping of many machines are used dynamically
-        machines_counter_dynamic = np.zeros(self.num_machines)
+        features['machines_counter_dynamic'] = np.zeros(self.num_machines)
         for i in range(self.num_machines):
-            machines_counter_dynamic[i] = 0
+            features['machines_counter_dynamic'][i] = 0
         for task in self.tasks:
             if not task.done:
                 for index in range(len(task.machines)):
                     if task.machines[index] == 1:
-                        machines_counter_dynamic[index] += 1
-
+                        features['machines_counter_dynamic'][index] += 1
 
         # rms: variables for computing the critical_path
         feasible_tasks = SetQueue()
-        is_task_in_critical_path = np.zeros(len(self.tasks))
+        features['is_task_in_critical_path'] = np.zeros(len(self.tasks))
         self.critical_path = ([], 0)
         for task in self.tasks:
             if not task.parent_index:
                 feasible_tasks.put(task.task_index)
         start_task_index = feasible_tasks.get()
         # 4.1 For each operation in the feasible list formulate all possible network paths.
-#         print('critical_path', critical_path[0])
         self.compute_paths(start_task_index, [], 0)
-#         print('critical_path final', self.critical_path)
-#         print('critical_path', critical_path[0])
         for index in self.critical_path[0]:
-            is_task_in_critical_path[index] = 1
-#         print('critical_path', critical_path[0])
-#         print('is_task_in_critical_path', is_task_in_critical_path)
+            features['is_task_in_critical_path'][index] = 1
 
         for task in self.tasks:
-#                 mat_machine_op[task.task_index][index] = task.machines[index]
+#             features['mat_machine_op'][task.task_index][index] = task.machines[index]
+            for index in range(len(task.machines)):
+                features['mat_machine_op'][task.task_index][index]  = task.machines[index]
             if task.done:
-                task_status[task.task_index] = 0
-                operation_time_per_tasks[task.task_index] = task.finished - task.started
+                features['task_status'][task.task_index] = 0
+                features['operation_time_per_tasks'][task.task_index] = task.finished - task.started
                 # rms: variant 2 state
-                completion_time_per_task[task.task_index] = task.finished
+                features['completion_time_per_task'][task.task_index] = task.finished
 #                 assignations[task.task_index] = task.selected_machine + 1
             if not task.done:
                 # rms: complete with the specific execution time per machine not with task.runtime
-
                 for index in range(len(task.machines)):
                     if task.machines[index] == 1:
-                        remaining_processing_times_on_machines[index] += task.execution_times[index]
+                        features['remaining_processing_times_on_machines'][index] += task.execution_times[index]
 
                 weight_up = 0
                 weight_down = 0
@@ -369,62 +362,92 @@ class IndirectActionEnv(Env):
                     if task.machines[index] == 1:
 #                         weight_up += (self.machines_counter[index] * task.execution_times[index])
 #                         weight_down += self.machines_counter[index]
-                        weight_up += (machines_counter_dynamic[index] * task.execution_times[index])
-                        weight_down += machines_counter_dynamic[index]
+                        weight_up += (features['machines_counter_dynamic'][index] * task.execution_times[index])
+                        weight_down += features['machines_counter_dynamic'][index]
                 weighted_average_runtime = weight_up / weight_down
 
                 # rms: first assume that the task is not yet part of the next task that can be scheduled right away
-                task_status[task.task_index] = 1
+                features['task_status'][task.task_index] = 1
                 for next_task in next_tasks:
                     if next_task.task_index == task.task_index:
-                        task_status[task.task_index] = 0.5
-                operation_time_per_tasks[task.task_index] = weighted_average_runtime
+                        features['task_status'][task.task_index] = 0.5
+                features['operation_time_per_tasks'][task.task_index] = weighted_average_runtime
 
                 # rms: variant 2 state
                 max_completion_time_per_child = 0
                 for child_index in task.children:
                     for tasks_j in self.tasks:
                         if child_index == tasks_j.task_index:
-                            max_completion_time_per_child = max(max_completion_time_per_child, completion_time_per_task[tasks_j.task_index])
-                completion_time_per_task[task.task_index] = max_completion_time_per_child + operation_time_per_tasks[task.task_index]
+                            max_completion_time_per_child = max(max_completion_time_per_child, features['completion_time_per_task'][tasks_j.task_index])
+                features['completion_time_per_task'][task.task_index] = max_completion_time_per_child + features['operation_time_per_tasks'][task.task_index]
 
-        # normalization
-        # rms: TODO: minmax scalar (x - min) / (max - min)
 
-        remaining_processing_times_on_machines /= max(max(remaining_processing_times_on_machines), 1)
-
-#         operation_time_per_tasks /= max(operation_time_per_tasks)
-        completion_time_per_task /= max(completion_time_per_task)
 
         # rms: estimated_remaining_processing_time_per_task
         for task in self.tasks:
-            estimated_remaining_processing_time_per_task[task.task_index] = operation_time_per_tasks[task.task_index]
+            features['estimated_remaining_processing_time_per_task'][task.task_index] = features['operation_time_per_tasks'][task.task_index]
             task_successor_index = task.parent_index
 
             # rms: variant 5: NPT: only for next successor:
             if task_successor_index is not None:
-                estimated_remaining_processing_time_per_successor_task[task.task_index] = operation_time_per_tasks[task_successor_index]
+                features['estimated_remaining_processing_time_per_successor_task'][task.task_index] = features['operation_time_per_tasks'][task_successor_index]
             while task_successor_index is not None:
-                estimated_remaining_processing_time_per_task[task.task_index] += operation_time_per_tasks[task_successor_index]
+                features['estimated_remaining_processing_time_per_task'][task.task_index] += features['operation_time_per_tasks'][task_successor_index]
                 if not task.done:
-                    remaining_tasks_count[task.task_index] += 1
+                    features['remaining_tasks_count'][task.task_index] += 1
                 task_successor_index = self.tasks[task_successor_index].parent_index
 
-        estimated_remaining_processing_time_per_task /= max(estimated_remaining_processing_time_per_task)
-#         print('is_task_in_critical_path', is_task_in_critical_path)
-        observation = np.concatenate([
-            remaining_processing_times_on_machines,
-            operation_time_per_tasks,
-#             estimated_remaining_processing_time_per_task,
-#             estimated_remaining_processing_time_per_successor_task,
-#             remaining_tasks_count,
-#             machines_counter_dynamic,
-            is_task_in_critical_path,
-            task_status,
-#             completion_time_per_task
-#             assignations
-#             machines_for_next_task_per_job.flatten()
-        ])
+        # rms: normalization and flattening if needed
+        # rms: minmax scalar (x - min) / (max - min)
+        if max(features['operation_time_per_tasks']) - min(features['operation_time_per_tasks']) != 0:
+            features['operation_time_per_tasks'] = (features['operation_time_per_tasks'] - min(features['operation_time_per_tasks'])) / (features['operation_time_per_tasks'] - max(max(features['operation_time_per_tasks']), 1))
+        else:
+            features['operation_time_per_tasks'] /= max(features['operation_time_per_tasks'])
+
+        if max(features['remaining_processing_times_on_machines']) - min(features['remaining_processing_times_on_machines']) != 0:
+            features['remaining_processing_times_on_machines'] = (features['remaining_processing_times_on_machines'] - min(features['remaining_processing_times_on_machines'])) / (features['remaining_processing_times_on_machines'] -  max(max(features['remaining_processing_times_on_machines']), 1))
+        else:
+            features['remaining_processing_times_on_machines'] /= max(max(features['remaining_processing_times_on_machines']), 1)
+
+        if max(features['completion_time_per_task']) - min(features['completion_time_per_task']) != 0:
+            features['completion_time_per_task'] = (features['completion_time_per_task'] - min(features['completion_time_per_task'])) / (features['completion_time_per_task'] - max(max(features['completion_time_per_task']), 1))
+        else:
+            features['completion_time_per_task'] /= max(features['completion_time_per_task'])
+
+        if max(features['estimated_remaining_processing_time_per_task']) - min(features['estimated_remaining_processing_time_per_task']) != 0:
+            features['estimated_remaining_processing_time_per_task'] = (features['estimated_remaining_processing_time_per_task'] - min(features['estimated_remaining_processing_time_per_task'])) / (features['estimated_remaining_processing_time_per_task'] - max(max(features['estimated_remaining_processing_time_per_task']), 1))
+        else:
+            features['estimated_remaining_processing_time_per_task'] /= max(features['estimated_remaining_processing_time_per_task'])
+
+        # rms: max scalar  max
+#         features['remaining_processing_times_on_machines'] /= max(max(features['remaining_processing_times_on_machines']), 1)
+#           features['operation_time_per_tasks'] /= max(features['operation_time_per_tasks'])
+#         features['completion_time_per_task'] /= max(features['completion_time_per_task'])
+#         features['estimated_remaining_processing_time_per_task'] /= max(features['estimated_remaining_processing_time_per_task'])
+
+        features['mat_machine_op'] = features['mat_machine_op'].flatten()
+
+        observation = []
+        if self.binary_features is not None:
+            for i in range(len(self.binary_features)):
+                if self.binary_features[i] == '1' and features[self.feature_index_mapping[i]] is not None:
+                    observation.append(features[self.feature_index_mapping[i]])
+            observation = np.concatenate(observation)
+        else:
+            pass
+#             observation = np.concatenate([
+#                 remaining_processing_times_on_machines,
+#                 operation_time_per_tasks,
+#     #             estimated_remaining_processing_time_per_task,
+#     #             estimated_remaining_processing_time_per_successor_task,
+#     #             remaining_tasks_count,
+#     #             machines_counter_dynamic,
+#                 is_task_in_critical_path,
+#                 task_status,
+#     #             completion_time_per_task
+#     #             assignations
+#     #             machines_for_next_task_per_job.flatten()
+#             ])
 
         self._state_obs = observation
         return self._state_obs

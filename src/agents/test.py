@@ -190,7 +190,7 @@ def log_results(plot_logger: Logger, inter_test_idx: Union[int, None], heuristic
 
 
 def test_model(env_config: Dict, data: List[List[Task]], logger: Logger, plot: bool = None, log_episode: bool = None,
-               model=None, heuristic_id: str = None, intermediate_test_idx=None) -> dict:
+               model=None, heuristic_id: str = None, intermediate_test_idx=None, binary_features = None) -> dict:
     """
     This function tests a model in the passed environment for all problem instances passed as data_test and returns an
     evaluation summary
@@ -210,23 +210,20 @@ def test_model(env_config: Dict, data: List[List[Task]], logger: Logger, plot: b
 
     # create evaluation handler
     evaluation_handler = EvaluationHandler()
-    print('Heuristic_ID or none if agent', heuristic_id )
 
     for test_i in range(len(data)):
 
         # create env
-        environment, _ = EnvironmentLoader.load(env_config, data=[data[test_i]])
+        environment, _ = EnvironmentLoader.load(env_config, data=[data[test_i]], binary_features=binary_features)
         environment.runs = test_i
 
         # run environment episode
         # rms: added env_config['sp_type']
 
         run_episode(environment, model, heuristic_id, evaluation_handler, env_config['sp_type'])
-        if (heuristic_id == 'LETSA' or heuristic_id == None) and test_i == 0:
-            for task in environment.tasks:
-                print(task.str_schedule_info_short())
-
-
+#         if (heuristic_id == 'LETSA' or heuristic_id == None) and test_i == 0:
+#             for task in environment.tasks:
+#                 print(task.str_schedule_info_short())
 
 
 #         # log results. Creating wandb table
@@ -243,7 +240,7 @@ def test_model(env_config: Dict, data: List[List[Task]], logger: Logger, plot: b
 
 
 def test_model_and_heuristic(config: dict, model, data_test: List[List[Task]], logger: Logger,
-                             plot_ganttchart: bool = False, log_episode: bool = False) -> dict:
+                             plot_ganttchart: bool = False, log_episode: bool = False, binary_features = None, run_heuristics = None) -> dict:
     """
     Test model and agent_heuristics len(data) times and returns results
 
@@ -257,21 +254,22 @@ def test_model_and_heuristic(config: dict, model, data_test: List[List[Task]], l
     :return: Dict with evaluation_result dicts for the agent and all heuristics which were tested
 
     """
-    print('Testing model, heuristics and solver... ')
+#     print('Testing model, heuristics and solver... ')
     results = {}
 
     test_kwargs = {'env_config': config, 'data': data_test, 'logger': logger,
-                   'plot': plot_ganttchart, 'log_episode': log_episode}
+                   'plot': plot_ganttchart, 'log_episode': log_episode, 'binary_features': binary_features}
 
     # test agent
-    print('agent')
+#     print('agent')
     res = test_model(model=model, **test_kwargs)
     results.update({'agent': res})
 
     # test heuristics
-    for heuristic in config.get('test_heuristics', TEST_HEURISTICS):
-        res = test_model(heuristic_id=heuristic, **test_kwargs)
-        results.update({heuristic: res})
+    if run_heuristics == 1:
+        for heuristic in config.get('test_heuristics', TEST_HEURISTICS):
+            res = test_model(heuristic_id=heuristic, **test_kwargs)
+            results.update({heuristic: res})
 
     # rms: comment solver
 #     # test solver and calculate optimality gap
@@ -291,6 +289,10 @@ def get_perser_args():
                         help='Path to config file you want to use for training')
     parser.add_argument('-plot', '--plot-ganttchart', dest="plot_ganttchart", action="store_true",
                         help='Enable or disable model result plot.')
+    parser.add_argument('-bf', '--binary_features', type=str, required=False,
+                            help='Binary list of features')
+    parser.add_argument('-rh', '--run_heuristics', type=int, required=False,
+                            help='Binary list of features')
 
     args = parser.parse_args()
 
@@ -299,9 +301,11 @@ def get_perser_args():
 
 def main(external_config=None):
 
-    # get config_file from terminal input
+    # get config_file and binary_features from terminal input
     parse_args = get_perser_args()
     config_file_path = parse_args.config_file_path
+    binary_features = parse_args.binary_features
+    run_heuristics = parse_args.run_heuristics
 
     # get config and data
     config = load_config(config_file_path, external_config)
@@ -317,7 +321,7 @@ def main(external_config=None):
     logger = Logger(config=config)
     model = get_agent_class_from_config(config=config).load(file=best_model_path, config=config, logger=logger)
     results = test_model_and_heuristic(config=config, model=model, data_test=data,
-                                       plot_ganttchart=parse_args.plot_ganttchart, logger=logger)
+                                       plot_ganttchart=parse_args.plot_ganttchart, logger=logger, binary_features=binary_features, run_heuristics=run_heuristics)
     print(results)
     plt.show()
 

@@ -1,6 +1,12 @@
 
 # Commands to run:
 
+0. Automated script to run both training and testing with features permutations:
+
+python run.py
+
+*Make sure to create a directory called results containing asp_wide folder before running the script
+
 1. For training: 
 
 Make sure this line is not commented in src/data_generator/bom_instance_factory.py

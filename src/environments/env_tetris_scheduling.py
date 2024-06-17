@@ -28,12 +28,26 @@ class Env(gym.Env):
 
     """
 
-    def __init__(self, config: dict, data: List[List[Task]]):
+    def __init__(self, config: dict, data: List[List[Task]], binary_features):
 
         super(Env, self).__init__()
 
         # import data containing all instances
         self.data: List[List[Task]] = data  # is later shuffled before input into the environment
+
+        self.binary_features = binary_features
+        self.feature_index_mapping = {
+             0: 'task_status',
+             1: 'operation_time_per_tasks',
+             2: 'completion_time_per_task',
+             3: 'estimated_remaining_processing_time_per_task',
+             4: 'estimated_remaining_processing_time_per_successor_task',
+             5: 'remaining_tasks_count',
+             6: 'is_task_in_critical_path',
+             7: 'remaining_processing_times_on_machines',
+             8: 'mat_machine_op',
+             9: 'machines_counter_dynamic'
+        }
 
         # get number of jobs, tasks, tools, machines and runtimes from input data, and setup time
         self.num_jobs, self.num_tasks, self.max_runtime, self.max_deadline, self.max_setup_time, self.max_sum_runtime_setup_pair = self.get_instance_info()
@@ -647,13 +661,15 @@ class Env(gym.Env):
 
         """
         if self.runs >= self.log_interval:
-            print('-' * 110, f'\n{self.runs} instances played! Last instance seen: {self.data_idx}/{len(self.data)}')
-            print(f'Average performance since last log: mean reward={np.around(np.mean(self.logging_rewards), 2)}, ' \
-                     f'mean makespan={np.around(np.mean(self.logging_makespans), 2)}, ' \
-                     f'mean tardiness={np.around(np.mean(self.logging_tardinesses), 2)}')
-            self.logging_rewards.clear()
-            self.logging_makespans.clear()
-            self.logging_tardinesses.clear()
+            #rms : comment out
+            pass
+#             print('-' * 110, f'\n{self.runs} instances played! Last instance seen: {self.data_idx}/{len(self.data)}')
+#             print(f'Average performance since last log: mean reward={np.around(np.mean(self.logging_rewards), 2)}, ' \
+#                      f'mean makespan={np.around(np.mean(self.logging_makespans), 2)}, ' \
+#                      f'mean tardiness={np.around(np.mean(self.logging_tardinesses), 2)}')
+#             self.logging_rewards.clear()
+#             self.logging_makespans.clear()
+#             self.logging_tardinesses.clear()
 
     def close(self):
         """

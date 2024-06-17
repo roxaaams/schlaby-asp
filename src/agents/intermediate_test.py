@@ -21,7 +21,7 @@ class IntermediateTest:
     :param logger: Logger object
 
     """
-    def __init__(self, env_config: dict, n_test_steps: int, data: List[List[Task]], logger: Logger):
+    def __init__(self, env_config: dict, n_test_steps: int, data: List[List[Task]], logger: Logger, binary_features = None):
         # callback and model
         self.n_test_steps = n_test_steps  # steps between callbacks
         self.last_time_trigger = 0
@@ -34,6 +34,8 @@ class IntermediateTest:
         # test/Env parameter
         self.env_config = env_config
         self.data_test = data
+
+        self.binary_features = binary_features
 
     def on_step(self, num_timesteps: int, instances: int, model) -> None:
         """
@@ -48,9 +50,9 @@ class IntermediateTest:
 
         """
         if (num_timesteps - self.last_time_trigger) >= self.n_test_steps:
-            print('#'*5)
-            print('#'*5, f'INTERMEDIATE TEST after step {num_timesteps} and after {instances} instances... ')
-            print('#' * 5)
+#             print('#'*5)
+#             print('#'*5, f'INTERMEDIATE TEST after step {num_timesteps} and after {instances} instances... ')
+#             print('#' * 5)
 
             # safe recent model as comparison for the current optimum
             compare_path = ModelHandler.get_compare_path(self.env_config)
@@ -63,7 +65,7 @@ class IntermediateTest:
 
             # test current model
             evaluation_results = test_model(self.env_config, self.data_test, model=model, logger=self.logger,
-                                            plot=False, log_episode=False, intermediate_test_idx=num_timesteps)
+                                            plot=False, log_episode=False, intermediate_test_idx=num_timesteps, binary_features=self.binary_features)
 
             # change name back in wandb config
             self.env_config.update({"saved_model_name": self.file})

@@ -54,7 +54,7 @@ value_layer:  [ 256, 256 ]
 value_activation: 'Tanh' #'ReLU'
 # (R)   [int]     Maximum number of instances shown to the agent. Limits the training process. Note that instances may be
                   # multiple times, if total_instances is larger than the number of generated instances
-total_instances: 2000
+total_instances: 500
 # (R)   [int]     Maximum number of steps that the agent can interact with the env. Limits the training process
 total_timesteps: 3_000_000
 # (R)   [float]   Range between 0 and 1. How much (percentually) of the generated data will be used for training.

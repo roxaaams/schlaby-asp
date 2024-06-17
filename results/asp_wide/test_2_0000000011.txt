@@ -1,0 +1,212 @@
+Testing model, heuristics and solver... 
+agent
+Heuristic_ID or none if agent None
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.51, mean makespan=25446.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+20 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.36, mean makespan=18200.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+30 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.69, mean makespan=34565.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+40 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.53, mean makespan=26613.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+50 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.45, mean makespan=22387.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+60 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.54, mean makespan=27119.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+70 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.44, mean makespan=22059.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+80 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.58, mean makespan=28911.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+90 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.31, mean makespan=15743.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+100 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.77, mean makespan=38737.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+110 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.61, mean makespan=30548.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+120 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.71, mean makespan=35483.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+130 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.37, mean makespan=18406.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+140 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.91, mean makespan=45714.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+150 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.44, mean makespan=21787.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+160 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.68, mean makespan=33871.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+170 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.65, mean makespan=32641.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+180 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.47, mean makespan=23328.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+190 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.75, mean makespan=37527.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+200 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.41, mean makespan=20655.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+210 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.42, mean makespan=20955.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+220 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.47, mean makespan=23389.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+230 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.47, mean makespan=23388.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+240 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.36, mean makespan=17817.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+250 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.45, mean makespan=22572.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+260 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.37, mean makespan=18355.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+270 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.53, mean makespan=26643.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+280 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.85, mean makespan=42588.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+290 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.54, mean makespan=26864.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+300 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.46, mean makespan=22809.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+310 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.52, mean makespan=26028.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+320 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.54, mean makespan=27049.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+330 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.66, mean makespan=33170.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+340 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.56, mean makespan=28066.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+350 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-1.2, mean makespan=59767.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+360 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.36, mean makespan=18146.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+370 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.67, mean makespan=33653.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+380 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.53, mean makespan=26616.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+390 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.44, mean makespan=21978.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+400 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.47, mean makespan=23372.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+410 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.43, mean makespan=21286.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+420 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.34, mean makespan=17126.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+430 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.65, mean makespan=32745.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+440 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.8, mean makespan=40067.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+450 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.55, mean makespan=27402.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+460 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.59, mean makespan=29429.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+470 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.57, mean makespan=28257.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+480 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.68, mean makespan=34186.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+490 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.41, mean makespan=20327.0, mean tardiness=0.0
+Heuristic_ID or none if agent LETSA
+-------------------------------------------------------------------------------------------------------------- 
+10 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.4, mean makespan=20010.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+20 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.29, mean makespan=14264.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+30 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.4, mean makespan=19925.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+40 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.5, mean makespan=24984.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+50 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.3, mean makespan=14859.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+60 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.38, mean makespan=18856.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+70 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.37, mean makespan=18711.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+80 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.49, mean makespan=24470.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+90 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.28, mean makespan=14044.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+100 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.57, mean makespan=28321.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+110 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.51, mean makespan=25305.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+120 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.56, mean makespan=28183.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+130 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.26, mean makespan=12942.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+140 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.76, mean makespan=37786.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+150 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.3, mean makespan=14985.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+160 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.44, mean makespan=22242.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+170 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.43, mean makespan=21621.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+180 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.33, mean makespan=16735.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+190 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.66, mean makespan=33061.0, mean tardiness=0.0
+-------------------------------------------------------------------------------------------------------------- 
+200 instances played! Last instance seen: 0/1
+Average performance since last log: mean reward=-0.36, mean makespan=17997.0, mean tardiness=0.0
+
