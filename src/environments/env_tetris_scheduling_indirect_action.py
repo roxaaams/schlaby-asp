@@ -400,22 +400,22 @@ class IndirectActionEnv(Env):
         # rms: normalization and flattening if needed
         # rms: minmax scalar (x - min) / (max - min)
         if max(features['operation_time_per_tasks']) - min(features['operation_time_per_tasks']) != 0:
-            features['operation_time_per_tasks'] = (features['operation_time_per_tasks'] - min(features['operation_time_per_tasks'])) / (features['operation_time_per_tasks'] - max(max(features['operation_time_per_tasks']), 1))
+            features['operation_time_per_tasks'] = (features['operation_time_per_tasks'] - min(features['operation_time_per_tasks'])) / (max(features['operation_time_per_tasks']) - min(features['operation_time_per_tasks']))
         else:
             features['operation_time_per_tasks'] /= max(features['operation_time_per_tasks'])
 
         if max(features['remaining_processing_times_on_machines']) - min(features['remaining_processing_times_on_machines']) != 0:
-            features['remaining_processing_times_on_machines'] = (features['remaining_processing_times_on_machines'] - min(features['remaining_processing_times_on_machines'])) / (features['remaining_processing_times_on_machines'] -  max(max(features['remaining_processing_times_on_machines']), 1))
+            features['remaining_processing_times_on_machines'] = (features['remaining_processing_times_on_machines'] - min(features['remaining_processing_times_on_machines'])) / (max(max(features['remaining_processing_times_on_machines']), 1) - min(features['remaining_processing_times_on_machines']))
         else:
             features['remaining_processing_times_on_machines'] /= max(max(features['remaining_processing_times_on_machines']), 1)
 
         if max(features['completion_time_per_task']) - min(features['completion_time_per_task']) != 0:
-            features['completion_time_per_task'] = (features['completion_time_per_task'] - min(features['completion_time_per_task'])) / (features['completion_time_per_task'] - max(max(features['completion_time_per_task']), 1))
+            features['completion_time_per_task'] = (features['completion_time_per_task'] - min(features['completion_time_per_task'])) / (max(features['completion_time_per_task']) - min(features['completion_time_per_task']) )
         else:
             features['completion_time_per_task'] /= max(features['completion_time_per_task'])
 
         if max(features['estimated_remaining_processing_time_per_task']) - min(features['estimated_remaining_processing_time_per_task']) != 0:
-            features['estimated_remaining_processing_time_per_task'] = (features['estimated_remaining_processing_time_per_task'] - min(features['estimated_remaining_processing_time_per_task'])) / (features['estimated_remaining_processing_time_per_task'] - max(max(features['estimated_remaining_processing_time_per_task']), 1))
+            features['estimated_remaining_processing_time_per_task'] = (features['estimated_remaining_processing_time_per_task'] - min(features['estimated_remaining_processing_time_per_task'])) / (max(features['estimated_remaining_processing_time_per_task']) - min(features['estimated_remaining_processing_time_per_task']))
         else:
             features['estimated_remaining_processing_time_per_task'] /= max(features['estimated_remaining_processing_time_per_task'])
 
