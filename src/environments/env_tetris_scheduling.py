@@ -10,6 +10,7 @@ import copy
 from src.data_generator.task import Task
 from src.visuals_generator.gantt_chart import GanttChartPlotter
 from typing import List, Tuple, Dict, Any, Union
+from src.models.machine import Machine
 
 REWARD_BUFFER_SIZE = 250
 
@@ -27,21 +28,36 @@ class Env(gym.Env):
 
     """
 
-    def __init__(self, config: dict, data: List[List[Task]]):
+    def __init__(self, config: dict, data: List[List[Task]], binary_features):
 
         super(Env, self).__init__()
 
         # import data containing all instances
         self.data: List[List[Task]] = data  # is later shuffled before input into the environment
 
-        # get number of jobs, tasks, tools, machines and runtimes from input data
-        self.num_jobs, self.num_tasks, self.max_runtime, self.max_deadline = self.get_instance_info()
+        self.binary_features = binary_features
+        self.feature_index_mapping = {
+             0: 'task_status',
+             1: 'operation_time_per_tasks',
+             2: 'completion_time_per_task',
+             3: 'estimated_remaining_processing_time_per_task',
+             4: 'estimated_remaining_processing_time_per_successor_task',
+             5: 'remaining_tasks_count',
+             6: 'is_task_in_critical_path',
+             7: 'remaining_processing_times_on_machines',
+             8: 'mat_machine_op',
+             9: 'machines_counter_dynamic'
+        }
+
+        # get number of jobs, tasks, tools, machines and runtimes from input data, and setup time
+        self.num_jobs, self.num_tasks, self.max_runtime, self.max_deadline, self.max_setup_time, self.max_sum_runtime_setup_pair = self.get_instance_info()
         self.num_machines: int = copy.copy(self.data[0][0]._n_machines)
         self.num_tools: int = copy.copy(self.data[0][0]._n_tools)
         self.num_all_tasks: int = self.num_jobs * self.num_tasks
         self.num_steps_max: int = config.get('num_steps_max', self.num_all_tasks)
         self.max_task_index: int = self.num_tasks - 1
         self.max_job_index: int = self.num_jobs - 1
+        self.sp_type = config.get('sp_type')
 
         # retrieve run-dependent settings from config
         self.shuffle: bool = config.get('shuffle', False)
@@ -77,7 +93,7 @@ class Env(gym.Env):
         self.logging_tardinesses: List = []
 
         # action_space: idx_job
-        self.action_space: spaces.Discrete = spaces.Discrete(self.num_jobs)
+        self.action_space: spaces.Discrete = spaces.Discrete(self.num_tasks)
 
         # initial observation
         self._state_obs: List = self.reset()
@@ -90,6 +106,21 @@ class Env(gym.Env):
         self.reward_strategy = config.get('reward_strategy', 'dense_makespan_reward')
         self.reward_scale = config.get('reward_scale', 1)
         self.mr2_reward_buffer: List[List] = [[] for _ in range(len(data))]  # needed for m2r reward only
+
+        # we need some kind of schedule dict with start_date and end_date
+        self.machines = dict()
+        self.machines_counter = dict()
+        for i in range(self.num_machines):
+            self.machines[i] = Machine()
+            self.machines_counter[i] = 0
+
+        # mapping of many machines are used
+        for task in self.tasks:
+            for index in range(len(task.machines)):
+                if task.machines[index] == 1:
+                    self.machines_counter[index] += 1
+
+        self.critical_path = ([], 0)
 
     def reset(self) -> List[float]:
         """
@@ -120,7 +151,25 @@ class Env(gym.Env):
 
         # load new instance every run
         self.data_idx = self.runs % len(self.data)
+        # recompute self.num_tasks, self.max_runtime, self.max_deadline for asp case
+        if self.sp_type == 'asp':
+            self.num_jobs, self.num_tasks, self.max_runtime, self.max_deadline, self.max_setup_time, self.max_sum_runtime_setup_pair = self.get_instance_info(self.data_idx)
+            self.max_task_index: int = self.num_tasks - 1
+            self.num_all_tasks: int = self.num_jobs * self.num_tasks
+            self.tardiness: numpy.ndarray = np.zeros(self.num_all_tasks, dtype=int)
         self.tasks = copy.deepcopy(self.data[self.data_idx])
+        # we need  a schedule dict with start_date and end_date
+        self.machines = dict()
+        self.machines_counter = dict()
+        for i in range(self.num_machines):
+            self.machines[i] = Machine()
+            self.machines_counter[i] = 0
+
+        # mapping of many machines are used
+        for task in self.tasks:
+            for index in range(len(task.machines)):
+                if task.machines[index] == 1:
+                    self.machines_counter[index] += 1
         if self.shuffle:
             np.random.shuffle(self.tasks)
         self.task_job_mapping = {(task.job_index, task.task_index): i for i, task in enumerate(self.tasks)}
@@ -128,6 +177,7 @@ class Env(gym.Env):
         # retrieve maximum deadline of the current instance
         max_deadline = max([task.deadline for task in self.tasks])
         self.max_deadline = max_deadline if max_deadline > 0 else 1
+        self.critical_path = ([], 0)
 
         return self.state_obs
 
@@ -177,18 +227,22 @@ class Env(gym.Env):
         self.num_steps += 1
         return observation, reward, done, infos
 
-    def get_instance_info(self) -> (int, int, int, int):
+    def get_instance_info(self, index = 0) -> (int, int, int, int):
         """
         Retrieves info about the instance size and configuration from an instance sample
-        :return: (number of jobs, number of tasks and the maximum runtime) of this datapoint
         """
-        num_jobs, num_tasks, max_runtime, max_deadline = 0, 0, 0, 0
-        for task in self.data[0]:
+        num_jobs, num_tasks, max_runtime, max_deadline, max_setup_time, max_sum_runtime_setup_pair = 0, 0, 0, 0, 0, 0
+        for task in self.data[index]:
             num_jobs = task.job_index if task.job_index > num_jobs else num_jobs
             num_tasks = task.task_index if task.task_index > num_tasks else num_tasks
             max_runtime = task.runtime if task.runtime > max_runtime else max_runtime
             max_deadline = task.deadline if task.deadline > max_deadline else max_deadline
-        return num_jobs + 1, num_tasks + 1, max_runtime, max_deadline
+            max_setup_time = task.setup_time if task.setup_time else max_setup_time
+            for machine_index in range(len(task.machines)):
+                if task.machines[machine_index] == 1:
+                    max_sum_runtime_setup_pair = max(max_sum_runtime_setup_pair, task.execution_times[machine_index] + task.setup_times[machine_index])
+
+        return num_jobs + 1, num_tasks + 1, max_runtime, max_deadline, max_setup_time, max_sum_runtime_setup_pair
 
     @property
     def state_obs(self) -> List[float]:
@@ -210,10 +264,7 @@ class Env(gym.Env):
             obs.append(next_task_in_job.task_index / (self.num_tasks + 1))
             obs.append(next_task_in_job.deadline / (self.max_deadline + 1))
 
-        # obs = np.zeros(self.observation_space.shape[0])  # overwrite with dummy
-
         self._state_obs = obs
-        # print('obs| ', self._state_obs)
         return self._state_obs
 
     @staticmethod
@@ -244,6 +295,18 @@ class Env(gym.Env):
         """
         return np.sum(job_action == job_mask) >= 1
 
+    def get_selected_task_by_idx(self, task_idx: int) -> Task:
+        """
+        Helper Function to get the selected task (next possible task) only by the task index from the heuristics for ASP
+
+        :param task_idx: task index
+
+        :return: Index of the task in the task list and the selected task
+
+        """
+        selected_task = self.tasks[task_idx]
+        return selected_task
+
     def get_selected_task(self, job_idx: int) -> Tuple[int, Task]:
         """
         Helper Function to get the selected task (next possible task) only by the job index
@@ -257,6 +320,7 @@ class Env(gym.Env):
         selected_task = self.tasks[task_idx]
         return task_idx, selected_task
 
+    #  aici trebuie modificat pentru ASP: timpi diferiti: trebuie sa iau masina care incepe cel mai devreme si termina cel mai devreme
     def choose_machine(self, task: Task) -> int:
         """
         This function performs the logic, with which the machine is chosen (in the case of the flexible JSSP)
@@ -272,7 +336,86 @@ class Env(gym.Env):
         machine_times = np.where(possible_machines,
                                  self.ends_of_machine_occupancies,
                                  np.full(len(possible_machines), np.inf))
-        return int(np.argmin(machine_times))
+        # choose machine with the earliest starting time and also shortest execution time
+        if self.sp_type == 'asp':
+            earliest_finishing_time = np.inf
+            machine_id = int(np.argmin(machine_times))
+
+            # Iterate over each machine
+            for i in range(len(machine_times)):
+                if machine_times[i] != np.inf:
+                    current_earliest_finishing_time = task.execution_times[i] + task.setup_times[i] + machine_times[i]
+                    if current_earliest_finishing_time < earliest_finishing_time:
+                        earliest_finishing_time = current_earliest_finishing_time
+                        machine_id = i
+
+            return machine_id
+        else:
+            return int(np.argmin(machine_times))
+
+    def choose_machine_using_completion_time(self, task: Task, original_completion_time):
+        """
+        This function performs the logic, with which the machine is chosen using the completion time computed
+        from critical path (in the case of the ASP using LETSA heuristic whose steps e the described in the original paper)
+
+        :param task: Task
+
+        :return: Machine on which the task will be scheduled.
+
+        """
+        possible_machines = task.machines
+        # 4.5.1 Identify the latest available starting time  for operation Je (to verify constraint (2.6) of (PI».
+        # 4.5.2 If latest available starting time Sc = Cc - tc, such that the machine is
+        # available during (Sc, Cc); Sc, Cc are ideal starting and completion times,
+        # respectively. Else select max{Se} as the latest available starting time such that
+
+        latest_start_time, machine_id, index, min_runtime = -1, -1, -1, 10**10
+        # Iterate over each machine
+        for machine in range(len(possible_machines)):
+            if possible_machines[machine] != 0:
+                completion_time = original_completion_time
+                runtime = task.execution_times[machine] + task.setup_times[machine]
+                start_time = completion_time - runtime
+                # Case: No intervals scheduled on current machine
+                if self.machines[machine].get_int_len() == 0:
+                    if latest_start_time < start_time or (latest_start_time == start_time and min_runtime > runtime):
+                        latest_start_time, machine_id, index, min_runtime = start_time, machine, 0, runtime
+                # Case: Intervals already scheduled
+                else:
+                    found = False
+                    last_task = machines[machine].get_last_int()
+                    if self.tasks[last_task].started < start_time and (latest_start_time < start_time or (latest_start_time == start_time and min_runtime > runtime)):
+                        latest_start_time, machine_id, index, min_runtime = start_time, machine, -1, runtime
+                        found = True
+                    else:
+                         for i in range(self.machines[machine].get_int_len() - 2, 0, -1):
+                            after_task = self.machines[machine].get_int(i + 1)
+                            current_task = self.machines[machine].get_int(i)
+                            if start_time > self.tasks[current_task].finished and completion_time < self.tasks[after_task].started:
+                                found = True
+                            else:
+                                tentative_start_time = self.tasks[current_task].started - runtime
+                                if self.tasks[after_task].started - self.tasks[current_task].finished >= runtime:
+                                    tentative_start_time = self.tasks[after_task].started - runtime
+                                    start_time = tentative_start_time
+                                    found = True
+                            if found:
+                                if latest_start_time < start_time or (latest_start_time == start_time and min_runtime > runtime):
+                                    latest_start_time, machine_id, index, min_runtime = start_time, machine, i + 1, runtime
+                                break
+                    # No machine found! Trying again by analysing the case when the task can be scheduled as first interval on current machine
+                    if not found:
+                        first_task = self.machines[machine].get_int(0)
+                        #  Can schedule before first operation on current machine
+                        if self.tasks[first_task].started > completion_time and (latest_start_time < start_time or (latest_start_time == start_time and min_runtime > runtime)):
+                            latest_start_time, machine_id, index, min_runtime = start_time, machine, 0, runtime
+                        #  Can schedule before first operation on current machine with updated time
+                        else:
+                            tentative_start_time = self.tasks[first_task].started - runtime
+                            if tentative_start_time >= 0 and (latest_start_time <  tentative_start_time or (latest_start_time == tentative_start_time and min_runtime > runtime)):
+                                latest_start_time, machine_id, index, min_runtime = tentative_start_time, machine, 0, runtime
+        end_time = latest_start_time + task.setup_times[machine_id] + task.execution_times[machine_id]
+        return machine_id, latest_start_time, end_time
 
     def get_action_mask(self) -> np.array:
         """
@@ -289,6 +432,17 @@ class Env(gym.Env):
 
         self.last_mask = job_mask
         return job_mask
+
+    def execute_action_with_given_interval(self, job_id: int, task: Task, machine_id, start_time, end_time) -> None:
+        # Update machine occupancy and job_task_state
+        self.ends_of_machine_occupancies[machine_id] = end_time
+        self.job_task_state[job_id] += 1
+
+        # Update job and task
+        task.started = start_time
+        task.finished = end_time
+        task.selected_machine = machine_id
+        task.done = True
 
     def execute_action(self, job_id: int, task: Task, machine_id: int) -> None:
         """
@@ -307,8 +461,16 @@ class Env(gym.Env):
         if task.task_index == 0:
             start_time_of_preceding_task = 0
         else:
-            preceding_task = self.tasks[self.task_job_mapping[(job_id, task.task_index - 1)]]
-            start_time_of_preceding_task = preceding_task.finished
+            # handle asp case
+            if self.sp_type == 'asp':
+                proceeding_tasks = [self.tasks[self.task_job_mapping[(job_id, index)]] for index in task.children]
+                start_time_of_preceding_task = -1
+                for proceeding_task in proceeding_tasks:
+                    if start_time_of_preceding_task < proceeding_task.finished:
+                        start_time_of_preceding_task = proceeding_task.finished
+            else:
+                preceding_task = self.tasks[self.task_job_mapping[(job_id, task.task_index - 1)]]
+                start_time_of_preceding_task = preceding_task.finished
 
         # check earliest possible time to schedule according to preceding task and needed machine
         start_time = max(start_time_of_preceding_task, self.ends_of_machine_occupancies[machine_id])
@@ -341,7 +503,12 @@ class Env(gym.Env):
             if min_possible_start_time > start_time:
                 start_time = min_possible_start_time
 
-        end_time = start_time + task.runtime
+        end_time = start_time
+        # use the setup and execution time of the machine in case of asp
+        if self.sp_type == 'asp':
+            end_time = end_time + task.execution_times[machine_id] + task.setup_times[machine_id]
+        else:
+            end_time = end_time + task.runtime
 
         # update machine occupancy and job_task_state
         self.ends_of_machine_occupancies[machine_id] = end_time
@@ -355,7 +522,7 @@ class Env(gym.Env):
         task.selected_machine = machine_id
         task.done = True
 
-    def compute_reward(self) -> Any:
+    def compute_reward(self, use_letsa=False) -> Any:
         """
         Calculates the reward that will later be returned to the agent. Uses the self.reward_strategy string to
         discriminate between different reward strategies. Default is 'dense_reward'.
@@ -365,10 +532,10 @@ class Env(gym.Env):
         """
         if self.reward_strategy == 'dense_makespan_reward':
             # dense reward for makespan optimization according to https://arxiv.org/pdf/2010.12367.pdf
-            reward = self.makespan - self.get_makespan()
-            self.makespan = self.get_makespan()
+            reward = self.makespan - self.get_makespan(use_letsa)
+            self.makespan = self.get_makespan(use_letsa)
         elif self.reward_strategy == 'sparse_makespan_reward':
-            reward = self.sparse_makespan_reward()
+            reward = self.sparse_makespan_reward(use_letsa)
         elif self.reward_strategy == 'mr2_reward':
             reward = self.mr2_reward()
         else:
@@ -378,7 +545,7 @@ class Env(gym.Env):
 
         return reward
 
-    def sparse_makespan_reward(self) -> int:
+    def sparse_makespan_reward(self, use_letsa=False) -> int:
         """
         Computes the reward based on the final makespan at the end of the episode. Else 0.
 
@@ -388,7 +555,7 @@ class Env(gym.Env):
         if not self.check_done():
             reward = 0
         else:
-            reward = self.get_makespan()
+            reward = self.get_makespan(use_letsa)
 
         return reward
 
@@ -449,7 +616,6 @@ class Env(gym.Env):
         """
         for i, task in enumerate(self.tasks):
             # if task has not the highest index -> continue
-
             if task.task_index == self.max_task_index:
                 # if job=last task of the job done, punish possible completion
                 # after deadline -> 0 if done before deadline
@@ -463,10 +629,21 @@ class Env(gym.Env):
 
         return t_tardiness
 
-    def get_makespan(self):
+    def get_makespan(self, use_letsa=False):
         """
         Returns the current makespan (the time the latest of all scheduled tasks finishes)
+        In case of LETSA, the makespan is calculated as the difference between the latest end time and the earliest start time
         """
+        if use_letsa == True:
+            earliest_start_time = np.inf
+            latest_end_time = 0
+            for task in self.tasks:
+                if task.done == True:
+                    earliest_start_time = min(earliest_start_time, task.started)
+                    latest_end_time = max(latest_end_time, task.finished)
+
+            return latest_end_time - earliest_start_time
+
         return np.max(self.ends_of_machine_occupancies)
 
     def log_intermediate_step(self) -> None:
@@ -477,6 +654,8 @@ class Env(gym.Env):
 
         """
         if self.runs >= self.log_interval:
+            # comment out if you don't want to see the intermediate logs
+            pass
             print('-' * 110, f'\n{self.runs} instances played! Last instance seen: {self.data_idx}/{len(self.data)}')
             print(f'Average performance since last log: mean reward={np.around(np.mean(self.logging_rewards), 2)}, ' \
                      f'mean makespan={np.around(np.mean(self.logging_makespans), 2)}, ' \
@@ -508,6 +687,7 @@ class Env(gym.Env):
         :return: PIL.Image.Image if mode=image, else None
 
         """
+        print("mode", mode)
         if mode == 'human':
             GanttChartPlotter.get_gantt_chart_image(self.tasks, show_image=True, return_image=False)
         elif mode == 'image':

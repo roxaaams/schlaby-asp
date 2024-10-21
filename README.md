@@ -1,4 +1,186 @@
-# Schlably
+# Extended version of Schlably to support in-tree precedence relations
+
+This is an extended version of Schlably to support in-tree precedence relations for ASP (Assembly Scheduling Problem) instances.
+This version includes the following changes. More details about the original Schlably can be found below in this README.
+
+## Data Generation
+
+Data processing and generation are adapted to parse and generate instances with in-tree precedence relations. The precedence relations are generated based on the in-tree structure of Bill-of-Material (BOM) file.
+The BOM files were generated with the help of a more general ASP instance generator, which is not included in this repository available at [Scamp Datagen](https://github.com/acopie/scamp-datagen). There are different types of BOM files available in the data/own_data directory as examples.
+Based on the given data generator config file for ASP, the bom_instance_factory.py script parses the BOM files into Task instances with in-tree precedence relations, and can also generate additional instances relying on (i) random perturbation of the processing times; (ii) random inclusion and exclusion of eligible machines. The perturbation keeps unaltered the number of operations as well as the minimal and maximal values of the processing times.
+
+Example:
+
+```bash
+python -m src.data_generator.bom_instance_factory -fp data_generation/asp/config_ASP_TUBES_2.yaml
+```
+Modify the following fields in your config file for ASP case to generate new instances with in-tree precedence relations:
+
+```yaml
+# (O) [string] Load the bom input files from this input directory
+input_directory: /Users/Documents/schlaby-asp/data/own_data/ASP_TUBES_2
+# (0) [bool] If true, the instances will be modified
+should_modify_instances: True
+# (O) [int] Number of instances to be generated based on the original instances
+num_similar_instances: 2
+```
+
+## Training
+
+The training script is adapted to train the model with the observation space tailored for ASP instances with in-tree precedence relations. 
+
+```bash
+python -m src.agents.train -fp training/ppo/config_for_training.yaml 
+```
+
+In case you want to train the model with different features as mentioned in Section "Observation Space", you can set the command line argument `--binary_features` or `-bf` to the desired features.
+The features are represented as a binary mask. The binary mask is a 10-bit binary number, where each bit represents a feature. The bit is set to 1 if the feature is included, and 0 otherwise.
+The default binary mask is `1111100000`
+
+Example:
+
+```bash
+python -m src.agents.test -fp testing/ppo/config_for_testing.yaml -bf 1111100000
+```
+
+## Testing
+
+The testing script is adapted to benchmark the model against the heuristics for ASP instances with in-tree precedence relations.
+
+```bash
+python -m src.agents.test -fp testing/ppo/config_for_testing.yaml 
+```
+
+In case you want to test the model and not benchmark it against the heuristics, you can set the command line argument `--run_heuristics` or `-rh` to `0` . 
+The testing script will only test the model and save the results in the results directory. This is useful when you want to test the model with different features as mentioned in Section "Training and Testing for all combination of features" and the heuristics can be run only once.
+
+```bash
+python -m src.agents.test -fp testing/ppo/config_for_testing.yaml --run_heuristics 0
+```
+
+In case you want to test the model with different features as mentioned in Section "Observation Space", you can set the command line argument `--binary_features` or `-bf` to the desired features.
+The features are represented as a binary mask. The binary mask is a 10-bit binary number, where each bit represents a feature. The bit is set to 1 if the feature is included, and 0 otherwise. 
+The default binary mask is `1111100000`
+
+Example:
+
+```bash
+python -m src.agents.test -fp testing/ppo/config_for_testing.yaml -bf 1111100000
+```
+
+## Dispatching Rules - Heuristics
+
+The dispatching rules  are heuristics that aim to select an operation from the list of feasible operations. The new and adapted rules for ASP (see heuristics_agent.py) are:
+They can be configured in the config files. For example: `test_heuristics'
+  ['LETSA', 'EDD_ASP', 'MPO_ASP', 'LPO_ASP', 'SPT_ASP', 'rand_asp']`:
+
+- **Random Selection (RAND_ASP)**: At each step, a feasible operation is selected randomly. The rule name is 
+
+- **Shortest Processing Times (SPT_ASP)**: Operations are selected in ascending order of their processing times. If there are several eligible machines for an operation, an estimation of the processing time is used (maximal or the average value over all machines).
+
+- **Most Preceding Operations (MPO_ASP)**: The feasible operation with the largest number of predecessors is selected.
+
+- **Least Preceding Operations (LPO_ASP)**: The feasible operation with the smallest number of predecessors is selected.
+
+- **Most Remaining Operations (MRO_ASP)**: Operations are selected in decreasing order of the number of nodes in the ASP tree that belong to the path from the current node to the root. This rule is similar to the "maximum work remaining" rule used to select jobs in JSSP. A related rule was used in \cite{Zhang2018} in the case of flexible ASP.
+
+- **Least Remaining Operations (LRO_ASP)**: Operations are selected in increasing order of the number of nodes in the ASP tree that belong to the path from the current node to the root.
+
+- **Lead Time Evaluation and Scheduling Algorithm (LETSA)**: A heuristic rule designed for ASP that selects operations that belong to the current critical path (longest path, with respect to the execution times, from a feasible operation to the root of the ASP tree).
+
+
+## Observation Space
+
+The observation space in this project is inspired by previous works and consists of ten features tailored for the ASP. 
+
+These features are:
+
+1. **Operation Status (OS)**: Indicates the scheduling status of an operation. Index in the binary mask is 0.
+   - `0`: Already scheduled.
+   - `1`: Not scheduled but feasible.
+   - `0.5`: Infeasible (at least one predecessor not scheduled).
+
+2. **Estimated Processing Time per Operation (EPT)**: The weighted average of processing times for eligible machines for an operation. Index in the binary mask is 1.
+
+3. **Estimated Completion Time per Operation (ECT)**: Index in the binary mask is 2.
+   - If scheduled, it is the completion time.
+   - If not scheduled, it is the maximum ECT of predecessors plus EPT.
+
+4. **Estimated Remaining Processing Time per Operation (ERT_o)**: Sum of estimated processing times from the operation to the root of the operation network. Index in the binary mask is 3.
+
+5. **Estimated Processing Time for the Next Operation (EPT_next)**: Estimated processing time for the successor of the current operation. Index in the binary mask is 4.
+
+6. **Remaining Operations Count (ROC)**: Number of operations from the current node to the root, computed for unscheduled but feasible operations. Index in the binary mask is 5.
+
+7. **Usage of the Critical Path (CP)**: Binary state indicating if the operation is on the critical path. Index in the binary mask is 6.
+
+8. **Estimated Remaining Time per Machine (ERT_m)**: Sum of estimated processing times of unscheduled operations per machine. Index in the binary mask is 7.
+
+9. **Assignment Matrix (AM)**: Binary matrix indicating eligible machines for each operation. Index in the binary mask is 8.
+
+10. **Machine Sharing Feature (SF)**: Number of unscheduled operations per machine. Index in the binary mask is 9.
+
+The feature index mapping can be found in the env_testris_scheduling.py file:
+
+```python
+self.feature_index_mapping = {
+0: 'task_status',
+1: 'operation_time_per_tasks',
+2: 'completion_time_per_task',
+3: 'estimated_remaining_processing_time_per_task',
+4: 'estimated_remaining_processing_time_per_successor_task',
+5: 'remaining_tasks_count',
+6: 'is_task_in_critical_path',
+7: 'remaining_processing_times_on_machines',
+8: 'mat_machine_op',
+9: 'machines_counter_dynamic'
+}
+```
+
+## Training and Testing for all combination of features
+
+The run.py script generates all combinations of features as binary masks for training and testing configurations and executes corresponding commands using the `subprocess` module. The masks are generated using the `product` function from the `itertools` module. The script is designed to be run from the command line and includes argument parsing for customization.
+
+### Functions
+
+1. **`execute_cmd(cmd)`**:
+   - Executes a shell command.
+   - Captures and prints the command's output.
+   - Handles errors and prints error messages if the command fails.
+
+2. **`generate_and_process_binary_masks(results_dir, train_config_file_path, test_config_file_path, lower_bound, upper_bound)`**:
+   - Generates binary masks and processes them within the specified bounds.
+   - Constructs and executes training and testing commands for each mask.
+   - Skips the all-zero mask (`null_mask`).
+   - Runs heuristics only once.
+
+3. **`validate_bounds(lower_bound, upper_bound)`**:
+   - Validates that `lower_bound` is greater than or equal to 1 and less than or equal to `upper_bound`.
+   - Validates that `upper_bound` is less than or equal to 1023.
+   - Raises an error if the bounds are invalid.
+
+4. **`main()`**:
+   - Parses command-line arguments.
+   - Validates the bounds.
+   - Calls `generate_and_process_binary_masks` with the parsed arguments.
+
+### Command-Line Arguments
+
+- `--results_dir`: Directory to store results (default: `'results/all/'`).
+- `-trainfp`, `--train_config_file_path`: Path to the training config file (default: `'training/ppo/config_ASP_TUBES.yaml'`, required).
+- `-testfp`, `--test_config_file_path`: Path to the testing config file (default: `'testing/ppo/config_ASP_TUBES_TESTING.yaml'`, required).
+- `--upper_bound`: Upper bound for mask generation (default: `1023`, must be <= `1023`).
+- `--lower_bound`: Lower bound for mask generation (default: `1`, must be >= `1`).
+
+### Usage
+
+Run the script from the command line with the desired arguments:
+
+```sh
+python run.py --results_dir 'results/custom/' -trainfp 'path/to/train_config.yaml' -testfp 'path/to/test_config.yaml' --upper_bound 1000 --lower_bound 10
+```
+
+# Original Schlably
 ​
 Schlably is a Python-Based framework for experiments on scheduling problems with Deep Reinforcement Learning (DRL). 
 It features an extendable gym environment and DRL-Agents along with code for data generation, training and testing.  
@@ -35,7 +217,11 @@ To create your own data, or more precisely, instances of a scheduling problem, p
    python -m src.data_generator.instance_factory -fp data_generation/jssp/<your_data_generation_config>.yaml
    ````
 3. Please note that the file path needs to be given relative to the config directory of the project and that otherwise your config may not be found.
-   
+
+   python -m src.data_generator.instance_factory -fp data_generation/asp/config_job2_task50_tools0.yaml
+
+
+python -m src.data_generator.bom_instance_factory -fp data_generation/asp/config_ASP_WIDE.yaml
 
 
 ​
@@ -54,6 +240,7 @@ To train your own model, proceed as follows:
 Immediately after training the model will be tested and benchmarked against all heuristics included in the TEST_HEURISTICS constant located in [src/agents/test.py](src/agents/test.py)
 The trained model can be accessed via the experiment_save_path and saved_model_name you specified in the training config.
 
+python -m src.agents.train -fp training/ppo/config_ASP_WIDE.yaml
 
 ​
 ### Testing

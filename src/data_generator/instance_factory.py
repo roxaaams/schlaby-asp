@@ -161,6 +161,10 @@ def main(config_file_name=None, external_config=None):
     # Assign deadlines in-place
     SPFactory.set_deadlines_to_max_deadline_per_job(instance_list, current_config.get('num_jobs', None))
 
+    for job in instance_list:
+        for task in job:
+            print(task)
+
     # compute individual hash for each instance
     SPFactory.compute_and_set_hashes(instance_list)
 

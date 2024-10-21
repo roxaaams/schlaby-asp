@@ -1,0 +1,351 @@
+{
+  "name": "A",
+  "operationid": 1,
+  "productid": 1,
+  "code": "A",
+  "pname": "combina frigrorifica",
+  "parentid": null,
+  "start_date": "2022-08-20 00:00:00.000000",
+  "delivery_date": "2023-09-01 00:00:00.000000",
+  "quantity": 30,
+  "machines": [
+    {
+      "id": 1,
+      "name": "Machine_01",
+      "execution_time": 20,
+      "setup_time": 600
+    },
+    {
+      "id": 2,
+      "name": "Machine_02",
+      "execution_time": 20,
+      "setup_time": 600
+    }
+  ],
+  "metainfo": {
+    "operations_list": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "machines_list": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18
+    ],
+    "maintenances": [
+      {
+        "id": 203,
+        "machineid": 2,
+        "start_date": "2022-08-25 14:00:00.000000",
+        "end_date": "2022-08-25 15:00:00.000000"
+      },
+      {
+        "id": 204,
+        "machineid": 5,
+        "start_date": "2022-08-31 09:00:00.000000",
+        "end_date": "2022-08-31 14:00:00.000000"
+      },
+      {
+        "id": 201,
+        "machineid": 4,
+        "start_date": "2022-08-29 20:00:00.000000",
+        "end_date": "2022-08-29 23:00:00.000000"
+      },
+      {
+        "id": 202,
+        "machineid": 1,
+        "start_date": "2022-08-29 13:00:00.000000",
+        "end_date": "2022-08-29 15:00:00.000000"
+      },
+      {
+        "id": 205,
+        "machineid": 3,
+        "start_date": "2022-08-28 14:00:00.000000",
+        "end_date": "2022-08-28 19:00:00.000000"
+      }
+    ]
+  },
+  "children": [
+    {
+      "name": "B",
+      "parentid": 1,
+      "operationid": 2,
+      "productid": 2,
+      "code": "B",
+      "pname": "Compresor",
+      "quantity": 1,
+      "machines": [
+        {
+          "id": 11,
+          "name": "Machine_11",
+          "execution_time": 100,
+          "setup_time": 500
+        },
+        {
+          "id": 12,
+          "name": "Machine_12",
+          "execution_time": 90,
+          "setup_time": 600
+        },
+        {
+          "id": 13,
+          "name": "Machine_13",
+          "execution_time": 110,
+          "setup_time": 500
+        },
+        {
+          "id": 14,
+          "name": "Machine_14",
+          "execution_time": 98,
+          "setup_time": 560
+        },
+        {
+          "id": 15,
+          "name": "Machine_15",
+          "execution_time": 100,
+          "setup_time": 500
+        }
+      ],
+      "children": [
+
+      ]
+    },
+    {
+      "name": "C",
+      "parentid": 1,
+      "operationid": 3,
+      "productid": 3,
+      "code": "C",
+      "pname": "usa",
+      "quantity": 1,
+      "machines": [
+        {
+          "id": 16,
+          "name": "Machine_16",
+          "execution_time": 12,
+          "setup_time": 900
+        },
+        {
+          "id": 15,
+          "name": "Machine_15",
+          "execution_time": 12,
+          "setup_time": 900
+        }
+      ],
+      "children": [
+        {
+          "name": "D",
+          "parentid": 3,
+          "operationid": 4,
+          "productid": 4,
+          "code": "D",
+          "pname": "sticla",
+          "quantity": 2,
+          "machines": [
+            {
+              "id": 18,
+              "name": "Machine_18",
+              "execution_time": 50,
+              "setup_time": 900
+            },
+            {
+              "id": 19,
+              "name": "Machine_19",
+              "execution_time": 50,
+              "setup_time": 900
+            }
+          ],
+          "children": [
+
+          ]
+        },
+        {
+          "name": "E",
+          "parentid": 3,
+          "operationid": 5,
+          "productid": 5,
+          "code": "E",
+          "pname": "armatura",
+          "quantity": 1,
+          "machines": [
+            {
+              "id": 1,
+              "name": "Machine_01",
+              "execution_time": 30,
+              "setup_time": 900
+            },
+            {
+              "id": 2,
+              "name": "Machine_02",
+              "execution_time": 30,
+              "setup_time": 900
+            }
+          ],
+          "children": [
+            {
+              "name": "E-SP1",
+              "parentid": 5,
+              "operationid": 6,
+              "productid": 6,
+              "code": "E-SP1",
+              "pname": "Armatura_1",
+              "quantity": 3,
+              "machines": [
+                {
+                  "id": 3,
+                  "name": "Machine_03",
+                  "execution_time": 15,
+                  "setup_time": 400
+                }
+              ],
+              "children": [
+                {
+                  "name": "E-SP2",
+                  "parentid": 6,
+                  "operationid": 7,
+                  "productid": 7,
+                  "code": "E-SP2",
+                  "pname": "armatura 2",
+                  "quantity": 4,
+                  "machines": [
+                    {
+                      "id": 3,
+                      "name": "Machine_03",
+                      "execution_time": 40,
+                      "setup_time": 100
+                    },
+                    {
+                      "id": 2,
+                      "name": "Machine_02",
+                      "execution_time": 24,
+                      "setup_time": 107
+                    }
+                  ],
+                  "children": [
+                    {
+                      "name": "E-SP3",
+                      "parentid": 7,
+                      "operationid": 8,
+                      "productid": 8,
+                      "code": "E-SP3",
+                      "pname": "armatura 3",
+                      "quantity": 2,
+                      "machines": [
+                        {
+                          "id": 6,
+                          "name": "Machine_06",
+                          "execution_time": 5,
+                          "setup_time": 200
+                        },
+                        {
+                          "id": 13,
+                          "name": "Machine_13",
+                          "execution_time": 110,
+                          "setup_time": 500
+                        },
+                        {
+                          "id": 14,
+                          "name": "Machine_14",
+                          "execution_time": 98,
+                          "setup_time": 560
+                        },
+                        {
+                          "id": 15,
+                          "name": "Machine_15",
+                          "execution_time": 100,
+                          "setup_time": 500
+                        }
+                      ],
+                      "children": [
+                        {
+                          "name": "E-SP4",
+                          "parentid": 8,
+                          "operationid": 9,
+                          "productid": 9,
+                          "code": "E-SP4",
+                          "pname": "armatura  4",
+                          "quantity": 5,
+                          "machines": [
+                            {
+                              "id": 3,
+                              "name": "Machine_03",
+                              "execution_time": 20,
+                              "setup_time": 100
+                            },
+                            {
+                              "id": 2,
+                              "name": "Machine_02",
+                              "execution_time": 28,
+                              "setup_time": 250
+                            }
+                          ],
+                          "children": [
+                            {
+                              "name": "E-SP5",
+                              "parentid": 9,
+                              "operationid": 10,
+                              "productid": 10,
+                              "code": "E-SP5",
+                              "pname": "armatura 5",
+                              "quantity": 10,
+                              "machines": [
+                                {
+                                  "id": 8,
+                                  "name": "Machine_08",
+                                  "execution_time": 30,
+                                  "setup_time": 900
+                                },
+                                {
+                                  "id": 9,
+                                  "name": "Machine_09",
+                                  "execution_time": 32,
+                                  "setup_time": 700
+                                },
+                                {
+                                  "id": 4,
+                                  "name": "Machine_04",
+                                  "execution_time": 33,
+                                  "setup_time": 800
+                                }
+                              ],
+                              "children": [
+
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

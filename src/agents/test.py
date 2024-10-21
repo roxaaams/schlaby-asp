@@ -12,6 +12,8 @@ You can adapt the heuristics used for testing in the TEST_HEURISTICS constant. A
 When running the file from a console you can use --plot-ganttchart to show the generated gantt_chart figures.
 """
 import argparse
+from email.policy import default
+
 from matplotlib import pyplot as plt
 from typing import Tuple, List, Dict, Union
 import numpy as np
@@ -26,12 +28,12 @@ from src.utils.file_handler.model_handler import ModelHandler
 from src.data_generator.task import Task
 from src.agents.train_test_utility_functions import get_agent_class_from_config, load_config, load_data
 from src.agents.solver import OrToolSolver
+from src.models.setqueue import SetQueue
 
 # constants
 TEST_HEURISTICS: List[str] = ['rand', 'EDD', 'SPT', 'MTR', 'LTR']
 
-
-def get_action(env, model, heuristic_id: str, heuristic_agent: Union[HeuristicSelectionAgent, None]) -> Tuple[int, str]:
+def get_action(env, model, heuristic_id: str, heuristic_agent: Union[HeuristicSelectionAgent, None], sp_type, feasible_tasks, visited, max_deadline):
     """
     This function determines the next action according to the input model or heuristic
 
@@ -47,20 +49,26 @@ def get_action(env, model, heuristic_id: str, heuristic_agent: Union[HeuristicSe
         "You have to pass an agent model XOR a heuristic id to solve the scheduling problem"
     obs = env.state_obs
     mask = env.get_action_mask()
+    completion_time = None
 
     if heuristic_id:
         action_mode = 'heuristic'
         tasks = env.tasks
         task_mask = mask
-        selected_action = heuristic_agent(tasks, task_mask, heuristic_id)
+        #  init values for LETSA heuristic
+        # critical_path is assigned to [] at every while iteration
+        if heuristic_id == 'LETSA':
+            selected_action, completion_time = heuristic_agent(tasks, task_mask, heuristic_id, feasible_tasks, visited, max_deadline)
+        else:
+            selected_action = heuristic_agent(tasks, task_mask, heuristic_id)
     else:
         action_mode = 'agent'
         selected_action, _ = model.predict(observation=obs, action_mask=mask)
 
-    return selected_action, action_mode
+    return selected_action, action_mode, completion_time
 
 
-def run_episode(env, model, heuristic_id: Union[str, None], handler: EvaluationHandler) -> None:
+def run_episode(env, model, heuristic_id: Union[str, None], handler: EvaluationHandler, sp_type) -> None:
     """
     This function executes one testing episode
 
@@ -77,19 +85,41 @@ def run_episode(env, model, heuristic_id: Union[str, None], handler: EvaluationH
 
     heuristic_agent = HeuristicSelectionAgent() if heuristic_id else None
 
+    #  we need to init these values for LETSA heuristic before the while loop as in the original algorithm
+    feasible_tasks = SetQueue()
+    visited = dict()
+    max_deadline = -1
+    for task in env.tasks:
+        if not task.parent_index:
+            feasible_tasks.put(task.task_index)
+        if max_deadline < task.deadline:
+            max_deadline = task.deadline
+
     # run agent on environment and collect rewards until done
     steps = 0
     while not done:
         steps += 1
-        action, action_mode = get_action(env, model, heuristic_id, heuristic_agent)
+        #  add sp_type to heuristic_agent and other values for LETSA heuristic
+        action, action_mode, completion_time = get_action(env, model, heuristic_id, heuristic_agent, sp_type, feasible_tasks, visited, max_deadline)
 
-        b = env.step(action, action_mode=action_mode)
+        #  next step should be taken based on the task_idx in case of asp
+        if sp_type == 'asp' and action_mode == 'heuristic':
+            if heuristic_id == 'LETSA':
+                b = env.step(action=0, action_mode=action_mode, task_idx=action, completion_time=completion_time)
+            else:
+                b = env.step(action=0, action_mode=action_mode, task_idx=action)
+        else:
+            b = env.step(action, action_mode=action_mode)
+
         total_reward += b[1]
         done = b[2]
 
     # store episode in object
     mean_reward = total_reward / steps
-    handler.record_environment_episode(env, mean_reward)
+    if sp_type == 'asp' and action_mode == 'heuristic' and heuristic_id == 'LETSA':
+        handler.record_environment_episode(env, mean_reward, use_letsa=True)
+    else:
+        handler.record_environment_episode(env, mean_reward)
 
 
 def test_solver(config: Dict, data_test: List[List[Task]], logger: Logger) -> Dict:
@@ -158,7 +188,7 @@ def log_results(plot_logger: Logger, inter_test_idx: Union[int, None], heuristic
 
 
 def test_model(env_config: Dict, data: List[List[Task]], logger: Logger, plot: bool = None, log_episode: bool = None,
-               model=None, heuristic_id: str = None, intermediate_test_idx=None) -> dict:
+               model=None, heuristic_id: str = None, intermediate_test_idx=None, binary_features = None) -> dict:
     """
     This function tests a model in the passed environment for all problem instances passed as data_test and returns an
     evaluation summary
@@ -182,26 +212,35 @@ def test_model(env_config: Dict, data: List[List[Task]], logger: Logger, plot: b
     for test_i in range(len(data)):
 
         # create env
-        environment, _ = EnvironmentLoader.load(env_config, data=[data[test_i]])
+        environment, _ = EnvironmentLoader.load(env_config, data=[data[test_i]], binary_features=binary_features)
         environment.runs = test_i
 
         # run environment episode
-        run_episode(environment, model, heuristic_id, evaluation_handler)
+        #  added env_config['sp_type']
 
-        # log results. Creating wandb table
-        if log_episode:
-            log_results(logger, intermediate_test_idx, heuristic_id, environment, evaluation_handler)
+        run_episode(environment, model, heuristic_id, evaluation_handler, env_config['sp_type'])
+        schedule_info = ''
+        routine_info = ''
+        for task in environment.tasks:
+            schedule_info += task.str_schedule_info_short() + ' '
+            routine_info += task.str_routine_info() + '\\\\ \n'
 
+        print(heuristic_id)
+        print(schedule_info)
+        print(routine_info)
+
+
+    #  do not plot results
         # plot results
-        if plot:
-            environment.render()
+        # if plot:
+        #     environment.render(mode="image")
 
     # return episode results, using EvaluationHandler properties and function
     return evaluation_handler.evaluate_test()
 
 
 def test_model_and_heuristic(config: dict, model, data_test: List[List[Task]], logger: Logger,
-                             plot_ganttchart: bool = False, log_episode: bool = False) -> dict:
+                             plot_ganttchart: bool = False, log_episode: bool = False, binary_features = None, run_heuristics = None) -> dict:
     """
     Test model and agent_heuristics len(data) times and returns results
 
@@ -215,26 +254,27 @@ def test_model_and_heuristic(config: dict, model, data_test: List[List[Task]], l
     :return: Dict with evaluation_result dicts for the agent and all heuristics which were tested
 
     """
-    print('Testing model, heuristics and solver... ')
     results = {}
 
     test_kwargs = {'env_config': config, 'data': data_test, 'logger': logger,
-                   'plot': plot_ganttchart, 'log_episode': log_episode}
+                   'plot': plot_ganttchart, 'log_episode': log_episode, 'binary_features': binary_features}
 
     # test agent
     res = test_model(model=model, **test_kwargs)
     results.update({'agent': res})
 
     # test heuristics
-    for heuristic in config.get('test_heuristics', TEST_HEURISTICS):
-        res = test_model(heuristic_id=heuristic, **test_kwargs)
-        results.update({heuristic: res})
+    if run_heuristics == 1:
+        for heuristic in config.get('test_heuristics', TEST_HEURISTICS):
+            res = test_model(heuristic_id=heuristic, **test_kwargs)
+            results.update({heuristic: res})
 
-    # test solver and calculate optimality gap
-    res = test_solver(config, data_test, logger)
-    results.update({'solver': res})
-
-    results = EvaluationHandler.add_solver_gap_to_results(results)
+    #  comment solver
+#     # test solver and calculate optimality gap
+#     res = test_solver(config, data_test, logger)
+#     results.update({'solver': res})
+#
+#     results = EvaluationHandler.add_solver_gap_to_results(results)
 
     return results
 
@@ -247,6 +287,10 @@ def get_perser_args():
                         help='Path to config file you want to use for training')
     parser.add_argument('-plot', '--plot-ganttchart', dest="plot_ganttchart", action="store_true",
                         help='Enable or disable model result plot.')
+    parser.add_argument('-bf', '--binary_features', type=str, default="1111100000", required=False,
+                            help='Binary list of features')
+    parser.add_argument('-rh', '--run_heuristics', type=int, default=1, required=False,
+                            help='Should run heuristics or not')
 
     args = parser.parse_args()
 
@@ -255,9 +299,11 @@ def get_perser_args():
 
 def main(external_config=None):
 
-    # get config_file from terminal input
+    # get config_file and binary_features from terminal input
     parse_args = get_perser_args()
     config_file_path = parse_args.config_file_path
+    binary_features = parse_args.binary_features
+    run_heuristics = parse_args.run_heuristics
 
     # get config and data
     config = load_config(config_file_path, external_config)
@@ -273,7 +319,7 @@ def main(external_config=None):
     logger = Logger(config=config)
     model = get_agent_class_from_config(config=config).load(file=best_model_path, config=config, logger=logger)
     results = test_model_and_heuristic(config=config, model=model, data_test=data,
-                                       plot_ganttchart=parse_args.plot_ganttchart, logger=logger)
+                                       plot_ganttchart=parse_args.plot_ganttchart, logger=logger, binary_features=binary_features, run_heuristics=run_heuristics)
     print(results)
     plt.show()
 

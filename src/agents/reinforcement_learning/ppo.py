@@ -175,7 +175,9 @@ class PolicyNetwork(nn.Module):
         logits = self.policy_net(observation)
 
         dist = Categorical(logits=logits)
-        
+#         print('observation', observation, 'len obs', len(observation))
+#         print('dist', dist)
+#         print('logits', logits)
         return dist
 
 
@@ -280,6 +282,7 @@ class PPO:
         with open(f"{file}.pkl", "rb") as handle:
             data = pickle.load(handle)
 
+        # 
         env = data["params"]["env"]
 
         # create PPO object, commit necessary parameters. Update remaining parameters
