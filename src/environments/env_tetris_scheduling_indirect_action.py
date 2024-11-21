@@ -29,7 +29,7 @@ class IndirectActionEnv(Env):
     :param data: Scheduling problem to be solved, so a list of instances
 
     """
-    def __init__(self, config: dict, data: List[List[Task]], binary_features='1111100000'):
+    def __init__(self, config: dict, data: List[List[Task]], binary_features='1001011000'):
 
         super(IndirectActionEnv, self).__init__(config, data, binary_features)
 
@@ -146,7 +146,7 @@ class IndirectActionEnv(Env):
                 machine_id, start_time, end_time = self.choose_machine_using_completion_time(selected_task, original_completion_time)
                 #  job = 0 since we only have one job
                 self.execute_action_with_given_interval(0, selected_task, machine_id, start_time, end_time)
-        #  since now we select the task instead of job, then we need to get the machine directly as in ASP
+        #  since  we select the task instead of job, then we need to get the machine directly as in ASP
         elif  action_mode == 'agent' and self.sp_type == 'asp' and self.should_use_machine_task_pair == True and self.should_determine_task_index == False:
              self.execute_action(0, self.tasks[selected_task_id], selected_machine)
         #  check if the task is a valid one (not planned and his children all planned)
@@ -174,10 +174,9 @@ class IndirectActionEnv(Env):
         infos = {'mask': action_mask}
         observation = self.state_obs
         if action_mode == 'heuristic' and self.sp_type == 'asp' and 'completion_time' in kwargs.keys():
-            reward = self.compute_reward(use_letsa=True) / 50000
+            reward = self.compute_reward(use_letsa=True) / self.reward_normalization_factor
         else:
-            reward = self.compute_reward() / 50000
-#         print('reward', reward)
+            reward = self.compute_reward() / self.reward_normalization_factor
         self.reward_history.append(reward)
 
         done = self.check_done()
@@ -411,6 +410,7 @@ class IndirectActionEnv(Env):
                 observation.append(features[self.feature_index_mapping[i]])
         observation = np.concatenate(observation)
 
+        # print('observation:', observation)
         self._state_obs = observation
         return self._state_obs
 

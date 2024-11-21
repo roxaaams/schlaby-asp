@@ -3,6 +3,8 @@
 This is an extended version of Schlably to support in-tree precedence relations for ASP (Assembly Scheduling Problem) instances.
 This version includes the following changes. More details about the original Schlably can be found below in this README.
 
+Currently, only the indirect encoding was modified to support in-tree precedence relations. The direct encoding is not supported yet.
+
 ## Data Generation
 
 Data processing and generation are adapted to parse and generate instances with in-tree precedence relations. The precedence relations are generated based on the in-tree structure of Bill-of-Material (BOM) file.
@@ -35,7 +37,7 @@ python -m src.agents.train -fp training/ppo/config_for_training.yaml
 
 In case you want to train the model with different features as mentioned in Section "Observation Space", you can set the command line argument `--binary_features` or `-bf` to the desired features.
 The features are represented as a binary mask. The binary mask is a 10-bit binary number, where each bit represents a feature. The bit is set to 1 if the feature is included, and 0 otherwise.
-The default binary mask is `1111100000`
+The default binary mask is `1001011000`.
 
 Example:
 
@@ -60,7 +62,7 @@ python -m src.agents.test -fp testing/ppo/config_for_testing.yaml --run_heuristi
 
 In case you want to test the model with different features as mentioned in Section "Observation Space", you can set the command line argument `--binary_features` or `-bf` to the desired features.
 The features are represented as a binary mask. The binary mask is a 10-bit binary number, where each bit represents a feature. The bit is set to 1 if the feature is included, and 0 otherwise. 
-The default binary mask is `1111100000`
+The default binary mask is `1001011000`.
 
 Example:
 
@@ -137,6 +139,8 @@ self.feature_index_mapping = {
 }
 ```
 
+The default binary mask is `1001011000`
+
 ## Training and Testing for all combination of features
 
 The run.py script generates all combinations of features as binary masks for training and testing configurations and executes corresponding commands using the `subprocess` module. The masks are generated using the `product` function from the `itertools` module. The script is designed to be run from the command line and includes argument parsing for customization.
@@ -179,6 +183,9 @@ Run the script from the command line with the desired arguments:
 ```sh
 python run.py --results_dir 'results/custom/' -trainfp 'path/to/train_config.yaml' -testfp 'path/to/test_config.yaml' --upper_bound 1000 --lower_bound 10
 ```
+e.g.  python run.py --results_dir results/asp_tubes_2 -trainfp training/ppo/config_ASP_TUBES_2.yaml -testfp testing/ppo/config_ASP_TUBES_TESTING_2.yaml --upper_bound 1023 --lower_bound 49
+
+
 
 # Original Schlably
 ​

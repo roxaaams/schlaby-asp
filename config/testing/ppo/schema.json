@@ -41,6 +41,9 @@
         },
         "test_heuristics": {
             "type": "array"
+        },
+        "reward_normalization_factor": {
+            "type": "number"
         }
     },
     "required": [

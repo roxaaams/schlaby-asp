@@ -31,24 +31,192 @@ class OrToolSolver:
 
     - Classic JSSP
     - Classic FJSSP
+    - ASP
     - both of the above with and without tool constraints
     - optimization criteria tardiness and makespan
 
+
     Data needs to be passed in 'instance format' and is returned in this format, too.
+
     """
 
     @classmethod
-    def optimize(cls, instance: List[Task], objective: str = 'makespan'):
+    def optimize_asp(cls, instance: List[Task], objective: str = 'makespan'):
+        # count machines
+        all_machines = range(len(instance[0].machines))
+
+        # Computes worst-case makespan horizon dynamically as the sum of all durations.
+        horizon = sum(int(task.runtime) for task in instance)
+
+        # initiate CP Model
+        model = cp_model.CpModel()
+
+        # Named tuple to store information about created variables.
+        task_type = collections.namedtuple('task_type', 'start end interval duedate tardiness tools')
+        # Named tuple to manipulate solution information.
+        assigned_task_type = collections.namedtuple(
+            'assigned_task_type', 'start job index machines duration duedate tool')
+
+        # Creates job intervals and add to the corresponding machine lists.
+        all_tasks = {}
+        machine_usages = {}  # indexed by (job_id, task_id, machine_id)
+        machine_to_intervals = collections.defaultdict(list)
+
+        for task in instance:
+            # assemble task information
+            print(task)
+            duration = task.runtime
+            due_date = task.deadline
+            suffix = '_%i_%i' % (task.job_index, task.task_index)
+            # set up constants and variables
+            due_date_const = model.NewConstant(int(due_date))
+            start_var = model.NewIntVar(0, horizon - duration, f'start{suffix}')
+            duration = model.NewConstant(duration)
+            end_var = model.NewIntVar(0, horizon, f'end{suffix}')
+            interval_var = model.NewIntervalVar(start_var, duration, end_var, f'interval{suffix}')
+            if due_date == 0:  # if set to 0 this is not the last task.
+                # Therefore set it to end_var, so that the tardiness of this subtask is 0 by default
+                tardiness_var = model.NewConstant(0)
+            else:
+                tardiness_var = model.NewIntVar(- (horizon - int(due_date)), 0, f'tardiness{suffix}')
+                model.Add(tardiness_var == end_var - due_date_const)
+
+            # add to all_tasks
+            all_tasks[task.job_index, task.task_index] = task_type(start=start_var,
+                                                   end=end_var,
+                                                   interval=interval_var,
+                                                   duedate=due_date_const,
+                                                   tardiness=tardiness_var,
+                                                                   tools=[])
+
+            # add conditional (alternative) machine intervals (only one of all machines is used)
+            machines = task.machines
+            alt_machine_usages = []
+            for machine_id in range(0, len(machines)):
+                if machines[machine_id] == 1:
+                    alternative_suffix = f'{task.job_index}_{task.task_index}_{machine_id}'
+                    machine_usage = model.NewBoolVar(f'presence_{alternative_suffix}')
+                    alt_start = model.NewIntVar(0, horizon, f'start_{alternative_suffix}')
+                    alt_end = model.NewIntVar(0, horizon, f'end_{alternative_suffix}')
+                    alt_interval = model.NewOptionalIntervalVar(
+                        alt_start, task.execution_times[machine_id] + task.setup_times[machine_id] , alt_end, machine_usage, f'interval_{alternative_suffix}'
+                    )
+                    alt_machine_usages.append(machine_usage)
+
+                    # Link the master variables with the local ones
+                    model.Add(start_var == alt_start).OnlyEnforceIf(machine_usage)
+                    model.Add(end_var == alt_end).OnlyEnforceIf(machine_usage)
+
+                    # Add local interval to the right machine
+                    machine_to_intervals[machine_id].append(alt_interval)
+
+                    # Store booleans of the usages for the solution
+                    machine_usages[(task.task_index, machine_id)] = machine_usage
+
+            # select exactly one machine usage per task
+            model.Add(sum(alt_machine_usages) == 1)
+
+        # Create and add disjunctive constraints of intervals, in which a machine or tool may be used
+        for machine in all_machines:
+            model.AddNoOverlap(machine_to_intervals[machine])
+
+        # Precedences inside a job.
+        for task in instance:
+            print(task.task_index)
+            for sub_task_index in task.children:
+                print(sub_task_index)
+                print('all_tasks[0, task.task_id]', all_tasks[0, task.task_index])
+                print('all_tasks[0, sub_task_index].end', all_tasks[0, sub_task_index].end)
+                model.Add(all_tasks[0, task.task_index].start >= all_tasks[0, sub_task_index].end)
+
+        if objective == 'makespan':
+            obj_var = model.NewIntVar(0, horizon, 'makespan')
+            model.AddMaxEquality(obj_var, [all_tasks[0, 0].end])
+        elif objective == 'tardiness':
+            # Tardiness objective.
+            obj_var = model.NewIntVar(-horizon, horizon, 'total_tardiness')
+            model.Add(
+                obj_var == sum([all_tasks[0,0].tardiness]))
+        else:
+            raise ValueError(f'Unknown objective {objective}')
+
+        # Add objective
+        model.Minimize(obj_var)
+
+        # Solve
+        solver = cp_model.CpSolver()
+        status = solver.Solve(model)
+
+        # Extract solution to more handy format
+        if status == cp_model.OPTIMAL or status == cp_model.FEASIBLE:
+            # print('Solution:')
+            # Create one list of assigned tasks per machine.
+            assigned_jobs = collections.defaultdict(list)
+            for task in instance:
+                for alt_machine in instance[job_id][task_id][0]:
+                    if solver.Value(machine_usages[(0, task_id, alt_machine)]):
+                        machine = alt_machine
+                assigned_jobs[machine].append(
+                    assigned_task_type(start=solver.Value(
+                        all_tasks[job_id, task_id].start),
+                        job=job_id,
+                        index=task_id,
+                        machines=task[0],
+                        duration=task[1],
+                        duedate=task[2],
+                        tool=task[3]))
+
+            # Create per machine output lines.
+            output = ''
+            for machine in all_machines:
+                # Sort by starting time.
+                assigned_jobs[machine].sort()
+                sol_line_tasks = 'Machine ' + str(machine) + ': '
+                sol_line = '           '
+
+                for assigned_task in assigned_jobs[machine]:
+                    name = 'job_%i_task_%i' % (assigned_task.job,
+                                               assigned_task.index)
+                    # Add spaces to output to align columns.
+                    sol_line_tasks += '%-15s' % name
+
+                    start = assigned_task.start
+                    duration = assigned_task.duration
+                    tool = assigned_task.tool
+                    sol_tmp = f'[{start}, {start + duration}, tool:{tool}]'
+                    # Add spaces to output to align columns.
+                    sol_line += '%-15s' % sol_tmp
+
+                sol_line += '\n'
+                sol_line_tasks += '\n'
+                output += sol_line_tasks
+                output += sol_line
+
+            # # Finally print the solution found.
+            # print(f'Minimal {objective}: {solver.ObjectiveValue()}')
+            # print(output)
+        else:
+            print('No solution found.')
+
+        return assigned_jobs, solver.ObjectiveValue()
+
+    @classmethod
+    def optimize(cls, instance: List[Task], objective: str = 'makespan', sp_type = None):
+
         """
         Optimizes the passed instance according to the passed objective.
 
         :param List[Task] instance: The instance as a list of Tasks
-        :param str objective: Bbjective to be minimized. May be 'makespan' or 'tardiness'.
+        :param str objective: Objective to be minimized. May be 'makespan' or 'tardiness'.
+        :param sp_type: Type of the problem. Default is None. Set it to 'ASP' if you want to solve an ASP problem.
 
         :return: tuple(list[Task], float) Solved instance and objective value
 
         """
         # parse instance to suitable format
+        if sp_type == 'asp':
+            return cls.optimize_asp(instance, objective)
+
         instance = cls.parse_instance_to_solver_format(instance)
 
         # count machines
@@ -311,13 +479,15 @@ def get_perser_args():
     parser.add_argument('-obj', '--solver_objective', type=str, required=False,
                         help='According to this objective the solver computes a solution. '
                              'Choose between makespan and tardiness')
+    parser.add_argument('-spt', '--sp_type', type=str, default=None, required=False,
+                        help='Type of the problem. Default is None. Set it to ASP if you want to solve an ASP problem.')
 
     args = parser.parse_args()
 
     return args
 
 
-def main(instances_data_file_path, solver_objective, write_to_file=False, plot_gantt_chart=False):
+def main(instances_data_file_path, solver_objective, write_to_file=False, plot_gantt_chart=False, sp_type=None):
 
     # load and parse jobs
     data = DataHandler.load_instances_data_file(instances_data_file_path=instances_data_file_path)
@@ -327,7 +497,7 @@ def main(instances_data_file_path, solver_objective, write_to_file=False, plot_g
 
     for sample_instance in copy.copy(data):
         # find solution
-        assigned_jobs, objective_value = or_tool_solver.optimize(sample_instance, objective=solver_objective)
+        assigned_jobs, objective_value = or_tool_solver.optimize(sample_instance, objective=solver_objective, sp_type=sp_type)
 
         # get solution into Task format
         parsed_data = or_tool_solver.parse_to_plottable_format(sample_instance, assigned_jobs)
@@ -348,9 +518,10 @@ if __name__ == '__main__':
     write = parse_args.write_to_file
     plot = parse_args.plot_gantt_chart
     objective = parse_args.solver_objective
+    sp_type = parse_args.sp_type
     # set objective to default if no terminal input
     if objective is None:
         objective = SOLVER_OBJECTIVE
 
     # pass args to main
-    main(instances_data_file_path=path, solver_objective=objective, write_to_file=write, plot_gantt_chart=plot)
+    main(instances_data_file_path=path, solver_objective=objective, write_to_file=write, plot_gantt_chart=plot, sp_type=sp_type)

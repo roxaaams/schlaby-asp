@@ -58,7 +58,6 @@
         },
         "num_similar_instances": {
             "type": "integer",
-            "minimum": 1,
             "default": 0
         },
         "should_multiply_quantity_to_execution_times": {

@@ -24,7 +24,7 @@ from src.data_generator.sp_factory import SPFactory
 def dfs_bom(node, sorted_top, tasks_mapping_ids, deadline, job_index, filename, quantity, should_multiply_quantity_to_execution_times):
     for child in node.get('children', []):
         dfs_bom(child, sorted_top, tasks_mapping_ids, deadline - 1, job_index, filename, quantity * node['quantity'], should_multiply_quantity_to_execution_times)
-    machines = [0] * 31
+    machines = [0] * 50
     execution_times = {}
     setup_times = {}
     max_runtime = 0
@@ -123,32 +123,33 @@ def load_bom_files(input_directory, similar_instances_number, should_modify_inst
                  task.runtime = max_runtime
                  task.average_runtime = int(average_runtime / len(task.machines))
                  task.setup_time = max_setup
-    for i in range(similar_instances_number):
-        instance_index = random.randint(0, original_list_length - 1)
-        new_instance = copy.deepcopy(instance_list[instance_index])
-        for task in new_instance:
-            max_runtime = 0
-            max_setup = 0
-            average_runtime = 0
-            for machine_id in range(len(task.machines)):
-               machine_op_type = random.randint(0, 1)
-               # 0- should add new machine if not existing, 1 - should modify current machine times
-               if machine_op_type == 0:
-                   if task.machines[machine_id] == 0:
-                       task.machines[machine_id] = 1
-                       task.execution_times[machine_id] = random.randint(10, task.runtime)
-                       task.setup_times[machine_id] = random.randint(10, task.setup_time)
-               else:
-                    task.execution_times[machine_id] = random.randint(10, task.runtime)
-                    task.setup_times[machine_id] = random.randint(10, task.setup_time)
-               max_runtime = max(max_runtime, task.execution_times[machine_id])
-               max_setup = max(max_setup, task.setup_times[machine_id])
-               average_runtime += task.execution_times[machine_id]
-            task.runtime = max_runtime
-            task.average_runtime = int(average_runtime / len(task.machines))
-            task.setup_time = max_setup
 
-        instance_list.append(new_instance)
+        for i in range(similar_instances_number):
+            instance_index = random.randint(0, original_list_length - 1)
+            new_instance = copy.deepcopy(instance_list[instance_index])
+            for task in new_instance:
+                max_runtime = 0
+                max_setup = 0
+                average_runtime = 0
+                for machine_id in range(len(task.machines)):
+                   machine_op_type = random.randint(0, 1)
+                   # 0- should add new machine if not existing, 1 - should modify current machine times
+                   if machine_op_type == 0:
+                       if task.machines[machine_id] == 0:
+                           task.machines[machine_id] = 1
+                           task.execution_times[machine_id] = random.randint(10, task.runtime)
+                           task.setup_times[machine_id] = random.randint(10, task.setup_time)
+                   else:
+                        task.execution_times[machine_id] = random.randint(10, task.runtime)
+                        task.setup_times[machine_id] = random.randint(10, task.setup_time)
+                   max_runtime = max(max_runtime, task.execution_times[machine_id])
+                   max_setup = max(max_setup, task.setup_times[machine_id])
+                   average_runtime += task.execution_times[machine_id]
+                task.runtime = max_runtime
+                task.average_runtime = int(average_runtime / len(task.machines))
+                task.setup_time = max_setup
+
+            instance_list.append(new_instance)
 
     return instance_list
 
@@ -165,6 +166,7 @@ def main(config_file_path, external_config=None):
         current_config.get('should_multiply_quantity_to_execution_times')
     )
 
+    # comment if needed
     for instance in instance_list:
         for task in instance:
             print(task)

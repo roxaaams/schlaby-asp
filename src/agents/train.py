@@ -22,6 +22,7 @@ from src.utils.file_handler.model_handler import ModelHandler
 from src.data_generator.task import Task
 from src.utils.logger import Logger
 from src.agents.train_test_utility_functions import get_agent_class_from_config, load_config, load_data
+from datetime import datetime
 
 
 def final_evaluation(config: dict, data_test: List[List[Task]], logger: Logger):
@@ -135,7 +136,7 @@ def get_perser_args():
     parser.add_argument('-fp', '--config_file_path', type=str, required=True,
                         help='Path to config file you want to use for training')
 
-    parser.add_argument('-bf', '--binary_features', type=str, required=True,
+    parser.add_argument('-bf', '--binary_features', type=str, default='1001011000', required=False,
                             help='Binary list of features')
 
     args = parser.parse_args()
@@ -149,6 +150,10 @@ if __name__ == "__main__":
     parse_args = get_perser_args()
     config_file_path = parse_args.config_file_path
     binary_features = parse_args.binary_features
-    print(binary_features)
+    print(f"Binary features: {binary_features}")
+    start_time = datetime.now()
 
     main(config_file_name=config_file_path, binary_features=binary_features)
+    end_time = datetime.now()
+    timespan = (end_time - start_time).total_seconds() * 1000
+    print(f"Training timestamp: {timespan} milliseconds")

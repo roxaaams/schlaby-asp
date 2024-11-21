@@ -185,7 +185,7 @@ class SPFactory:
     def _generate_instance_asp(cls, task_combinations: List[Tuple[int]], num_jobs: int, num_tasks: int,
                               num_machines: int, num_tools: int, predecessor_percentage: int = 90, **kwargs) -> List[Task]:
         """
-        Generates a  instance
+        Generates an instance
 
         :param task_combinations: List with all possible tasks
         :param num_jobs: number of jobs generated in an instance
@@ -207,13 +207,9 @@ class SPFactory:
             for t in range(num_tasks):
                 task = list(task_combinations[np.random.randint(0, len(task_combinations) - 1)])
                 max_number_children = max(0, round((t * predecessor_percentage) / 100))
-#                 print('task index', t, 'predecessor_percentage', predecessor_percentage, 'max_number_children', max_number_children)
                 size = random.randint(0, max_number_children)
-#                 print('size', size)
                 candidate_children = sorted(set(range(t)) - parent_indexes.keys())
-#                 print('candidate_children', candidate_children)
                 children = random.sample(candidate_children, min(size, len(candidate_children)))
-#                 print('children', children)
                 for child in children:
                     parent_indexes[child] = t
                 task = Task(

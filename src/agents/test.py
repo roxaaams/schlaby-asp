@@ -18,6 +18,8 @@ from matplotlib import pyplot as plt
 from typing import Tuple, List, Dict, Union
 import numpy as np
 from tqdm import tqdm
+from datetime import datetime
+
 
 from src.environments.environment_loader import EnvironmentLoader
 from src.agents.heuristic.heuristic_agent import HeuristicSelectionAgent
@@ -143,7 +145,7 @@ def test_solver(config: Dict, data_test: List[List[Task]], logger: Logger) -> Di
         solved_instance = DataHandler.load_solved_instance_by_hash(instance_hash)
         # if no solution exists, compute the solution and write it to file for futures use
         if solved_instance is None:
-            assigned_jobs, _ = OrToolSolver.optimize(instance, objective='makespan')
+            assigned_jobs, _ = OrToolSolver.optimize(instance, objective='makespan', sp_type=config['sp_type'])
             solved_instance = OrToolSolver.parse_to_plottable_format(instance, assigned_jobs)
             # write solution to file
             DataHandler.write_solved_instance_by_hash(solved_instance, instance_hash)
@@ -225,15 +227,16 @@ def test_model(env_config: Dict, data: List[List[Task]], logger: Logger, plot: b
             schedule_info += task.str_schedule_info_short() + ' '
             routine_info += task.str_routine_info() + '\\\\ \n'
 
-        print(heuristic_id)
-        print(schedule_info)
-        print(routine_info)
+        # uncomment this when testing and not just training
+        # print(heuristic_id)
+        # print(schedule_info)
+        # print(routine_info)
 
 
     #  do not plot results
-        # plot results
-        # if plot:
-        #     environment.render(mode="image")
+    # plot results
+    # if plot:
+    #     environment.render(mode="image")
 
     # return episode results, using EvaluationHandler properties and function
     return evaluation_handler.evaluate_test()
@@ -259,9 +262,14 @@ def test_model_and_heuristic(config: dict, model, data_test: List[List[Task]], l
     test_kwargs = {'env_config': config, 'data': data_test, 'logger': logger,
                    'plot': plot_ganttchart, 'log_episode': log_episode, 'binary_features': binary_features}
 
-    # test agent
+    # # test agent
+    start_time = datetime.now()
     res = test_model(model=model, **test_kwargs)
     results.update({'agent': res})
+    end_time = datetime.now()
+    # Calculate the timespan in milliseconds
+    timespan = (end_time - start_time).total_seconds() * 1000
+    print(f"Testing Timespan: {timespan} milliseconds")
 
     # test heuristics
     if run_heuristics == 1:
@@ -270,11 +278,11 @@ def test_model_and_heuristic(config: dict, model, data_test: List[List[Task]], l
             results.update({heuristic: res})
 
     #  comment solver
-#     # test solver and calculate optimality gap
-#     res = test_solver(config, data_test, logger)
-#     results.update({'solver': res})
-#
-#     results = EvaluationHandler.add_solver_gap_to_results(results)
+    # test solver and calculate optimality gap
+    # res = test_solver(config, data_test, logger)
+    # results.update({'solver': res})
+
+    results = EvaluationHandler.add_solver_gap_to_results(results)
 
     return results
 
@@ -287,7 +295,7 @@ def get_perser_args():
                         help='Path to config file you want to use for training')
     parser.add_argument('-plot', '--plot-ganttchart', dest="plot_ganttchart", action="store_true",
                         help='Enable or disable model result plot.')
-    parser.add_argument('-bf', '--binary_features', type=str, default="1111100000", required=False,
+    parser.add_argument('-bf', '--binary_features', type=str, default="1001011000", required=False,
                             help='Binary list of features')
     parser.add_argument('-rh', '--run_heuristics', type=int, default=1, required=False,
                             help='Should run heuristics or not')
@@ -325,5 +333,6 @@ def main(external_config=None):
 
 
 if __name__ == '__main__':
+    start_time = datetime.now()
 
     main()

@@ -120,6 +120,9 @@
         },
         "success_metric": {
             "type": "string"
+        },
+        "reward_normalization_factor": {
+            "type": "number"
         }
     },
     "required": [

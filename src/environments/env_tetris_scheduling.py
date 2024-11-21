@@ -49,6 +49,9 @@ class Env(gym.Env):
              9: 'machines_counter_dynamic'
         }
 
+
+        self.reward_normalization_factor = config.get('reward_normalization_factor', 50000)
+
         # get number of jobs, tasks, tools, machines and runtimes from input data, and setup time
         self.num_jobs, self.num_tasks, self.max_runtime, self.max_deadline, self.max_setup_time, self.max_sum_runtime_setup_pair = self.get_instance_info()
         self.num_machines: int = copy.copy(self.data[0][0]._n_machines)

@@ -19,7 +19,7 @@ reward_strategy: dense_makespan_reward
 # strength
 reward_scale: 1
 # (O)   [string]  Name of the model you want to load for testing
-saved_model_name: ASP_TUBES
+saved_model_name: ASP_TUBES_2
 # (R)   [int]     Seed for all pseudo random generators (random, numpy, torch)
 seed: 2
   # (R)   [string]  Set an individual description that you can identify this
@@ -33,4 +33,4 @@ wandb_mode: 0
 # (O)   [string]  Set a wandb project where you want to upload all wandb logs
 wandb_project: project-1
 # (R)   List[str] List of all heuristics and algorithms against which to benchmark
-test_heuristics:  ['LETSA', 'EDD_ASP', 'MPO_ASP', 'LPO_ASP', 'SPT_ASP', 'rand_asp', 'LPO_ROOT_ASP', 'MPO_ROOT_ASP'] # ['EDD_ASP', 'MPO_ASP', 'SPT_ASP']
+test_heuristics:  ['LETSA', 'EDD_ASP', 'MPO_ASP', 'LPO_ASP', 'SPT_ASP', 'rand_asp']
