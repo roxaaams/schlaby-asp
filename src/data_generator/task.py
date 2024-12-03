@@ -108,7 +108,7 @@ class Task:
         return f"{self.task_index} & {self.parent_index} &  {machines_str}"
 
     def str_schedule_info(self) -> str:
-        return f"Task index {self.task_index}  parent_index {self.parent_index} Selected Machine {str(self.selected_machine)} Start {str(self.started)} Finish {str(self.finished)}"
+        return f"Task id from BOM {self.task_id}, Task index in code {self.task_index}, Selected Machine {str(self.selected_machine)}, Start {str(self.started)}, Finish {str(self.finished)}"
 
     def str_schedule_info_short(self) -> str:
         return f"{self.task_index} {str(self.selected_machine)} {str(self.started)} {str(self.finished)}"

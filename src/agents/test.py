@@ -224,12 +224,12 @@ def test_model(env_config: Dict, data: List[List[Task]], logger: Logger, plot: b
         schedule_info = ''
         routine_info = ''
         for task in environment.tasks:
-            schedule_info += task.str_schedule_info_short() + ' '
-            routine_info += task.str_routine_info() + '\\\\ \n'
+            schedule_info += task.str_schedule_info() + '\\\\ \n'
+            # routine_info += task.str_routine_info() + '\\\\ \n'
 
         # uncomment this when testing and not just training
-        # print(heuristic_id)
-        # print(schedule_info)
+        print(heuristic_id)
+        print(schedule_info)
         # print(routine_info)
 
 
@@ -263,13 +263,13 @@ def test_model_and_heuristic(config: dict, model, data_test: List[List[Task]], l
                    'plot': plot_ganttchart, 'log_episode': log_episode, 'binary_features': binary_features}
 
     # # test agent
-    start_time = datetime.now()
-    res = test_model(model=model, **test_kwargs)
-    results.update({'agent': res})
-    end_time = datetime.now()
-    # Calculate the timespan in milliseconds
-    timespan = (end_time - start_time).total_seconds() * 1000
-    print(f"Testing Timespan: {timespan} milliseconds")
+    # start_time = datetime.now()
+    # res = test_model(model=model, **test_kwargs)
+    # results.update({'agent': res})
+    # end_time = datetime.now()
+    # # Calculate the timespan in milliseconds
+    # timespan = (end_time - start_time).total_seconds() * 1000
+    # print(f"Testing Timespan: {timespan} milliseconds")
 
     # test heuristics
     if run_heuristics == 1:

@@ -97,7 +97,7 @@ def compute_paths(tasks: List[Task], task: Task, path, duration, visited):
     path.append(task.task_index)
 
     # Compute the length (cumulative processing # time) of each path determined in step 4.1.
-    duration += task.runtime
+    duration += task.runtime + task.setup_time
 
     # 4.3 a: Determine the critical (the largest cumulative processing time) path
     if is_leaf(task) and duration > critical_path[1]:
@@ -115,6 +115,9 @@ def letsa(tasks: List[Task], action_mask: np.array, feasible_tasks, visited, max
     critical_path = ([], 0)
     # 4.1 For each operation in the feasible list formulate all possible network paths.
     compute_paths(tasks, tasks[start_task_index], [], 0, visited)
+    print('Length of critical path', critical_path[1])
+    for i in range(len(critical_path[0])):
+        print('Task_index:', critical_path[0][i], 'Task_id in BOM: ', tasks[critical_path[0][i]].task_id, ' Quantity: ', tasks[critical_path[0][i]].quantity, ' Runtime: ', tasks[critical_path[0][i]].runtime)
 
     # 4.3 b Select the operation Je of the critical path that also belongs to the feasible list F.
     # in this case it is the first operation, which also belongs to F, that is selected for scheduling.

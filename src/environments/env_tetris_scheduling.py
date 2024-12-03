@@ -374,32 +374,40 @@ class Env(gym.Env):
 
         latest_start_time, machine_id, index, min_runtime = -1, -1, -1, 10**10
         # Iterate over each machine
+        print('Task', task.task_id)
         for machine in range(len(possible_machines)):
             if possible_machines[machine] != 0:
+                # print('Possible machine', machine)
                 completion_time = original_completion_time
                 runtime = task.execution_times[machine] + task.setup_times[machine]
                 start_time = completion_time - runtime
                 # Case: No intervals scheduled on current machine
                 if self.machines[machine].get_int_len() == 0:
+                    # print('Empty machine')
                     if latest_start_time < start_time or (latest_start_time == start_time and min_runtime > runtime):
                         latest_start_time, machine_id, index, min_runtime = start_time, machine, 0, runtime
                 # Case: Intervals already scheduled
                 else:
                     found = False
-                    last_task = machines[machine].get_last_int()
-                    if self.tasks[last_task].started < start_time and (latest_start_time < start_time or (latest_start_time == start_time and min_runtime > runtime)):
+                    last_task = self.machines[machine].get_last_int()
+                    # print('Non empty machine')
+                    # print('Free from ', self.tasks[last_task.task_index].finished)
+                    if self.tasks[last_task.task_index].started < start_time and (latest_start_time < start_time or (latest_start_time == start_time and min_runtime > runtime)):
+                        # print('task_id', self.tasks[last_task.task_index].task_id)
                         latest_start_time, machine_id, index, min_runtime = start_time, machine, -1, runtime
                         found = True
+                        # print('Case 1: scheduling after last interval')
                     else:
+                        #  print('Case 2: scheduling between intervals')
                          for i in range(self.machines[machine].get_int_len() - 2, 0, -1):
                             after_task = self.machines[machine].get_int(i + 1)
                             current_task = self.machines[machine].get_int(i)
-                            if start_time > self.tasks[current_task].finished and completion_time < self.tasks[after_task].started:
+                            if start_time > self.tasks[current_task.task_index].finished and completion_time < self.tasks[after_task.task_index].started:
                                 found = True
                             else:
-                                tentative_start_time = self.tasks[current_task].started - runtime
-                                if self.tasks[after_task].started - self.tasks[current_task].finished >= runtime:
-                                    tentative_start_time = self.tasks[after_task].started - runtime
+                                tentative_start_time = self.tasks[current_task.task_index].started - runtime
+                                if self.tasks[after_task.task_index].started - self.tasks[current_task.task_index].finished >= runtime:
+                                    tentative_start_time = self.tasks[after_task.task_index].started - runtime
                                     start_time = tentative_start_time
                                     found = True
                             if found:
@@ -408,17 +416,19 @@ class Env(gym.Env):
                                 break
                     # No machine found! Trying again by analysing the case when the task can be scheduled as first interval on current machine
                     if not found:
+                        # print('Case 3: scheduling before first interval')
                         first_task = self.machines[machine].get_int(0)
                         #  Can schedule before first operation on current machine
-                        if self.tasks[first_task].started > completion_time and (latest_start_time < start_time or (latest_start_time == start_time and min_runtime > runtime)):
+                        if self.tasks[first_task.task_index].started > completion_time and (latest_start_time < start_time or (latest_start_time == start_time and min_runtime > runtime)):
                             latest_start_time, machine_id, index, min_runtime = start_time, machine, 0, runtime
                         #  Can schedule before first operation on current machine with updated time
                         else:
-                            tentative_start_time = self.tasks[first_task].started - runtime
+                            tentative_start_time = self.tasks[first_task.task_index].started - runtime
                             if tentative_start_time >= 0 and (latest_start_time <  tentative_start_time or (latest_start_time == tentative_start_time and min_runtime > runtime)):
                                 latest_start_time, machine_id, index, min_runtime = tentative_start_time, machine, 0, runtime
         end_time = latest_start_time + task.setup_times[machine_id] + task.execution_times[machine_id]
-        return machine_id, latest_start_time, end_time
+        print('Returning ', machine_id, latest_start_time, end_time)
+        return machine_id, latest_start_time, end_time, index
 
     def get_action_mask(self) -> np.array:
         """
@@ -436,10 +446,12 @@ class Env(gym.Env):
         self.last_mask = job_mask
         return job_mask
 
-    def execute_action_with_given_interval(self, job_id: int, task: Task, machine_id, start_time, end_time) -> None:
+    def execute_action_with_given_interval(self, job_id: int, task: Task, machine_id, start_time, end_time, index) -> None:
         # Update machine occupancy and job_task_state
         self.ends_of_machine_occupancies[machine_id] = end_time
         self.job_task_state[job_id] += 1
+
+        self.machines[machine_id].add_interval(index, task)
 
         # Update job and task
         task.started = start_time

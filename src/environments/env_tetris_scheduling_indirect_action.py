@@ -143,9 +143,9 @@ class IndirectActionEnv(Env):
             else:
                 #  LETSA specific
                 original_completion_time = kwargs['completion_time']
-                machine_id, start_time, end_time = self.choose_machine_using_completion_time(selected_task, original_completion_time)
+                machine_id, start_time, end_time, index = self.choose_machine_using_completion_time(selected_task, original_completion_time)
                 #  job = 0 since we only have one job
-                self.execute_action_with_given_interval(0, selected_task, machine_id, start_time, end_time)
+                self.execute_action_with_given_interval(0, selected_task, machine_id, start_time, end_time, index)
         #  since  we select the task instead of job, then we need to get the machine directly as in ASP
         elif  action_mode == 'agent' and self.sp_type == 'asp' and self.should_use_machine_task_pair == True and self.should_determine_task_index == False:
              self.execute_action(0, self.tasks[selected_task_id], selected_machine)
