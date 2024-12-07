@@ -97,7 +97,7 @@ def compute_paths(tasks: List[Task], task: Task, path, duration, visited):
     path.append(task.task_index)
 
     # Compute the length (cumulative processing # time) of each path determined in step 4.1.
-    duration += task.runtime + task.setup_time
+    duration += task.average_execution_times_setup
 
     # 4.3 a: Determine the critical (the largest cumulative processing time) path
     if is_leaf(task) and duration > critical_path[1]:

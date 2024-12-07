@@ -34,4 +34,4 @@ wandb_mode: 0
 # (O)   [string]  Set a wandb project where you want to upload all wandb logs
 wandb_project: project-1
 # (R)   List[str] List of all heuristics and algorithms against which to benchmark
-test_heuristics:  ['LETSA', 'EDD_ASP', 'MPO_ASP', 'LPO_ASP', 'SPT_ASP', 'rand_asp', 'LPO_ROOT_ASP', 'MPO_ROOT_ASP'] # ['EDD_ASP', 'MPO_ASP', 'SPT_ASP']
+test_heuristics:  ['LETSA'] #, 'EDD_ASP', 'MPO_ASP', 'LPO_ASP', 'SPT_ASP', 'rand_asp', 'LPO_ROOT_ASP', 'MPO_ROOT_ASP'] # ['EDD_ASP', 'MPO_ASP', 'SPT_ASP']

@@ -88,11 +88,16 @@ class Task:
         self.setup_time = setup_time
         self.execution_times = execution_times
         if should_multiply_quantity_to_execution_times == True:
+            self.max_execution_times_setup = 0
+            self.average_execution_times_setup = 0
             for machine_id in self.execution_times:
                 self.execution_times[machine_id] *= self.quantity
-                self.runtime = int(runtime * quantity)
-        self.deleted = deleted
-        self.average_runtime = average_runtime
+                if self.execution_times[machine_id]+self.setup_times[machine_id]>self.max_execution_times_setup:
+                    self.max_execution_times_setup = self.execution_times[machine_id]+self.setup_times[machine_id]
+                self.average_execution_times_setup += self.execution_times[machine_id]+self.setup_times[machine_id]
+            self.runtime = int(runtime * quantity)  # max execution time (without setup)
+            self.average_execution_times_setup /= len(self.execution_times)
+
 
     def __str__(self) -> str:
         return f"Task - job index {self.job_index} - task index {self.task_index} - parent_index {self.parent_index} - children {self.children}"
