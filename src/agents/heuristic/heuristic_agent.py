@@ -97,7 +97,7 @@ def compute_paths(tasks: List[Task], task: Task, path, duration, visited):
     path.append(task.task_index)
 
     # Compute the length (cumulative processing # time) of each path determined in step 4.1.
-    duration += task.average_execution_times_setup
+    duration += task.max_execution_times_setup
 
     # 4.3 a: Determine the critical (the largest cumulative processing time) path
     if is_leaf(task) and duration > critical_path[1]:
@@ -117,7 +117,7 @@ def letsa(tasks: List[Task], action_mask: np.array, feasible_tasks, visited, max
     compute_paths(tasks, tasks[start_task_index], [], 0, visited)
     print('Length of critical path', critical_path[1])
     for i in range(len(critical_path[0])):
-        print('Task_index:', critical_path[0][i], 'Task_id in BOM: ', tasks[critical_path[0][i]].task_id, ' Quantity: ', tasks[critical_path[0][i]].quantity, ' Runtime: ', tasks[critical_path[0][i]].runtime)
+        print('Task_index:', critical_path[0][i], 'Task_id in BOM: ', tasks[critical_path[0][i]].task_id, ' Quantity: ', tasks[critical_path[0][i]].quantity, ' Runtime: ', tasks[critical_path[0][i]].max_execution_times_setup)
 
     # 4.3 b Select the operation Je of the critical path that also belongs to the feasible list F.
     # in this case it is the first operation, which also belongs to F, that is selected for scheduling.
@@ -137,17 +137,19 @@ def letsa(tasks: List[Task], action_mask: np.array, feasible_tasks, visited, max
     # 4.5 Compute the starting time based on the available machines that can produce the operation Jc
     # 4.6 Schedule operation Jc at the latest available starting time Sc on the corresponding machine
 
-    #  NOTE: instead of scheduling right away, skip it now, follow the next steps and only at the end return the index of the start of operation to be scheduled
-    # 4.7 Delete operation Jc from the operation network.
-    tasks[start_task_index].deleted = True
-    # 4.8 Add all operations Ji such that di = Jc, to the feasible list.
-    # Also check is the operation was not added in the list
-    # Priority is given to the predecessor in the critical path while updating the list of feasible operations
-    if len(critical_path[0]) > 1 and not tasks[critical_path[0][1]].done:
-        feasible_tasks.put(critical_path[0][1])
-    for _, sub_task_index in enumerate(tasks[start_task_index].children):
-        if not tasks[sub_task_index].done:
-            feasible_tasks.put(sub_task_index)
+    # #  NOTE: instead of scheduling right away, skip it now, follow the next steps and only at the end return the index of the start of operation to be scheduled
+    # # 4.7 Delete operation Jc from the operation network.
+    # tasks[start_task_index].deleted = True
+    # # 4.8 Add all operations Ji such that di = Jc, to the feasible list.
+    # # Also check is the operation was not added in the list
+    # # Priority is given to the predecessor in the critical path while updating the list of feasible operations
+    # # if len(critical_path[0]) > 1 and not tasks[critical_path[0][1]].done:
+    # #     feasible_tasks.put(critical_path[0][1])
+    # for _, sub_task_index in enumerate(tasks[start_task_index].children):
+    #     if not tasks[sub_task_index].done:
+    #         feasible_tasks.put(sub_task_index)
+    # return start_task_index, int(completion_time)
+
     return start_task_index, int(completion_time)
 
 

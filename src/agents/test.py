@@ -96,25 +96,44 @@ def run_episode(env, model, heuristic_id: Union[str, None], handler: EvaluationH
             feasible_tasks.put(task.task_index)
         if max_deadline < task.deadline:
             max_deadline = task.deadline
+        print(task.str_setup_info())
+
 
     # run agent on environment and collect rewards until done
     steps = 0
-    while not done:
-        steps += 1
-        #  add sp_type to heuristic_agent and other values for LETSA heuristic
-        action, action_mode, completion_time = get_action(env, model, heuristic_id, heuristic_agent, sp_type, feasible_tasks, visited, max_deadline)
+    if heuristic_id != 'LETSA':
+        while not done:
+            steps += 1
+            #  add sp_type to heuristic_agent and other values for LETSA heuristic
+            action, action_mode, completion_time = get_action(env, model, heuristic_id, heuristic_agent, sp_type, feasible_tasks, visited, max_deadline)
 
-        #  next step should be taken based on the task_idx in case of asp
-        if sp_type == 'asp' and action_mode == 'heuristic':
-            if heuristic_id == 'LETSA':
-                b = env.step(action=0, action_mode=action_mode, task_idx=action, completion_time=completion_time)
+            #  next step should be taken based on the task_idx in case of asp
+            if sp_type == 'asp' and action_mode == 'heuristic':
+                if heuristic_id == 'LETSA':
+                    b = env.step(action=0, action_mode=action_mode, task_idx=action, completion_time=completion_time)
+                else:
+                    b = env.step(action=0, action_mode=action_mode, task_idx=action)
             else:
-                b = env.step(action=0, action_mode=action_mode, task_idx=action)
-        else:
-            b = env.step(action, action_mode=action_mode)
+                b = env.step(action, action_mode=action_mode)
 
-        total_reward += b[1]
-        done = b[2]
+            total_reward += b[1]
+            done = b[2]
+    else:
+        while not feasible_tasks.empty():
+            steps += 1
+            # getting the index of the task to be scheduled and the completion time
+            action, action_mode, completion_time = get_action(env, model, heuristic_id, heuristic_agent, sp_type, feasible_tasks, visited, max_deadline)
+            # schedule the task and get the reward
+            b = env.step(action=0, action_mode=action_mode, task_idx=action, completion_time=completion_time)
+            total_reward += b[1]
+             # # 4.8 Add all operations Ji such that di = Jc, to the feasible list.
+            # # Also check is the operation was not added in the list
+            # # Priority is given to the predecessor in the critical path while updating the list of feasible operations
+            for _, sub_task_index in enumerate(env.tasks[action].children):
+                if not env.tasks[sub_task_index].done:
+                    feasible_tasks.put(sub_task_index)
+
+
 
     # store episode in object
     mean_reward = total_reward / steps
