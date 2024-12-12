@@ -263,7 +263,7 @@ class IndirectActionEnv(Env):
 
         # Compute the length (cumulative processing # time) of each path determined in step 4.1.
         if not self.tasks[task_index].done:
-            duration += self.tasks[task_index].runtime
+            duration += self.tasks[task_index].max_execution_times_setup
         else:
             duration += (self.tasks[task_index].finished - self.tasks[task_index].started)
 

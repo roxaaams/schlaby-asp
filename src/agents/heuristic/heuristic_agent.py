@@ -110,14 +110,35 @@ def compute_paths(tasks: List[Task], task: Task, path, duration, visited):
 #             visited[index_subtask] = False
 
 def letsa(tasks: List[Task], action_mask: np.array, feasible_tasks, visited, max_deadline):
-    start_task_index = feasible_tasks.get()
+    # start_task_index = feasible_tasks.get()
+    # global critical_path
+    # critical_path = ([], 0)
+    # # 4.1 For each operation in the feasible list formulate all possible network paths.
+    # compute_paths(tasks, tasks[start_task_index], [], 0, visited)
+    # print('Length of critical path', critical_path[1])
+    # for i in range(len(critical_path[0])):
+    #     print('Task_index:', critical_path[0][i], 'Task_id in BOM: ', tasks[critical_path[0][i]].task_id, ' Quantity: ', tasks[critical_path[0][i]].quantity, ' Runtime: ', tasks[critical_path[0][i]].max_execution_times_setup)
+
+    #start_task_index = feasible_tasks.get()
+    #global critical_path
+    #critical_path = ([], 0)
+    # 4.1 For each operation in the feasible list formulate all possible network paths.
+    #compute_paths(tasks, tasks[start_task_index], [], 0, visited)
     global critical_path
     critical_path = ([], 0)
-    # 4.1 For each operation in the feasible list formulate all possible network paths.
-    compute_paths(tasks, tasks[start_task_index], [], 0, visited)
-    print('Length of critical path', critical_path[1])
-    for i in range(len(critical_path[0])):
-        print('Task_index:', critical_path[0][i], 'Task_id in BOM: ', tasks[critical_path[0][i]].task_id, ' Quantity: ', tasks[critical_path[0][i]].quantity, ' Runtime: ', tasks[critical_path[0][i]].max_execution_times_setup)
+    max_path_length_task_index = feasible_tasks[0]
+    compute_paths(tasks, tasks[max_path_length_task_index], [], 0, visited)
+    max_length_critical_path = (critical_path[0].copy(), critical_path[1])
+    for i in range(len(feasible_tasks)):
+        critical_path = ([], 0)
+        compute_paths(tasks, tasks[feasible_tasks[i]], [], 0, visited)
+        if max_length_critical_path[1] < critical_path[1]: 
+            max_path_length_task_index  = feasible_tasks[i]
+            max_length_critical_path = (critical_path[0].copy(), critical_path[1])
+   
+    print('Length of critical path', max_length_critical_path[1])
+    for i in range(len(max_length_critical_path[0])):
+        print('Task_index:', max_length_critical_path[0][i], 'Task_id in BOM: ', tasks[max_length_critical_path[0][i]].task_id, ' Quantity: ', tasks[max_length_critical_path[0][i]].quantity, ' Runtime: ', tasks[max_length_critical_path[0][i]].max_execution_times_setup)
 
     # 4.3 b Select the operation Je of the critical path that also belongs to the feasible list F.
     # in this case it is the first operation, which also belongs to F, that is selected for scheduling.
@@ -126,12 +147,12 @@ def letsa(tasks: List[Task], action_mask: np.array, feasible_tasks, visited, max
     # partial schedule (constraint 2.2 of (PI)), (ii) the due-date De if operation c is the last
     # operation of the final assembly Pe (constraint 2.4 of (PI).
     completion_time = 0
-    if not tasks[start_task_index].parent_index:
+    if not tasks[max_path_length_task_index].parent_index:
         completion_time = max_deadline
     else:
         # ??? Choose the earliest starting time of all successors Jc
         completion_time = max_deadline
-        parent_start_task_index = tasks[start_task_index].parent_index
+        parent_start_task_index = tasks[max_path_length_task_index].parent_index
         if parent_start_task_index and tasks[parent_start_task_index].done and tasks[parent_start_task_index].started < completion_time:
             completion_time = tasks[parent_start_task_index].started # - EPSILON
     # 4.5 Compute the starting time based on the available machines that can produce the operation Jc
@@ -143,14 +164,10 @@ def letsa(tasks: List[Task], action_mask: np.array, feasible_tasks, visited, max
     # # 4.8 Add all operations Ji such that di = Jc, to the feasible list.
     # # Also check is the operation was not added in the list
     # # Priority is given to the predecessor in the critical path while updating the list of feasible operations
-    # # if len(critical_path[0]) > 1 and not tasks[critical_path[0][1]].done:
-    # #     feasible_tasks.put(critical_path[0][1])
-    # for _, sub_task_index in enumerate(tasks[start_task_index].children):
-    #     if not tasks[sub_task_index].done:
-    #         feasible_tasks.put(sub_task_index)
-    # return start_task_index, int(completion_time)
-
-    return start_task_index, int(completion_time)
+    for _, sub_task_index in enumerate(tasks[max_path_length_task_index].children):
+        if not tasks[sub_task_index].done:
+            feasible_tasks.append(sub_task_index)
+    return max_path_length_task_index, int(completion_time)
 
 
 def edd_asp(tasks: List[Task], action_mask: np.array) -> int:

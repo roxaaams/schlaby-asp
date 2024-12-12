@@ -374,7 +374,7 @@ class Env(gym.Env):
 
         latest_start_time, machine_id, index, min_runtime = -1, -1, -1, 10**10
         # Iterate over each machine
-        print('Task', task.task_id)
+        # print('Task', task.task_id)
         for machine in range(len(possible_machines)):
             if possible_machines[machine] != 0:
                 # print('Possible machine', machine)

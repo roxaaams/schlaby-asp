@@ -118,3 +118,6 @@ class Task:
     def str_schedule_info_short(self) -> str:
         return f"{self.task_index} {str(self.selected_machine)} {str(self.started)} {str(self.finished)}"
 
+    def str_setup_info(self) -> str:
+        return f"Task_id: {self.task_id}, Task index {self.task_index}, Setup time {str(self.setup_time)}, Average execution and setup time {str(self.average_execution_times_setup)}, Max execution and setup time {str(self.max_execution_times_setup)}"
+
