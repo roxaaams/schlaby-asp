@@ -126,7 +126,10 @@ def letsa(tasks: List[Task], action_mask: np.array, feasible_tasks, visited, max
     #compute_paths(tasks, tasks[start_task_index], [], 0, visited)
     global critical_path
     critical_path = ([], 0)
+    length = len(feasible_tasks)
+    print(length)
     max_path_length_task_index = feasible_tasks[0]
+    max_path_length_delete_index = 0
     compute_paths(tasks, tasks[max_path_length_task_index], [], 0, visited)
     max_length_critical_path = (critical_path[0].copy(), critical_path[1])
     for i in range(len(feasible_tasks)):
@@ -134,6 +137,7 @@ def letsa(tasks: List[Task], action_mask: np.array, feasible_tasks, visited, max
         compute_paths(tasks, tasks[feasible_tasks[i]], [], 0, visited)
         if max_length_critical_path[1] < critical_path[1]: 
             max_path_length_task_index  = feasible_tasks[i]
+            max_path_length_delete_index = i
             max_length_critical_path = (critical_path[0].copy(), critical_path[1])
    
     print('Length of critical path', max_length_critical_path[1])
@@ -164,6 +168,7 @@ def letsa(tasks: List[Task], action_mask: np.array, feasible_tasks, visited, max
     # # 4.8 Add all operations Ji such that di = Jc, to the feasible list.
     # # Also check is the operation was not added in the list
     # # Priority is given to the predecessor in the critical path while updating the list of feasible operations
+    del feasible_tasks[max_path_length_delete_index]
     for _, sub_task_index in enumerate(tasks[max_path_length_task_index].children):
         if not tasks[sub_task_index].done:
             feasible_tasks.append(sub_task_index)

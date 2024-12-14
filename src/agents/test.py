@@ -19,7 +19,7 @@ from typing import Tuple, List, Dict, Union
 import numpy as np
 from tqdm import tqdm
 from datetime import datetime
-
+from collections import deque
 
 from src.environments.environment_loader import EnvironmentLoader
 from src.agents.heuristic.heuristic_agent import HeuristicSelectionAgent
@@ -88,12 +88,15 @@ def run_episode(env, model, heuristic_id: Union[str, None], handler: EvaluationH
     heuristic_agent = HeuristicSelectionAgent() if heuristic_id else None
 
     #  we need to init these values for LETSA heuristic before the while loop as in the original algorithm
-    feasible_tasks = []
+    feasible_tasks = deque()
     visited = dict()
     max_deadline = -1
+    print('length of tasks ', len(env.tasks))
     for task in env.tasks:
+        print(task.parent_index)
         if not task.parent_index:
             feasible_tasks.append(task.task_index)
+            print('adaug in deque ', task.task_index)
         if max_deadline < task.deadline:
             max_deadline = task.deadline
         print(task.str_setup_info())
