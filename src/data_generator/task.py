@@ -113,11 +113,14 @@ class Task:
         return f"{self.task_index} & {self.parent_index} &  {machines_str}"
 
     def str_schedule_info(self) -> str:
-        return f"Task id from BOM {self.task_id}, Task index in code {self.task_index}, Selected Machine {str(self.selected_machine)}, Start {str(self.started)}, Finish {str(self.finished)}"
+        return f"Task id BOM {self.task_id}, Machine {str(self.selected_machine)}, Start {str(self.started)}, Finish {str(self.finished)}"
+
+    def str_schedule_info_simple(self) -> str:
+        return f"{self.task_id},{str(self.selected_machine)},{str(self.started)},{str(self.finished)}"
 
     def str_schedule_info_short(self) -> str:
         return f"{self.task_index} {str(self.selected_machine)} {str(self.started)} {str(self.finished)}"
 
     def str_setup_info(self) -> str:
-        return f"Task_id: {self.task_id}, Task index {self.task_index}, Setup time {str(self.setup_time)}, Average execution and setup time {str(self.average_execution_times_setup)}, Max execution and setup time {str(self.max_execution_times_setup)}"
+        return f"Task_id: {self.task_id}, Task index {self.task_index}, Setup time {str(self.setup_time)}, Avg exec and setup time {str(self.average_execution_times_setup)}, Max exec and setup time {str(self.max_execution_times_setup)}"
 

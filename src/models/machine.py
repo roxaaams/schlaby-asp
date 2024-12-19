@@ -29,5 +29,26 @@ class Machine:
     def get_int(self, index):
         return self.intervals[index]
 
+    def get_pair(self, task):
+        return f'I,S,F:({task.task_index},{task.started},{task.finished})'
+
+    def has_no_overlapping_intervals(self):        
+        # Check for overlapping intervals
+        for i in range(1, len(self.intervals)):
+            if self.intervals[i-1].started < self.intervals[i].finished:
+                return "There are overlapping intervals, e.g. {0} vs {1}".format(self.get_pair(self.intervals[i]), self.get_pair(self.intervals[i-1]) )
+        return "No overlapping intervals"
+
+    def is_sorted(self):
+        if all(self.intervals[i].started >= self.intervals[i + 1].finished for i in range(len(self.intervals) - 1)):
+            return "Descending"
+        elif all(self.intervals[i].finished <= self.intervals[i + 1].started for i in range(len(self.intervals) - 1)):
+            return "Ascending"
+        elif len(self.intervals) == 0:
+            return "Some machines have no tasks assigned"
+        else:
+            return "Unsorted"
+
     def __str__(self):
-        return 'id: {self.id}, intervals: {self.intervals}, '.format(self=self)
+        intervals_str = ', '.join([f'{self.get_pair(task)}' for task in self.intervals])
+        return f'Intervals: [{intervals_str}]'

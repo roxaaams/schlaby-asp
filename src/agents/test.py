@@ -119,6 +119,7 @@ def run_episode(env, model, heuristic_id: Union[str, None], handler: EvaluationH
 
         total_reward += b[1]
         done = b[2]
+    print(env.intervals_info())
     # else:
     #     while not feasible_tasks.empty():
     #         steps += 1
@@ -171,6 +172,7 @@ def test_solver(config: Dict, data_test: List[List[Task]], logger: Logger) -> Di
         # create environment and assign the solved_instance as tasks. Necessary to use the env for evaluation
         env, _ = EnvironmentLoader.load(config, data=data_test)
         env.tasks = solved_instance
+
         eval_handler.update_episode_solved_with_solver(env)
         log_results(plot_logger=logger, inter_test_idx=None, heuristic='solver', env=env, handler=eval_handler)
 
@@ -242,7 +244,7 @@ def test_model(env_config: Dict, data: List[List[Task]], logger: Logger, plot: b
         schedule_info = ''
         routine_info = ''
         for task in environment.tasks:
-            schedule_info += task.str_schedule_info() + '\\\\ \n'
+            schedule_info += task.str_schedule_info_simple() + '\n'
             # routine_info += task.str_routine_info() + '\\\\ \n'
 
         # uncomment this when testing and not just training

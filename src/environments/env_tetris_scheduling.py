@@ -364,9 +364,14 @@ class Env(gym.Env):
         :param task: Task
 
         :return: Machine on which the task will be scheduled.
+        machine_id:  id of selected machine
+        latest_start_time:  starting time for task scheduled on selected machine
+        end_time:  end time for task scheduled on selected machine
+        index:   index in the list of time intervals/machine
 
         """
-        possible_machines = task.machines
+        possible_machines = task.machines   # binary vector with {0,1}
+    
         # 4.5.1 Identify the latest available starting time  for operation Je (to verify constraint (2.6) of (PI».
         # 4.5.2 If latest available starting time Sc = Cc - tc, such that the machine is
         # available during (Sc, Cc); Sc, Cc are ideal starting and completion times,
@@ -376,56 +381,73 @@ class Env(gym.Env):
         # Iterate over each machine
         # print('Task', task.task_id)
         for machine in range(len(possible_machines)):
-            if possible_machines[machine] != 0:
+            if possible_machines[machine] != 0:     #DZ machine is elligible for task
                 # print('Possible machine', machine)
-                completion_time = original_completion_time
-                runtime = task.execution_times[machine] + task.setup_times[machine]
-                start_time = completion_time - runtime
+                completion_time = original_completion_time   #DZ  fixed completion time
+                runtime = task.execution_times[machine] + task.setup_times[machine]  #DZ duration of task exec on mach
+                start_time = completion_time - runtime  #DZ ideal latest starting time
                 # Case: No intervals scheduled on current machine
-                if self.machines[machine].get_int_len() == 0:
+                if self.machines[machine].get_int_len() == 0:  #DZ no tasks on mach --> completion time can be the ideal one
                     # print('Empty machine')
                     if latest_start_time < start_time or (latest_start_time == start_time and min_runtime > runtime):
                         latest_start_time, machine_id, index, min_runtime = start_time, machine, 0, runtime
                 # Case: Intervals already scheduled
                 else:
                     found = False
-                    last_task = self.machines[machine].get_last_int()
+                    last_task = self.machines[machine].get_last_int()   #DZ last task executed on mach in interval [started, finished=started+runtime(mach,last task)] ]
                     # print('Non empty machine')
                     # print('Free from ', self.tasks[last_task.task_index].finished)
-                    if self.tasks[last_task.task_index].started < start_time and (latest_start_time < start_time or (latest_start_time == start_time and min_runtime > runtime)):
+
+                    # case: the new task can be scheduled as in the case when not task is executed on mach ???
+                    # ????? self.tasks[last_task.task_index].started
+
+                    # Condition disjoint intervals:  completion_time<=self.tasks[last_task.task_index].started
+                    #if self.tasks[last_task.task_index].started < start_time and (latest_start_time < start_time or (latest_start_time == start_time and min_runtime > runtime)):
+                    if self.tasks[last_task.task_index].started >= completion_time and (latest_start_time < start_time or (latest_start_time == start_time and min_runtime > runtime)):
                         # print('task_id', self.tasks[last_task.task_index].task_id)
                         latest_start_time, machine_id, index, min_runtime = start_time, machine, -1, runtime
                         found = True
                         # print('Case 1: scheduling after last interval')
                     else:
                         #  print('Case 2: scheduling between intervals')
-                         for i in range(self.machines[machine].get_int_len() - 2, 0, -1):
-                            after_task = self.machines[machine].get_int(i + 1)
+                        #  i decreasing if the time intervals are increasing
+                        #  i increasing if the time intervals are decreasing
+                        for i in range(self.machines[machine].get_int_len() - 2, 0, -1):
+                            #after_task = self.machines[machine].get_int(i + 1)
+                            before_task = self.machines[machine].get_int(i + 1)  #BT.completion_time <= CT.start_time
                             current_task = self.machines[machine].get_int(i)
-                            if start_time > self.tasks[current_task.task_index].finished and completion_time < self.tasks[after_task.task_index].started:
-                                found = True
-                            else:
-                                tentative_start_time = self.tasks[current_task.task_index].started - runtime
-                                if self.tasks[after_task.task_index].started - self.tasks[current_task.task_index].finished >= runtime:
-                                    tentative_start_time = self.tasks[after_task.task_index].started - runtime
-                                    start_time = tentative_start_time
-                                    found = True
-                            if found:
+                            # indice i+1                         indice i
+                            #BT.completion_time <= T.start_time<T.completion_time<=CT.start_time
+                            #if start_time > self.tasks[current_task.task_index].finished and completion_time < self.tasks[after_task.task_index].started:
+                            if start_time > self.tasks[before_task.task_index].finished and completion_time < self.tasks[current_task.task_index].started: 
+                                found = True # to insert between i and i+1 --> insert on i+1
                                 if latest_start_time < start_time or (latest_start_time == start_time and min_runtime > runtime):
                                     latest_start_time, machine_id, index, min_runtime = start_time, machine, i + 1, runtime
-                                break
+                                break    
+                            else:  # for  decreasing
+                                 #tentative_start_time = self.tasks[current_task.task_index].started - runtime
+                                 if self.tasks[current_task.task_index].started - self.tasks[before_task.task_index].finished >= runtime:
+                                     #tentative_start_time = self.tasks[after_task.task_index].started - runtime
+                                     tentative_start_time = self.tasks[current_task.task_index].started - runtime #tentative_start_time
+                                     found = True
+                                     if latest_start_time < tentative_start_time or (latest_start_time == tentative_start_time and min_runtime > runtime):
+                                         latest_start_time, machine_id, index, min_runtime = tentative_start_time, machine, i + 1, runtime
+                                     break
                     # No machine found! Trying again by analysing the case when the task can be scheduled as first interval on current machine
                     if not found:
                         # print('Case 3: scheduling before first interval')
                         first_task = self.machines[machine].get_int(0)
                         #  Can schedule before first operation on current machine
-                        if self.tasks[first_task.task_index].started > completion_time and (latest_start_time < start_time or (latest_start_time == start_time and min_runtime > runtime)):
+                        if self.tasks[first_task.task_index].finished <= start_time and (latest_start_time < start_time or (latest_start_time == start_time and min_runtime > runtime)):
+                        #if self.tasks[first_task.task_index].started > completion_time and (latest_start_time < start_time or (latest_start_time == start_time and min_runtime > runtime)):
                             latest_start_time, machine_id, index, min_runtime = start_time, machine, 0, runtime
                         #  Can schedule before first operation on current machine with updated time
-                        else:
-                            tentative_start_time = self.tasks[first_task.task_index].started - runtime
-                            if tentative_start_time >= 0 and (latest_start_time <  tentative_start_time or (latest_start_time == tentative_start_time and min_runtime > runtime)):
-                                latest_start_time, machine_id, index, min_runtime = tentative_start_time, machine, 0, runtime
+                        else: # add after the last interval
+                            last_task = self.machines[machine].get_last_int()
+                            tentative_start_time = self.tasks[last_task.task_index].started - runtime
+                            if latest_start_time < tentative_start_time or (latest_start_time == tentative_start_time and min_runtime > runtime):
+                                latest_start_time, machine_id, index, min_runtime = tentative_start_time, machine, -1, runtime
+                    
         end_time = latest_start_time + task.setup_times[machine_id] + task.execution_times[machine_id]
         print('Returning ', machine_id, latest_start_time, end_time)
         return machine_id, latest_start_time, end_time, index
@@ -657,8 +679,11 @@ class Env(gym.Env):
                     earliest_start_time = min(earliest_start_time, task.started)
                     latest_end_time = max(latest_end_time, task.finished)
 
-            return latest_end_time - earliest_start_time
+                    if task.parent_index is None:
+                        print('deadline', task.deadline, 'latest_end_time', latest_end_time)                       
 
+            print('earliest_start_time', earliest_start_time, 'latest_end_time', latest_end_time)  
+            return latest_end_time - earliest_start_time
         return np.max(self.ends_of_machine_occupancies)
 
     def log_intermediate_step(self) -> None:
@@ -691,6 +716,13 @@ class Env(gym.Env):
         Currently unnecessary, because the environment is deterministic -> no seed is used.
         """
         return seed
+
+    def intervals_info(self):
+        for i in range(self.num_machines):
+            print(f"Machine {i}:")
+            print(self.machines[i].has_no_overlapping_intervals())
+            print(self.machines[i].is_sorted())
+            print(self.machines[i])
 
     def render(self, mode='human'):
         """
