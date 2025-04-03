@@ -360,7 +360,7 @@ class EnvGNN(Env):
 
             # calculate new time
             # # fixed from sel_mach -> sel_mach_mapped
-            start_time =  self.tasks[sel_op_mapped_to_task].last_child_scheduled_finished # self.ends_of_machine_occupancies[sel_mach_mapped]
+            start_time = max(self.tasks[sel_op_mapped_to_task].last_child_scheduled_finished, self.ends_of_machine_occupancies[sel_mach_mapped])
             execution_setup_time  = self.tasks[sel_op_mapped_to_task].execution_times_setup[sel_mach_mapped]
             completion_time = start_time + execution_setup_time
 
