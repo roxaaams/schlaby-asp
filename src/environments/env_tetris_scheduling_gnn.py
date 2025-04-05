@@ -2,14 +2,12 @@ import numpy as np
 from typing import List
 import copy
 import random
-import heapq
 from src.data_generator.task import Task
 from src.environments.env_tetris_scheduling import Env
 import torch_geometric.transforms as T
 import numpy
 
 from src.models.machine import Machine
-from torch_geometric.data import HeteroData
 import torch
 
 class EnvGNN(Env):
@@ -497,6 +495,34 @@ class EnvGNN(Env):
                 reward = self.compute_reward() / self.reward_normalization_factor
             return self.state, reward, done, infos
 
+    def get_action_mask(self, is_asp=False) -> np.array:
+        """
+        Get Action mask
+        In this environment, we always treat all actions as valid, because the interaction logic accepts it. Note that
+        we only allow non-masked algorithms.
+        The heuristics, however, still need the job mask OR task_mask.
+        0 -> available
+        1 -> not available
+
+        :return: Action mask
+
+        """
+        if is_asp == False:
+            job_mask = np.where(self.job_task_state < self.num_tasks,
+                                np.ones(self.num_jobs, dtype=int), np.zeros(self.num_jobs, dtype=int))
+            self.last_mask = job_mask
+            return job_mask
+        else:
+            task_mask = [0] * self.num_tasks
+            for task in self.tasks:
+                done = True
+                for sub_task_index in task.children:
+                    if not self.tasks[sub_task_index].done:
+                        done = False
+                if done == True and not task.done:
+                    task_mask[task.task_index] = 1
+
+            return task_mask
 
     def sample(self):
         return random.choice([i for i in range(len(self.state['machine', 'exec', 'operation'].mask)) if not self.state['machine', 'exec', 'operation'].mask[i]])
