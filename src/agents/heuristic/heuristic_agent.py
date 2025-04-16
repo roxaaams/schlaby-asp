@@ -117,15 +117,15 @@ def letsa(tasks: List[Task], action_mask: np.array, feasible_tasks, visited, max
     max_path_length_delete_index = 0
     compute_paths(tasks, tasks[max_path_length_task_index], [], 0, visited)
     max_length_critical_path = (critical_path[0].copy(), critical_path[1])
-    
+
     for i in range(len(feasible_tasks)):
         critical_path = ([], 0)
         compute_paths(tasks, tasks[feasible_tasks[i]], [], 0, visited)
-        if max_length_critical_path[1] < critical_path[1]: 
+        if max_length_critical_path[1] < critical_path[1]:
             max_path_length_task_index  = feasible_tasks[i]
             max_path_length_delete_index = i
             max_length_critical_path = (critical_path[0].copy(), critical_path[1])
-   
+
     print('Length of critical path', max_length_critical_path[1])
     for i in range(len(max_length_critical_path[0])):
         print('Task_index:', max_length_critical_path[0][i], 'Task_id in BOM: ', tasks[max_length_critical_path[0][i]].task_id, ' Quantity: ', tasks[max_length_critical_path[0][i]].quantity, ' Runtime: ', tasks[max_length_critical_path[0][i]].max_execution_times_setup)
@@ -192,6 +192,8 @@ def edd_asp(tasks: List[Task], action_mask: np.array) -> int:
     return task_index
 
 
+
+
 def mpo_root_asp(tasks: List[Task], action_mask: np.array) -> int:
     possible_tasks = get_active_task_dict_asp(tasks)
     task_index = 0
@@ -230,6 +232,47 @@ def mpo_asp(tasks: List[Task], action_mask: np.array) -> int:
                 task_index = task.task_index
     return task_index
 
+def mpo_asp_standard(tasks: List[Task], action_mask: np.array) -> int:
+    """
+    MPO (Maximal Predecessor Operations Rule): Determines the task with the highest number of predecessors (not just the direct ones).
+
+    :param tasks: List of task objects, so one instance
+    :param action_mask: Action mask from the environment that is to receive the action selected by this heuristic
+
+    :return: Index of the task selected according to the heuristic
+
+    """
+
+    possible_tasks = get_active_task_dict_asp(tasks)
+    task_index = 0
+    max_number_children = 0
+    for i, task in enumerate(tasks):
+        if task.task_index in possible_tasks.keys():
+            if task.total_subnodes >= max_number_children:
+                max_number_children = task.total_subnodes
+                task_index = task.task_index
+    return task_index
+
+def lpo_asp_standard(tasks: List[Task], action_mask: np.array) -> int:
+    """
+    LPO (Least Predecessor Operations Rule): Determines the task with the least number of predecessors (not just the direct ones).
+
+    :param tasks: List of task objects, so one instance
+    :param action_mask: Action mask from the environment that is to receive the action selected by this heuristic
+
+    :return: Index of the task selected according to the heuristic
+
+    """
+
+    possible_tasks = get_active_task_dict_asp(tasks)
+    task_index = 0
+    min_number_children = np.inf
+    for i, task in enumerate(tasks):
+        if task.task_index in possible_tasks.keys():
+            if task.total_subnodes < min_number_children:
+                min_number_children = len(task.children)
+                task_index = task.task_index
+    return task_index
 
 def lpo_asp(tasks: List[Task], action_mask: np.array) -> int:
     """
@@ -284,8 +327,8 @@ def spt_asp(tasks: List[Task], action_mask: np.array) -> int:
     shortest_processing_time = np.inf
     for i, task in enumerate(tasks):
         if not task.done and task.task_index in possible_tasks.keys():
-            if task.runtime < shortest_processing_time:
-                shortest_processing_time = task.runtime
+            if task.max_execution_times_setup < shortest_processing_time:
+                shortest_processing_time = task.max_execution_times_setup
                 task_index = i
     return task_index
 
@@ -509,6 +552,8 @@ class HeuristicSelectionAgent:
             'SPT_ASP': spt_asp,
             'MPO_ASP': mpo_asp,
             'LPO_ASP': lpo_asp,
+            'MPO_ASP_STANDARD': mpo_asp_standard,
+            'LPO_ASP_STANDARD': lpo_asp_standard,
             'LPO_ROOT_ASP': lpo_root_asp,
             'MPO_ROOT_ASP': mpo_root_asp,
             'rand_asp': random_task_asp,

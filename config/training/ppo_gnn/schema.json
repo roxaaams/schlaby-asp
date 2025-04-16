@@ -138,6 +138,13 @@
         },
         "heads": {
             "type": "integer"
+        },
+        "top_k_selected_actions": {
+            "type": "integer",
+            "minimum": 1
+        },
+        "action_selection_heuristics": {
+            "type": "array"
         }
     },
     "required": [
@@ -151,6 +158,8 @@
         "test_validation_split",
         "intermediate_test_interval",
         "environment",
-        "test_heuristics"
+        "test_heuristics",
+        "action_selection_heuristics",
+        "top_k_selected_actions"
     ]
 }

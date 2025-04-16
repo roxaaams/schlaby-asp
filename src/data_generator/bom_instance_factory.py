@@ -22,8 +22,7 @@ from src.data_generator.task import Task
 from src.data_generator.sp_factory import SPFactory
 
 def dfs_bom(node, sorted_top, tasks_mapping_ids, deadline, job_index, filename, quantity, should_multiply_quantity_to_execution_times, num_machines = 50):
-    for child in node.get('children', []):
-        dfs_bom(child, sorted_top, tasks_mapping_ids, deadline - 1, job_index, filename, quantity * node['quantity'], should_multiply_quantity_to_execution_times, num_machines)
+
     machines = [0] * num_machines
     execution_times = {}
     setup_times = {}
@@ -42,13 +41,11 @@ def dfs_bom(node, sorted_top, tasks_mapping_ids, deadline, job_index, filename, 
         average_runtime = average_runtime + machine['execution_time']
     average_runtime = int(average_runtime / len(node.get('machines', [])))
 
-
     task = Task(job_index=job_index,
             task_index=len(sorted_top),
             task_id=node['operationid'],
             filename=filename,
             parent_index=node['parentid'],
-            children=[tasks_mapping_ids[child['operationid']] for child in node.get('children', [])],
             quantity=node['quantity'] * quantity,
             machines=machines,
             execution_times=execution_times,
@@ -63,9 +60,22 @@ def dfs_bom(node, sorted_top, tasks_mapping_ids, deadline, job_index, filename, 
             _n_machines=len(machines),
             should_multiply_quantity_to_execution_times=should_multiply_quantity_to_execution_times,
         )
+
+    total_subnodes = 0
+    for child in node.get('children', []):
+        total_subnodes += dfs_bom(child, sorted_top, tasks_mapping_ids, deadline - task.average_execution_times_setup, job_index, filename, quantity * node['quantity'], should_multiply_quantity_to_execution_times, num_machines)
+
+    if len(node.get('children', [])) == 0:
+        total_subnodes = 1
+
+    task.total_subnodes = total_subnodes
+    task.children=[tasks_mapping_ids[child['operationid']] for child in node.get('children', [])]
+
     sorted_top.append(task)
     sorted_top[-1].task_index = len(sorted_top) - 1
     tasks_mapping_ids[node['operationid']] = len(sorted_top) - 1
+
+    return total_subnodes
 
 def get_job_deadline(start_date_str, delivery_date_str):
     # Convert strings to datetime objects

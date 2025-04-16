@@ -39,7 +39,6 @@ class Task:
                  runtime: int = None, started: int = None, finished: int = None, selected_machine: int = None,
                  _n_machines: int = None, _n_tools: int = None, _feasible_machine_from_instance_init: int = None,
                  _feasible_order_index_from_instance_init: int = None,
-                 children: List[int] = None,
                  parent_index = None,
                  quantity: int = 1,
                  execution_times: Dict[int, int] = None,
@@ -81,7 +80,7 @@ class Task:
         # public - non-static
         self.task_id = task_id
         self.filename = filename
-        self.children = children
+        self.children = None
         self.parent_index = parent_index
         self.quantity = quantity
         self.setup_times = setup_times
@@ -104,6 +103,8 @@ class Task:
 
             self.runtime = int(runtime * quantity)  # max execution time (without setup)
             self.average_execution_times_setup /= len(self.execution_times_setup)
+
+        self.total_subnodes = 0
 
 
     def recalculate_execution_times_setup(self):

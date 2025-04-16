@@ -170,6 +170,9 @@ class ActorCritic(nn.Module):
         row, col = state[('machine', 'exec', 'operation')].edge_index
         batch_index = state["machine"].batch[row]
 
+        print('state["operation"]', state["operation"])
+        print('state["operation"].batch', state["operation"].batch)
+
         for i in range(state["operation"].batch[-1]+1):
             action_probs = res[batch_index==i].T[0]
             action_probs[state[('machine','exec','operation')].mask[batch_index==i]] = float("-inf")
@@ -263,11 +266,11 @@ class PPOGNN:
             state = state.to(device)
             action, log_prob = self.policy_old.forward(state, deterministic)
 
-        if deterministic:
-            self.rollout_buffer.states.append(copy.deepcopy(state))#FM era state inainte in loc de observation
-            self.rollout_buffer.actions.append(action) #FM era state inainte in loc de action
-            self.rollout_buffer.logprobs.append(log_prob)
-            print("predict() self.rollout_buffer.logprobs", self.rollout_buffer.logprobs[:5])
+        # if deterministic:
+        #     self.rollout_buffer.states.append(copy.deepcopy(state))#FM era state inainte in loc de observation
+        #     self.rollout_buffer.actions.append(action) #FM era state inainte in loc de action
+        #     self.rollout_buffer.logprobs.append(log_prob)
+        #     print("predict() self.rollout_buffer.logprobs", self.rollout_buffer.logprobs[:5])
 
         return action, log_prob #FM-intoarce  log_prob in loc de state
 
@@ -289,6 +292,7 @@ class PPOGNN:
         # convert list to tensor
         batch_size = self.batch_size
         batches = DataLoader(self.rollout_buffer.states, batch_size=batch_size)
+        # print("batches", batches)
         all_actions = torch.squeeze(torch.stack(self.rollout_buffer.actions, dim=0)).detach().to(device)
         all_logprobs = torch.squeeze(torch.stack(self.rollout_buffer.logprobs, dim=0)).detach().to(device)
 
@@ -301,6 +305,7 @@ class PPOGNN:
         for _ in range(self.n_epochs):
             # Evaluating old actions and values
             for batch in batches:
+                print("train batch['operation'].batch", batch["operation"].batch)
                 batch = batch.to(device)
                 old_actions = all_actions[i*batch_size: (i+1)*batch_size]
                 old_logprobs = all_logprobs[i*batch_size: (i+1)*batch_size]
@@ -429,9 +434,10 @@ class PPOGNN:
                 action, prob = self.predict(state=state, deterministic=True)
                 new_state, reward, done, info = self.env.step(action)
                 self.num_timesteps += 1
-                self.rollout_buffer.rewards.append(reward)
-                self.rollout_buffer.dones.append(done)
+                # self.rollout_buffer.rewards.append(reward)
+                # self.rollout_buffer.dones.append(done)
 
+                print('learn state', state, 'action', action, 'prob', prob, 'reward', reward, 'done', done)
                 self.rollout_buffer.store_memory(state, action, prob, reward, done)
 
                 # call intermediate_test on_step

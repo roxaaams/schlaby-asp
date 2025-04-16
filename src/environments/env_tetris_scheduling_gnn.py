@@ -2,6 +2,7 @@ import numpy as np
 from typing import List
 import copy
 import random
+from src.agents.heuristic import HeuristicSelectionAgent
 from src.data_generator.task import Task
 from src.environments.env_tetris_scheduling import Env
 import torch_geometric.transforms as T
@@ -15,17 +16,11 @@ class EnvGNN(Env):
 
         super(EnvGNN, self).__init__(config, data, binary_features)
 
-        # self.generate_gnn()
-
-
     def generate_gnn(self):
         self.machine_nodes_mapping = {}
         self.num_operations = sum(1 for task in self.tasks if not task.done)
-        print('num_operations', self.num_operations)
-        print('num_machines', self.num_machines)
 
         self.heteroData['operation'].x = torch.zeros((self.num_operations, self.num_features_oper), dtype= torch.float)
-        # print('self.heteroData['operation'].x', self.heteroData['operation'].x.shape)
         self.heteroData['machine'].x = torch.zeros((self.num_machines, self.num_features_mach), dtype= torch.float)
 
         aux_list_op = []
@@ -168,35 +163,16 @@ class EnvGNN(Env):
         # print ('self.heteroData[operation].x', self.heteroData['operation'].x)
 
         aux_list_features.append([aux_list_op_mach_processing_times, aux_list_op_mach_processing_time_ratios_a, aux_list_op_mach_processing_time_ratios_b])
-        print('aux_list_features', aux_list_features)
         aux_list_features_flat = [item for sublist in aux_list_features for item in sublist]
-        print('aux_list_features_flat nr_elements', len(aux_list_features_flat), 'elements',aux_list_features_flat )
 
 
-        # print('before self.heteroData[operation, exec, machine].edge_index', self.heteroData['operation', 'exec', 'machine'].edge_index)
         self.heteroData['operation', 'prec', 'operation'].edge_index = torch.LongTensor(aux_list_op).T
-        # print('self.heteroData[operation, prec, operation].edge_index', self.heteroData['operation', 'prec', 'operation'].edge_index)
 
-        # print('before self.heteroData[operation, exec, machine].edge_index', self.heteroData['operation', 'exec', 'machine'].edge_index)
         self.heteroData['operation', 'exec', 'machine'].edge_index = torch.LongTensor(aux_list_mach).T
-        print('self.heteroData.edge_index', self.heteroData['operation', 'exec', 'machine'].edge_index.shape)
-        # print('self.heteroData[operation, exec, machine].edge_index', self.heteroData['operation', 'exec', 'machine'].edge_index)
-        # print('before self.heteroData[operation, exec, machine].edge_attr', self.heteroData['operation', 'exec', 'machine'].edge_attr)
         self.heteroData['operation', 'exec', 'machine'].edge_attr = torch.Tensor(aux_list_features_flat).T
-        print('self.heteroData.edge_attr', self.heteroData['operation', 'exec', 'machine'].edge_attr.shape)
-        # print('self.heteroData[operation, exec, machine].edge_attr', self.heteroData['operation', 'exec', 'machine'].edge_attr)
 
-        # print('before self.heteroData[machine, exec, operation].edge_index', self.heteroData['machine', 'exec', 'operation'].edge_index)
         self.heteroData['machine', 'exec', 'operation'].edge_index = torch.LongTensor(aux_list_mach_2).T
-        # print('self.heteroData[machine, exec, operation].edge_index shape', self.heteroData['machine', 'exec', 'operation'].edge_index.shape)
-        # print('self.heteroData[machine, exec, operation].edge_index', self.heteroData['machine', 'exec', 'operation'].edge_index)
-        # print('before self.heteroData[machine, exec, operation].edge_attr', self.heteroData['machine', 'exec', 'operation'].edge_attr)
         self.heteroData['machine', 'exec', 'operation'].edge_attr = torch.Tensor(aux_list_features_flat).T
-        # print('self.heteroData[machine, exec, operation].edge_attr', self.heteroData['machine', 'exec', 'operation'].edge_attr)
-
-        print('self.machine_nodes_mapping in generate_gnn', self.machine_nodes_mapping)
-        # self.heteroData = T.RemoveIsolatedNodes()(self.heteroData)
-
 
     def get_metadata(self):
         self.generate_gnn()
@@ -209,13 +185,6 @@ class EnvGNN(Env):
         # reset episode counters and infos
         self.num_steps = 0
         self.makespan = 0
-        self.ends_of_machine_occupancies = np.zeros(self.num_machines, dtype=int)
-        #  kind of schedule dict with start_date and end_date
-        self.machines = dict()
-        self.machines_counter = dict()
-        for i in range(self.num_machines):
-            self.machines[i] = Machine()
-            self.machines_counter[i] = 0
 
         self.action_history = []
         self.executed_job_history = []
@@ -228,6 +197,15 @@ class EnvGNN(Env):
 
         # load new instance every run
         self.data_idx = self.runs % len(self.data)
+
+        self.num_machines = len(self.data[self.data_idx][0].machines)
+        self.ends_of_machine_occupancies = np.zeros(self.num_machines, dtype=int)
+        #  kind of schedule dict with start_date and end_date
+        self.machines = dict()
+        self.machines_counter = dict()
+        for i in range(self.num_machines):
+            self.machines[i] = Machine()
+            self.machines_counter[i] = 0
 
         self.num_jobs, self.num_tasks, self.max_runtime, self.max_deadline, self.max_sum_runtime_setup_pair = self.get_instance_info(self.data_idx)
         self.max_task_index: int = self.num_tasks - 1
@@ -243,7 +221,8 @@ class EnvGNN(Env):
             for machine in range(len(task.machines)):
                 if task.machines[machine] == 1:
                     num_machines_per_task += 1
-            print('task.task_index', task.task_index, 'task.parent', task.parent_index, ' num machines eligible',num_machines_per_task )
+
+        print('Filename', self.tasks[0].filename)
 
         # retrieve maximum deadline of the current instance
         max_deadline = max([task.deadline for task in self.tasks])
@@ -282,34 +261,7 @@ class EnvGNN(Env):
         return reward
 
     def step(self, action, **kwargs):
-
-        # print('before shape machine exec operation', self.state['machine', 'exec', 'operation'].edge_index.shape)
-        # print('before shape operation exec machine', self.state['operation', 'exec', 'machine'].edge_index.shape)
-        # print('before shape operation prec operation', self.state['operation', "prec", 'operation'].edge_index.shape)
-        # print('before shape machine exec operatio attr', self.state['operation', "prec", 'operation'].edge_attr.shape)
-        # print('before shape operation exec machine attr', self.state['operation', 'exec', 'machine'].edge_attr.shape)
-        # print('before shape operation', self.state['operation'].x.shape)
-        # print('before shape machine', self.state['machine'].x.shape)
-
         self.num_steps += 1
-
-        print('Current num_step', self.num_steps)
-        print('Operation nodes', self.state['operation'].x.shape)
-        print('x:    ', self.state['operation'].x)
-        print('Machine nodes', self.state['machine'].x.shape)
-        print('x:    ', self.state['machine'].x)
-        # print('Operation prec operation')
-        # print('edge:    ', self.state['operation', "prec", 'operation'].edge_index)
-        # print('Machine exec operation')
-        # print('edge:    ', self.state['machine', 'exec', 'operation'].edge_index)
-        # print('attr:    ', self.state['machine', 'exec', 'operation'].edge_attr)
-        # print('Operation exec machine')
-        # print('edge:    ', self.state['operation', 'exec', 'machine'].edge_index)
-        # print('attr:    ', self.state['operation', 'exec', 'machine'].edge_attr)
-        #
-        # print('Mapping of nodes and tasks', self.task_nodes_mapping)
-
-
 
         action_mode = 'agent'  # set default, if the action mode is not defined assuming agent is taking it
         if 'action_mode' in kwargs.keys():
@@ -317,44 +269,23 @@ class EnvGNN(Env):
 
         if action_mode == 'agent':
 
-            # print('state in step before', self.state)
-            print('Action index: ', action )
             action = self.state['machine', 'exec', 'operation'].edge_index[:,action]
 
             sel_op = action[1].item()
-            print('sel_op: ', sel_op)
             sel_op_mapped_to_task = self.task_nodes_mapping[sel_op]
-            print('sel_op_mapped_to_task: ', sel_op_mapped_to_task)
             sel_mach = action[0].item()
             sel_mach_mapped = self.machine_nodes_mapping[sel_mach][0]
 
-            print('sel_mach: ', sel_mach)
-            print('sel_mach_mapped: ', sel_mach_mapped)
-
             mask = self.state['machine', 'exec', 'operation'].edge_index[1,:] != sel_op
-            # print('mask for machine-exec-operation', mask)
             self.state['machine', 'exec', 'operation'].edge_index = self.state['machine', 'exec', 'operation'].edge_index[:,mask]
-            # print('mach exec op attr shape before', self.state['machine', 'exec', 'operation'].edge_attr.shape)
             self.state['machine', 'exec', 'operation'].edge_attr = self.state['machine', 'exec', 'operation'].edge_attr[mask]
-            # print('mach exec op attr shape after', self.state['machine', 'exec', 'operation'].edge_attr.shape)
-
 
             mask = self.state['operation', 'exec', 'machine'].edge_index[0,:] != sel_op
             self.state['operation', 'exec', 'machine'].edge_index = self.state['operation', 'exec', 'machine'].edge_index[:,mask]
-            # print('op exec mach attr shape before', self.state['operation', 'exec', 'machine'].edge_attr.shape)
             self.state['operation', 'exec', 'machine'].edge_attr = self.state['operation', 'exec', 'machine'].edge_attr[mask]
-            # print('op exec mach  attr shape after', self.state['operation', 'exec', 'machine'].edge_attr.shape)
 
-
-            # print('before sel_op deletion from prec edges',  self.state['operation', 'prec', 'operation'].edge_index)
             self.state['operation', 'prec', 'operation'].edge_index = self.state['operation', 'prec', 'operation'].edge_index[:,self.state['operation', 'prec', 'operation'].edge_index[0,:] != sel_op]
-            # print('after sel_op deletion from prec edges',  self.state['operation', 'prec', 'operation'].edge_index)
-            beforeShape = self.state['machine'].x.shape
             self.state = T.RemoveIsolatedNodes()(self.state)
-            afterShape = self.state['machine'].x.shape
-
-            print('beforeShape', beforeShape, 'afterShape', afterShape)
-
 
             # calculate new time
             # # fixed from sel_mach -> sel_mach_mapped
@@ -374,24 +305,21 @@ class EnvGNN(Env):
                 self.tasks[parent_task_index].last_child_scheduled_finished = max(completion_time, self.tasks[parent_task_index].last_child_scheduled_finished)
             print('Scheduled operation: ', sel_op_mapped_to_task, self.tasks[sel_op_mapped_to_task].started, self.tasks[sel_op_mapped_to_task].finished, self.tasks[sel_op_mapped_to_task].selected_machine, self.tasks[sel_op_mapped_to_task].done)
 
-
-            done = self.check_done()
-            if done:
-                total_reward = self.compute_reward() / self.reward_normalization_factor
-                infos = {'mask': [] }
-                return self.state, total_reward, done, infos
-
             # Redo the mapping of the task nodes
             del self.task_nodes_mapping[sel_op]
             for key in list(self.task_nodes_mapping.keys()):
                 if key > sel_op:
                     self.task_nodes_mapping[key - 1] = self.task_nodes_mapping.pop(key)
 
-            # print('after update of mapping', self.task_nodes_mapping)
-
             # update machine occupancy
             self.ends_of_machine_occupancies[sel_mach_mapped] = completion_time
             self.machines[sel_mach_mapped].add_last_interval(self.tasks[sel_op_mapped_to_task])
+
+            done = self.check_done()
+            if done:
+                total_reward = self.compute_reward() / self.reward_normalization_factor
+                infos = {'mask': [] }
+                return self.state, total_reward, done, infos
 
 
             # recalculate features for machine and operation nodes. order of features is
@@ -419,8 +347,6 @@ class EnvGNN(Env):
                                 break
                         aux_list_op_status.append(is_executable)
 
-            print('edge index mach-op after scheduling', self.state['machine', 'exec', 'operation'].edge_index.T)
-            print('self.machine_nodes_mapping after update', self.machine_nodes_mapping)
             for key in list(self.machine_nodes_mapping.keys()):
                 if self.tasks[sel_op_mapped_to_task].machines[self.machine_nodes_mapping[key][0]] == 1:
                     self.machine_nodes_mapping[key] = (self.machine_nodes_mapping[key][0], self.machine_nodes_mapping[key][1] - 1)
@@ -433,13 +359,11 @@ class EnvGNN(Env):
             self.machine_nodes_mapping = updated_machine_nodes_mapping #copy.deepcopy(self.machine_nodes_mapping) - nu se face copie a noii structuri
 
 
-            print('self.machine_nodes_mapping after update', self.machine_nodes_mapping)
             for key in list(self.machine_nodes_mapping.keys()):
                 if self.machine_nodes_mapping[key][0] == sel_mach_mapped:
                     self.state['machine'].x[key, 0] = self.ends_of_machine_occupancies[sel_mach_mapped]
                     self.state['machine'].x[key, 2] = self.machines[sel_mach_mapped].get_total_occupancy_duration() / self.ends_of_machine_occupancies[sel_mach_mapped]
             self.num_operations -= 1 # decrease the number of operations by 1 because one operation has been scheduled
-            print('self.state[machine].x.shape[0]', self.state['machine'].x.shape[0])
             for i in range(self.state['machine'].x.shape[0]):
                 self.state['machine'].x[i, 1] = self.machine_nodes_mapping[i][1] / self.num_operations
 
@@ -462,7 +386,6 @@ class EnvGNN(Env):
             for i in range(self.state['machine', 'exec', 'operation'].edge_attr.shape[0]):
                 self.state['machine', 'exec', 'operation'].edge_attr[i, 1] = aux_list_op_mach_processing_time_ratios_a[i]
 
-            done = self.check_done()
             self.calculate_mask()
 
             total_reward = self.compute_reward() / self.reward_normalization_factor
@@ -487,15 +410,15 @@ class EnvGNN(Env):
                     self.execute_action_with_given_interval(0, selected_task, machine_id, start_time, end_time, index)
 
             done = self.check_done()
-            infos = {'mask': self.get_action_mask(is_asp=True)}
+            infos = {'mask': []}
             if action_mode == 'heuristic' and self.sp_type == 'asp' and 'completion_time' in kwargs.keys():
                 reward = self.compute_reward(use_letsa=True) / self.reward_normalization_factor
-                infos = {'mask': self.get_action_mask(is_asp=True) }
+                infos = {'mask': [] }
             else:
                 reward = self.compute_reward() / self.reward_normalization_factor
             return self.state, reward, done, infos
 
-    def get_action_mask(self, is_asp=False) -> np.array:
+    def get_action_mask(self) -> np.array:
         """
         Get Action mask
         In this environment, we always treat all actions as valid, because the interaction logic accepts it. Note that
@@ -507,30 +430,59 @@ class EnvGNN(Env):
         :return: Action mask
 
         """
-        if is_asp == False:
-            job_mask = np.where(self.job_task_state < self.num_tasks,
-                                np.ones(self.num_jobs, dtype=int), np.zeros(self.num_jobs, dtype=int))
-            self.last_mask = job_mask
-            return job_mask
-        else:
-            task_mask = [0] * self.num_tasks
-            for task in self.tasks:
-                done = True
-                for sub_task_index in task.children:
-                    if not self.tasks[sub_task_index].done:
-                        done = False
-                if done == True and not task.done:
-                    task_mask[task.task_index] = 1
+        task_mask = [0] * self.num_tasks
+        for task in self.tasks:
+            done = True
+            for sub_task_index in task.children:
+                if not self.tasks[sub_task_index].done:
+                    done = False
+            if done == True and not task.done:
+                task_mask[task.task_index] = 1
 
-            return task_mask
+        return task_mask
 
     def sample(self):
         return random.choice([i for i in range(len(self.state['machine', 'exec', 'operation'].mask)) if not self.state['machine', 'exec', 'operation'].mask[i]])
 
-    def calculate_mask(self):
-        k = 3
+    def is_task_executable(self, task_i):
+        if not self.tasks[task_i].done:
+            if  len(self.tasks[task_i].children) > 0:
+                for task_j in self.tasks[task_i].children:
+                    if not self.tasks[task_j].done:
+                        return False
+        return True
 
-        # Select the first k (%) pairs (feasible op, mach) in increasing order of the completion time → to be used to set the action space
+    def calculate_mask(self):
+
+        # self.action_selection_heuristic
+
+        # Select the first self.top_k_selected_actions (%) pairs (feasible op, mach) in increasing order of the completion time → to be used to set the action space
+
+        # TODO: check all feasible pairs
+
+
+        # pairs = set()
+        # heuristic_agent = HeuristicSelectionAgent()
+        # for heuristic_id in self.action_selection_heuristics:
+        #     selected_task_i = heuristic_agent(self.tasks, [], heuristic_id)
+        #     if self.is_task_executable(selected_task_i):
+        #         for machine_id in range(len(self.tasks[selected_task_i].machines)):
+        #             if self.tasks[selected_task_i].machines[machine_id] == 1:
+        #                 found_op_key = None
+        #                 for key, val in self.task_nodes_mapping.items():
+        #                     if val == selected_task_i:
+        #                         found_op_key = key
+        #                         break
+        #                 found_mach_key = None
+        #                 for key in self.machine_nodes_mapping.keys():
+        #                     if  self.machine_nodes_mapping[key][0] == machine_id:
+        #                         found_mach_key = key
+        #                         break
+        #                 pair = (found_op_key, found_mach_key, self.ends_of_machine_occupancies[machine_id] + self.tasks[selected_task_i].execution_times_setup[machine_id])
+        #                 if pair not in pairs:
+        #                     pairs.add(pair)
+        #
+        # print('pairs', pairs)
 
         pairs = []
         for task_i, task in enumerate(self.tasks):
@@ -561,7 +513,10 @@ class EnvGNN(Env):
         # print('pairs', pairs)
         res = [True] * self.state['machine', 'exec', 'operation'].edge_index.shape[1]
 
-        sorted_pairs = sorted(pairs, key=lambda x: x[2])[:k]
+        sorted_pairs = sorted(list(pairs), key=lambda x: x[2])[:self.top_k_selected_actions]
+        print('self.task_nodes_mapping', self.task_nodes_mapping)
+        print('self.machine_nodes_mapping', self.machine_nodes_mapping)
+        print('sorted_pairs', sorted_pairs)
         tensor_pairs = torch.tensor([(pair[1], pair[0]) for pair in sorted_pairs])
         indexes = []
         for pair in tensor_pairs:
@@ -569,8 +524,6 @@ class EnvGNN(Env):
             aux = np.logical_and(aux[:,0], aux[:,1])
             indexes = indexes + [i for i, val in enumerate(aux) if val==1]
 
-        # print('sorted_pairs_with_indices', sorted_pairs_with_indices)
-        # print('Mapping of nodes and tasks in mask', self.task_nodes_mapping)
         for index in indexes:
             res[index] = False
 

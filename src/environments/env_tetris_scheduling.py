@@ -37,7 +37,6 @@ class Env(gym.Env):
         # import data containing all instances
         self.data: List[List[Task]] = data  # is later shuffled before input into the environment
 
-
         # For GNN
         self.num_features_oper = 4
         self.num_features_mach = 3
@@ -48,8 +47,8 @@ class Env(gym.Env):
         self.state = self.heteroData
         self.task_nodes_mapping = {}
         self.machine_nodes_mapping = {}
-
-
+        self.top_k_selected_actions = config.get('top_k_selected_actions', 3)
+        self.action_selection_heuristics = config.get('action_selection_heuristics', ['ECT'])
 
         self.binary_features = binary_features
         self.feature_index_mapping = {
@@ -64,7 +63,6 @@ class Env(gym.Env):
              8: 'mat_machine_op',
              9: 'machines_counter_dynamic'
         }
-
 
         self.reward_normalization_factor = config.get('reward_normalization_factor', 50000)
 
@@ -140,6 +138,8 @@ class Env(gym.Env):
                     self.machines_counter[index] += 1
 
         self.critical_path = ([], 0)
+
+        #
 
     def reset(self) -> List[float]:
         """
@@ -423,13 +423,8 @@ class Env(gym.Env):
                         if latest_start_time < start_time or (latest_start_time == start_time and min_runtime > runtime):
                             latest_start_time, machine_id, index, min_runtime = start_time, machine, -1, runtime
                         found = True
-                        if (task.task_id == 832):
-                            print('Task 832 more:', 'machine_id', machine_id, 'latest_start_time', latest_start_time, 'completion_time', completion_time, 'index', index, 'min_runtime', min_runtime)
                         # print('Case 1: scheduling after last interval')
                     else:
-                        #  print('Case 2: scheduling between intervals')
-                        #  i decreasing if the time intervals are increasing
-                        #  i increasing if the time intervals are decreasing
                         for i in range(self.machines[machine].get_int_len() - 2, 0, -1):
                             #after_task = self.machines[machine].get_int(i + 1)
                             before_task = self.machines[machine].get_int(i + 1)  #BT.completion_time <= CT.start_time
@@ -459,19 +454,15 @@ class Env(gym.Env):
                         #  Can schedule before first operation on current machine
                         if self.tasks[first_task.task_index].finished <= start_time and (latest_start_time < start_time or (latest_start_time == start_time and min_runtime > runtime)):
                         #if self.tasks[first_task.task_index].started > completion_time and (latest_start_time < start_time or (latest_start_time == start_time and min_runtime > runtime)):
-                            print('Case scheduling before first interval')
                             latest_start_time, machine_id, index, min_runtime = start_time, machine, 0, runtime
                         #  Can schedule before first operation on current machine with updated time
                         else: # add after the last interval
-                            print('Final case: scheduling after last interval')
-                            print('start_time', start_time, 'latest_start_time', 'tentaive_start_time', latest_start_time)
                             last_task = self.machines[machine].get_last_int()
                             tentative_start_time = min(self.tasks[last_task.task_index].started - runtime, completion_time - runtime)
                             if latest_start_time < tentative_start_time or (latest_start_time == tentative_start_time and min_runtime > runtime):
                                 latest_start_time, machine_id, index, min_runtime = tentative_start_time, machine, -1, runtime
 
         end_time = latest_start_time + task.setup_times[machine_id] + task.execution_times[machine_id]
-        print('Returning ', machine_id, latest_start_time, end_time)
         return machine_id, latest_start_time, end_time, index
 
     def get_action_mask(self) -> np.array:
