@@ -581,9 +581,10 @@ class Env(gym.Env):
 
         """
         if self.reward_strategy == 'dense_makespan_reward':
+            new_makespan = self.get_makespan(use_letsa)
             # dense reward for makespan optimization according to https://arxiv.org/pdf/2010.12367.pdf
-            reward = self.makespan - self.get_makespan(use_letsa)
-            self.makespan = self.get_makespan(use_letsa)
+            reward = self.makespan - new_makespan
+            self.makespan = new_makespan
         elif self.reward_strategy == 'sparse_makespan_reward':
             reward = self.sparse_makespan_reward(use_letsa)
         elif self.reward_strategy == 'mr2_reward':

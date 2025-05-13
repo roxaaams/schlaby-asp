@@ -119,10 +119,12 @@ class Model(torch.nn.Module):
     def forward(self, data: HeteroData):
         res = self.gnn(data.x_dict, data.edge_index_dict, data.edge_attr_dict)
         if self.actor:
+            # nr feat mach + nr feat op as input for actor
             x_src, x_dst = res['machine'][data.edge_index_dict[('machine','exec','operation')][0]], res['operation'][data.edge_index_dict['machine','exec','operation'][1]]
             edge_feat = torch.cat([x_src,  data.edge_attr_dict[('machine','exec','operation')], x_dst], dim=-1)
             res = self.lin3(edge_feat)
         else:
+            # todo: print this red['operation']
             res = self.lin6(res["operation"])
             res = self.tanh(res)
 
@@ -137,6 +139,7 @@ class ActorCritic(nn.Module):
         self.metadata = metadata
         self.soft = torch.nn.Softmax(dim=0)
 
+    # todo: recheck how pytorch works
     def forward(self, state, deterministic: bool = True):
         action_probs = self.actor(state).T[0]
         # print('self.action(state', self.actor(state) )
@@ -301,8 +304,8 @@ class PPOGNN:
 
         #print(all_rewards)
         # Optimize policy for N epochs
-        i=0
         for _ in range(self.n_epochs):
+            i=0
             # Evaluating old actions and values
             for batch in batches:
                 print("train batch['operation'].batch", batch["operation"].batch)
@@ -431,6 +434,7 @@ class PPOGNN:
 
             # run agent on env until done
             while not done:
+                initial_state = copy.deepcopy(state)
                 action, prob = self.predict(state=state, deterministic=True)
                 new_state, reward, done, info = self.env.step(action)
                 self.num_timesteps += 1
@@ -438,7 +442,7 @@ class PPOGNN:
                 # self.rollout_buffer.dones.append(done)
 
                 print('learn state', state, 'action', action, 'prob', prob, 'reward', reward, 'done', done)
-                self.rollout_buffer.store_memory(state, action, prob, reward, done)
+                self.rollout_buffer.store_memory(initial_state, action, prob, reward, done)
 
                 # call intermediate_test on_step
                 if intermediate_test:
@@ -459,9 +463,9 @@ class PPOGNN:
 
                 # update every n rollout_steps
                 if self.num_timesteps % self.rollout_steps == 0:
-                    # predict the next reward, needed for the advantage computation of the last collected step
-                    with torch.no_grad():
-                        _, _ = self.predict(state=new_state, deterministic=True)
+                    # # predict the next reward, needed for the advantage computation of the last collected step
+                    # with torch.no_grad():
+                    #     _, _ = self.predict(state=new_state, deterministic=True)
 
                     # train networks
                     self.train()

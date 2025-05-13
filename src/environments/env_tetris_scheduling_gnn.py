@@ -198,14 +198,14 @@ class EnvGNN(Env):
         # load new instance every run
         self.data_idx = self.runs % len(self.data)
 
-        self.num_machines = len(self.data[self.data_idx][0].machines)
-        self.ends_of_machine_occupancies = np.zeros(self.num_machines, dtype=int)
-        #  kind of schedule dict with start_date and end_date
-        self.machines = dict()
-        self.machines_counter = dict()
-        for i in range(self.num_machines):
-            self.machines[i] = Machine()
-            self.machines_counter[i] = 0
+        # self.num_machines = len(self.data[self.data_idx][0].machines)
+        # self.ends_of_machine_occupancies = np.zeros(self.num_machines, dtype=int)
+        # #  kind of schedule dict with start_date and end_date
+        # self.machines = dict()
+        # self.machines_counter = dict()
+        # for i in range(self.num_machines):
+        #     self.machines[i] = Machine()
+        #     self.machines_counter[i] = 0
 
         self.num_jobs, self.num_tasks, self.max_runtime, self.max_deadline, self.max_sum_runtime_setup_pair = self.get_instance_info(self.data_idx)
         self.max_task_index: int = self.num_tasks - 1
@@ -215,6 +215,15 @@ class EnvGNN(Env):
         self.task_job_mapping = {(task.job_index, task.task_index): i for i, task in enumerate(self.tasks)}
         self.task_nodes_mapping = {}
         self.machine_nodes_mapping = {}
+
+        self.num_machines = len(self.tasks[0].machines)
+        self.ends_of_machine_occupancies = np.zeros(self.num_machines, dtype=int)
+        #  kind of schedule dict with start_date and end_date
+        self.machines = dict()
+        self.machines_counter = dict()
+        for i in range(self.num_machines):
+            self.machines[i] = Machine()
+            self.machines_counter[i] = 0
 
         for task in self.tasks:
             num_machines_per_task = 0
