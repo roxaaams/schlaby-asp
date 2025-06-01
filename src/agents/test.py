@@ -14,7 +14,7 @@ When running the file from a console you can use --plot-ganttchart to show the g
 import argparse
 
 from matplotlib import pyplot as plt
-from typing import Tuple, List, Dict, Union
+from typing import List, Dict, Union
 import numpy as np
 from tqdm import tqdm
 from datetime import datetime
@@ -57,7 +57,9 @@ def get_action(env, model, heuristic_id: str, heuristic_agent: Union[HeuristicSe
         task_mask = mask
         # init values for LETSA heuristic
         # critical_path is assigned to [] at every while iteration
-        if heuristic_id == 'LETSA':
+        if heuristic_id == 'ECT_ASP':
+            selected_action = heuristic_agent(tasks, task_mask, heuristic_id, ends_of_machine_occupancies=env.get_ends_of_machine_occupancies())
+        elif heuristic_id == 'LETSA':
             selected_action, completion_time = heuristic_agent(tasks, task_mask, heuristic_id, feasible_tasks, visited, max_deadline)
         else:
             selected_action = heuristic_agent(tasks, task_mask, heuristic_id)

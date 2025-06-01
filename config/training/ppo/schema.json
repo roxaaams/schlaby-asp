@@ -123,6 +123,10 @@
         },
         "reward_normalization_factor": {
             "type": "number"
+        },
+        "select_unique_k_actions_per_heuristic": {
+            "type": "boolean",
+            "default": false
         }
     },
     "required": [

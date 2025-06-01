@@ -173,8 +173,8 @@ class ActorCritic(nn.Module):
         row, col = state[('machine', 'exec', 'operation')].edge_index
         batch_index = state["machine"].batch[row]
 
-        print('state["operation"]', state["operation"])
-        print('state["operation"].batch', state["operation"].batch)
+        # print('state["operation"]', state["operation"])
+        # print('state["operation"].batch', state["operation"].batch)
 
         for i in range(state["operation"].batch[-1]+1):
             action_probs = res[batch_index==i].T[0]
@@ -308,7 +308,7 @@ class PPOGNN:
             i=0
             # Evaluating old actions and values
             for batch in batches:
-                print("train batch['operation'].batch", batch["operation"].batch)
+                # print("train batch['operation'].batch", batch["operation"].batch)
                 batch = batch.to(device)
                 old_actions = all_actions[i*batch_size: (i+1)*batch_size]
                 old_logprobs = all_logprobs[i*batch_size: (i+1)*batch_size]
@@ -441,7 +441,7 @@ class PPOGNN:
                 # self.rollout_buffer.rewards.append(reward)
                 # self.rollout_buffer.dones.append(done)
 
-                print('learn state', state, 'action', action, 'prob', prob, 'reward', reward, 'done', done)
+                # print('learn state', state, 'action', action, 'prob', prob, 'reward', reward, 'done', done)
                 self.rollout_buffer.store_memory(initial_state, action, prob, reward, done)
 
                 # call intermediate_test on_step

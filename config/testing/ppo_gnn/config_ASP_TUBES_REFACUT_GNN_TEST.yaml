@@ -1,0 +1,54 @@
+##############################################################################
+###                               Testing                                  ###
+##############################################################################
+
+# (R) [str] Type of your scheduling problem - this template is for the asp
+sp_type: asp
+# (R)   [string]  RL algorithm you want to use - This template is for dqn
+algorithm: ppo_gnn
+# (R)   [string]  Path to the file with generated data that to be used for training
+instances_file: asp/config_ASP_TUBES_REFACUT_GNN_TEST.pkl
+  # (R)   [string]  Test Environment: Should be the same the agent was trained on
+# to stay consistent with action and observation spaces
+#environment: env_tetris_scheduling
+environment: env_tetris_scheduling_gnn
+# (O)   [str]     The reward strategy determines, how the reward is computed. Default is 'dense_makespan_reward'
+reward_strategy: dense_makespan_reward
+  #reward_strategy: sparse_makespan_reward
+  # (O)   [int]     The reward scale is a float by which the reward is multiplied to increase/decrease the reward signal
+# strength
+reward_scale: 1
+# (O)   [string]  Name of the model you want to load for testing
+saved_model_name: ASP_TUBES_REFACUT_GNN
+# (R)   [int]     Seed for all pseudo random generators (random, numpy, torch)
+seed: 2
+  # (R)   [string]  Set an individual description that you can identify this
+  # training run  more easily later on. This will be used in
+# "weights and biases" as well
+config_description: ASP_TUBES_REFACUT_GNN_TEST
+# (O)   [string]  Set a directory from where you want to load the agent model
+experiment_save_path: models
+# (O)   [int]:    wandb mode choose: choose from [0: no wandb, 1: wandb_offline, 2: wandb_online]
+wandb_mode: 0
+# (O)   [string]  Set a wandb project where you want to upload all wandb logs
+wandb_project: project-1
+# (R)   List[str] List of all heuristics and algorithms against which to benchmark
+test_heuristics:  ['LETSA', 'EDD_ASP', 'MPO_ASP', 'LPO_ASP', 'SPT_ASP', 'LPT_ASP', 'LRM_ASP', 'SRM_ASP', 'LWKR_ASP',  'rand_asp', 'MWKR_ASP']#, 'ECT_ASP']
+
+action_selection_heuristics:
+  [     'SPT_ASP_FIRST_K',
+        'LPT_ASP_FIRST_K',
+        'EDD_ASP_FIRST_K',
+        'MPO_ASP_FIRST_K',
+        'LPO_ASP_FIRST_K',
+        'LRM_ASP_FIRST_K',
+        'SRM_ASP_FIRST_K',
+        'LWKR_ASP_FIRST_K',
+        'MWKR_ASP_FIRST_K',
+        'LPO_ROOT_ASP_FIRST_K',
+        'MPO_ROOT_ASP_FIRST_K',
+        'ECT_ASP_FIRST_K'
+  ] # ['LWKR_ASP', 'MWKR_ASP', 'LPT_ASP', 'SRM_ASP'] # ['LWKR_ASP', 'LPT_ASP', 'LRM_ASP', 'SRM_ASP', 'EDD_ASP', 'MPO_ASP', 'LPO_ASP', 'SPT_ASP', 'rand_asp', 'MPO_ASP_STANDARD', 'LPO_ASP_STANDARD', 'LPO_ROOT_ASP', 'MPO_ROOT_ASP']
+
+# (O)   [bool]    If true, the agent will select only the k unique actions.
+select_unique_k_actions_per_heuristic: True

@@ -461,72 +461,91 @@ class EnvGNN(Env):
                         return False
         return True
 
+    def is_leaf(self, task_index):
+        return len(self.tasks[task_index].children) == 0 and self.tasks[task_index].parent_index != None
+
+    def compute_paths(self, task_index, path, duration):
+        path.append(task_index)
+
+        # Compute the length (cumulative processing # time) of each path determined in step 4.1.
+        if not self.tasks[task_index].done:
+            duration += self.tasks[task_index].max_execution_times_setup
+        else:
+            duration += (self.tasks[task_index].finished - self.tasks[task_index].started)
+
+        # 4.3 a: Determine the critical (the largest cumulative processing time) path
+        if self.is_leaf(task_index) and duration > self.critical_path[1]:
+            self.critical_path = (copy.deepcopy(path), duration)
+            return
+        for index_subtask in self.tasks[task_index].children:
+            self.compute_paths(index_subtask, path, duration)
+            path.pop()
+
+    def add_pairs(self, selected_task_ids, pairs):
+        for selected_task_i in selected_task_ids:
+
+            if self.is_task_executable(selected_task_i):
+                for machine_id in range(len(self.tasks[selected_task_i].machines)):
+                    if self.tasks[selected_task_i].machines[machine_id] == 1:
+                        found_op_key = None
+                        for key, val in self.task_nodes_mapping.items():
+                            if val == selected_task_i:
+                                found_op_key = key
+                                break
+                        found_mach_key = None
+                        for key in self.machine_nodes_mapping.keys():
+                            if  self.machine_nodes_mapping[key][0] == machine_id:
+                                found_mach_key = key
+                                break
+                        pair = (found_op_key, found_mach_key, self.ends_of_machine_occupancies[machine_id] + self.tasks[selected_task_i].execution_times_setup[machine_id])
+                        if pair not in pairs:
+                            # print('Adding pair', pair)
+                            pairs.add(pair)
+
+
     def calculate_mask(self):
-
-        # self.action_selection_heuristic
-
         # Select the first self.top_k_selected_actions (%) pairs (feasible op, mach) in increasing order of the completion time → to be used to set the action space
 
-        # TODO: check all feasible pairs
-
-
-        # pairs = set()
-        # heuristic_agent = HeuristicSelectionAgent()
-        # for heuristic_id in self.action_selection_heuristics:
-        #     selected_task_i = heuristic_agent(self.tasks, [], heuristic_id)
-        #     if self.is_task_executable(selected_task_i):
-        #         for machine_id in range(len(self.tasks[selected_task_i].machines)):
-        #             if self.tasks[selected_task_i].machines[machine_id] == 1:
-        #                 found_op_key = None
-        #                 for key, val in self.task_nodes_mapping.items():
-        #                     if val == selected_task_i:
-        #                         found_op_key = key
-        #                         break
-        #                 found_mach_key = None
-        #                 for key in self.machine_nodes_mapping.keys():
-        #                     if  self.machine_nodes_mapping[key][0] == machine_id:
-        #                         found_mach_key = key
-        #                         break
-        #                 pair = (found_op_key, found_mach_key, self.ends_of_machine_occupancies[machine_id] + self.tasks[selected_task_i].execution_times_setup[machine_id])
-        #                 if pair not in pairs:
-        #                     pairs.add(pair)
-        #
-        # print('pairs', pairs)
-
-        pairs = []
-        for task_i, task in enumerate(self.tasks):
-            if not task.done:
-                is_executable = True
-                if  len(task.children) > 0:
-                    for task_j in task.children:
-                        if not self.tasks[task_j].done:
-                            is_executable = False
-                            break
-                # print('task_i', task_i, 'is_executable', is_executable)
-                if is_executable:
-                    for machine_id in range(len(task.machines)):
-                        if task.machines[machine_id] == 1:
-                            found_op_key = None
-                            for key, val in self.task_nodes_mapping.items():
-                                if val == task_i:
-                                    found_op_key = key
-                                    break
-                            found_mach_key = None
-                            for key in self.machine_nodes_mapping.keys():
-                                if  self.machine_nodes_mapping[key][0] == machine_id:
-                                    found_mach_key = key
-                                    break
-                            pairs.append((found_op_key, found_mach_key, self.ends_of_machine_occupancies[machine_id] + task.execution_times_setup[machine_id]))
-
-
-        # print('pairs', pairs)
+        pairs = set()
+        sorted_pairs = None
+        tensor_pairs = None
         res = [True] * self.state['machine', 'exec', 'operation'].edge_index.shape[1]
+        heuristic_agent = HeuristicSelectionAgent()
 
-        sorted_pairs = sorted(list(pairs), key=lambda x: x[2])[:self.top_k_selected_actions]
-        print('self.task_nodes_mapping', self.task_nodes_mapping)
-        print('self.machine_nodes_mapping', self.machine_nodes_mapping)
-        print('sorted_pairs', sorted_pairs)
-        tensor_pairs = torch.tensor([(pair[1], pair[0]) for pair in sorted_pairs])
+        if len(self.action_selection_heuristics) == 0:
+            raise ValueError("No action selection heuristics provided. Please provide at least one heuristic ID.")
+
+        for heuristic_id in self.action_selection_heuristics:
+            if 'ECT' in heuristic_id:
+                if 'FIRST_K' in heuristic_id:
+                    selected_task_ids = heuristic_agent(self.tasks, [], heuristic_id, k=self.top_k_selected_actions, ends_of_machine_occupancies=self.ends_of_machine_occupancies)
+                    self.add_pairs(selected_task_ids, pairs)
+                else:
+                    selected_task_id = heuristic_agent(self.tasks, [], heuristic_id, ends_of_machine_occupancies=self.ends_of_machine_occupancies)
+                    self.add_pairs([selected_task_id], pairs)
+            elif 'FIRST_K' in heuristic_id:
+                selected_task_ids = heuristic_agent(self.tasks, [], heuristic_id, k=self.top_k_selected_actions)
+                self.add_pairs(selected_task_ids, pairs)
+            else:
+                selected_task_id = heuristic_agent(self.tasks, [], heuristic_id)
+                self.add_pairs([selected_task_id], pairs)
+
+        if self.select_unique_k_actions_per_heuristic:
+            sorted_pairs = sorted(list(pairs), key=lambda x: x[2])
+            tensor_pairs = torch.empty((0, 2), dtype=torch.long)  # Initialize an empty tensor with shape (0, 2)
+            seen_pairs = set()
+
+            for pair in sorted_pairs:
+                if (pair[1], pair[0]) not in seen_pairs:  # Ensure uniqueness based on the pair itself
+                    new_tensor = torch.tensor([[pair[1], pair[0]]], dtype=torch.long)  # Create a tensor for the current pair
+                    tensor_pairs = torch.cat((tensor_pairs, new_tensor), dim=0)  # Append the new tensor
+                    seen_pairs.add((pair[1], pair[0]))  # Track the pair
+                    if tensor_pairs.shape[0] == self.top_k_selected_actions:  # Stop when k pairs are added
+                        break
+        else:
+            sorted_pairs = sorted(list(pairs), key=lambda x: x[2])[:self.top_k_selected_actions]
+            tensor_pairs = torch.tensor([(pair[1], pair[0]) for pair in sorted_pairs])
+
         indexes = []
         for pair in tensor_pairs:
             aux = self.state['machine', 'exec', 'operation'].edge_index.T == pair
@@ -537,6 +556,40 @@ class EnvGNN(Env):
             res[index] = False
 
         self.state['machine', 'exec', 'operation'].mask = torch.BoolTensor(res)
+
+        # pairs = []
+        # for task_i, task in enumerate(self.tasks):
+        #     if not task.done:
+        #         is_executable = True
+        #         if  len(task.children) > 0:
+        #             for task_j in task.children:
+        #                 if not self.tasks[task_j].done:
+        #                     is_executable = False
+        #                     break
+        #         # print('task_i', task_i, 'is_executable', is_executable)
+        #         if is_executable:
+        #             for machine_id in range(len(task.machines)):
+        #                 if task.machines[machine_id] == 1:
+        #                     found_op_key = None
+        #                     for key, val in self.task_nodes_mapping.items():
+        #                         if val == task_i:
+        #                             found_op_key = key
+        #                             break
+        #                     found_mach_key = None
+        #                     for key in self.machine_nodes_mapping.keys():
+        #                         if  self.machine_nodes_mapping[key][0] == machine_id:
+        #                             found_mach_key = key
+        #                             break
+        #                     pairs.append((found_op_key, found_mach_key, self.ends_of_machine_occupancies[machine_id] + task.execution_times_setup[machine_id]))
+
+
+        # print('pairs', pairs)
+        #
+        # print('self.task_nodes_mapping', self.task_nodes_mapping)
+        # print('self.machine_nodes_mapping', self.machine_nodes_mapping)
+
+
+
 
     def normalize_state(self, state):
         state = copy.deepcopy(state)

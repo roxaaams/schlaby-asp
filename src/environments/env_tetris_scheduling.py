@@ -49,6 +49,7 @@ class Env(gym.Env):
         self.machine_nodes_mapping = {}
         self.top_k_selected_actions = config.get('top_k_selected_actions', 3)
         self.action_selection_heuristics = config.get('action_selection_heuristics', ['ECT'])
+        self.select_unique_k_actions_per_heuristic = config.get('select_unique_k_actions_per_heuristic', False)
 
         self.binary_features = binary_features
         self.feature_index_mapping = {
@@ -340,7 +341,6 @@ class Env(gym.Env):
         selected_task = self.tasks[task_idx]
         return task_idx, selected_task
 
-    #  aici trebuie modificat pentru ASP: timpi diferiti: trebuie sa iau masina care incepe cel mai devreme si termina cel mai devreme
     def choose_machine(self, task: Task) -> int:
         """
         This function performs the logic, with which the machine is chosen (in the case of the flexible JSSP)
@@ -356,7 +356,7 @@ class Env(gym.Env):
         machine_times = np.where(possible_machines,
                                  self.ends_of_machine_occupancies,
                                  np.full(len(possible_machines), np.inf))
-        # choose machine with the earliest starting time and also shortest execution time
+        # choose machine with the earliest starting time and also the shortest execution time
         if self.sp_type == 'asp':
             earliest_finishing_time = np.inf
             machine_id = int(np.argmin(machine_times))
@@ -654,8 +654,8 @@ class Env(gym.Env):
         :return: True if all jobs are done, else False
 
         """
-        for task in self.tasks:
-            print('in check_done --> task_index', task.task_index, 'done', task.done, 'started', task.started, 'task.finished', task.finished)
+        # for task in self.tasks:
+        #     print('in check_done --> task_index', task.task_index, 'done', task.done, 'started', task.started, 'task.finished', task.finished)
 
         sum_done = sum([task.done for task in self.tasks])
         return sum_done == self.num_all_tasks or self.num_steps == self.num_steps_max
@@ -774,3 +774,6 @@ class Env(gym.Env):
             return GanttChartPlotter.get_gantt_chart_image(self.tasks)
         else:
             raise NotImplementedError(f"The Environment on which you called render doesn't support mode: {mode}")
+
+    def get_ends_of_machine_occupancies(self):
+        return self.ends_of_machine_occupancies
