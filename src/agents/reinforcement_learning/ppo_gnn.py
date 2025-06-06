@@ -209,7 +209,7 @@ class PPOGNN:
         self.gamma = config.get('gamma', 0.99)
         self.gae_lambda = config.get('gae_lambda', 0.95)
         self.clip_range = config.get('clip_range', 0.2)
-        self.n_epochs = config.get('n_epochs', 0.5)
+        self.n_epochs = config.get('n_epochs', 5)
         self.rollout_steps = config.get('rollout_steps', 2048)
         self.ent_coef = config.get('ent_coef', 0.0)
         self.num_timesteps = 0
@@ -235,6 +235,7 @@ class PPOGNN:
             torch.manual_seed(self.seed)
             self.env.seed(self.seed)
 
+        # TODO: check how it is organised and how is used
         self.rollout_buffer = RolloutBuffer(self.rollout_steps, self.batch_size)
 
         if metadata is None:
@@ -304,8 +305,10 @@ class PPOGNN:
 
         #print(all_rewards)
         # Optimize policy for N epochs
-        for _ in range(self.n_epochs):
+        for epoch in range(self.n_epochs):
             i=0
+            epoch_loss = 0
+            epoch_loss_cri = 0
             # Evaluating old actions and values
             for batch in batches:
                 # print("train batch['operation'].batch", batch["operation"].batch)
@@ -322,7 +325,7 @@ class PPOGNN:
                 # Finding Surrogate Loss
                 advantages = rewards - state_values.detach()
 
-                all_losses_cri += 0.5*self.MseLoss(state_values, rewards).mean()
+                epoch_loss_cri += 0.5*self.MseLoss(state_values, rewards).mean()
                 surr1 = ratios * advantages
                 surr2 = torch.clamp(ratios, 1-self.clip_range, 1+self.clip_range) * advantages
                 # final loss of clipped objective PPO
@@ -338,7 +341,10 @@ class PPOGNN:
                 self.optimizer.step()
 
                 i+=1
-                all_losses+=loss.mean()
+                epoch_loss = loss.mean()
+            print('epoch', epoch, 'loss', epoch_loss.mean().item(), 'loss_cri', epoch_loss_cri.mean().item())
+            all_losses_cri += epoch_loss_cri
+            all_losses+= epoch_loss
 
 
         # Copy new weights into old policy
