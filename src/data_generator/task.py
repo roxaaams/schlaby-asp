@@ -39,7 +39,6 @@ class Task:
                  runtime: int = None, started: int = None, finished: int = None, selected_machine: int = None,
                  _n_machines: int = None, _n_tools: int = None, _feasible_machine_from_instance_init: int = None,
                  _feasible_order_index_from_instance_init: int = None,
-                 children: List[int] = None,
                  parent_index = None,
                  quantity: int = 1,
                  execution_times: Dict[int, int] = None,
@@ -81,23 +80,47 @@ class Task:
         # public - non-static
         self.task_id = task_id
         self.filename = filename
-        self.children = children
+        self.children = None
         self.parent_index = parent_index
         self.quantity = quantity
         self.setup_times = setup_times
         self.setup_time = setup_time
         self.execution_times = execution_times
+        self.execution_times_setup: Dict[int, int] = {}
+        self.last_child_scheduled_finished = 0
         if should_multiply_quantity_to_execution_times == True:
             self.max_execution_times_setup = 0
+            self.min_execution_times_setup = 1000000000
             self.average_execution_times_setup = 0
             for machine_id in self.execution_times:
                 self.execution_times[machine_id] *= self.quantity
-                if self.execution_times[machine_id]+self.setup_times[machine_id]>self.max_execution_times_setup:
-                    self.max_execution_times_setup = self.execution_times[machine_id]+self.setup_times[machine_id]
-                self.average_execution_times_setup += self.execution_times[machine_id]+self.setup_times[machine_id]
-            self.runtime = int(runtime * quantity)  # max execution time (without setup)
-            self.average_execution_times_setup /= len(self.execution_times)
+                self.execution_times_setup[machine_id] = self.execution_times[machine_id] + self.setup_times[machine_id]
+                if self.execution_times_setup[machine_id]>self.max_execution_times_setup:
+                    self.max_execution_times_setup = self.execution_times_setup[machine_id]
+                if self.execution_times_setup[machine_id]<self.min_execution_times_setup:
+                    self.min_execution_times_setup = self.execution_times_setup[machine_id]
+                self.average_execution_times_setup += self.execution_times_setup[machine_id]
 
+            self.runtime = int(runtime * quantity)  # max execution time (without setup)
+            self.average_execution_times_setup /= len(self.execution_times_setup)
+
+        self.total_subnodes = 0
+
+
+    def recalculate_execution_times_setup(self):
+        self.max_execution_times_setup = 0
+        self.min_execution_times_setup = 1000000000
+        self.average_execution_times_setup = 0
+        self.runtime = 0
+        for machine_id in self.execution_times:
+            self.runtime = max(self.runtime, self.execution_times[machine_id])  # max execution time (without setup)
+            if self.execution_times_setup[machine_id]>self.max_execution_times_setup:
+                self.max_execution_times_setup = self.execution_times_setup[machine_id]
+            if self.execution_times_setup[machine_id]<self.min_execution_times_setup:
+                self.min_execution_times_setup = self.execution_times_setup[machine_id]
+            self.average_execution_times_setup += self.execution_times_setup[machine_id]
+
+        self.average_execution_times_setup /= len(self.execution_times_setup)
 
     def __str__(self) -> str:
         return f"Task - job index {self.job_index} - task index {self.task_index} - parent_index {self.parent_index} - children {self.children}"

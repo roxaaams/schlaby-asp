@@ -12,6 +12,8 @@ from src.visuals_generator.gantt_chart import GanttChartPlotter
 from typing import List, Tuple, Dict, Any, Union
 from src.models.machine import Machine
 
+from torch_geometric.data import HeteroData
+
 REWARD_BUFFER_SIZE = 250
 
 
@@ -35,6 +37,20 @@ class Env(gym.Env):
         # import data containing all instances
         self.data: List[List[Task]] = data  # is later shuffled before input into the environment
 
+        # For GNN
+        self.num_features_oper = 4
+        self.num_features_mach = 3
+        # TODO: num_operations must be always the number of operations that were not scheduled/done already!!!
+        # DONE in the code below
+        self.num_operations = 0
+        self.heteroData = HeteroData()
+        self.state = self.heteroData
+        self.task_nodes_mapping = {}
+        self.machine_nodes_mapping = {}
+        self.top_k_selected_actions = config.get('top_k_selected_actions', 3)
+        self.action_selection_heuristics = config.get('action_selection_heuristics', ['ECT'])
+        self.select_unique_k_actions_per_heuristic = config.get('select_unique_k_actions_per_heuristic', False)
+
         self.binary_features = binary_features
         self.feature_index_mapping = {
              0: 'task_status',
@@ -49,11 +65,10 @@ class Env(gym.Env):
              9: 'machines_counter_dynamic'
         }
 
-
         self.reward_normalization_factor = config.get('reward_normalization_factor', 50000)
 
         # get number of jobs, tasks, tools, machines and runtimes from input data, and setup time
-        self.num_jobs, self.num_tasks, self.max_runtime, self.max_deadline, self.max_setup_time, self.max_sum_runtime_setup_pair = self.get_instance_info()
+        self.num_jobs, self.num_tasks, self.max_runtime, self.max_deadline, self.max_sum_runtime_setup_pair = self.get_instance_info()
         self.num_machines: int = copy.copy(self.data[0][0]._n_machines)
         self.num_tools: int = copy.copy(self.data[0][0]._n_tools)
         self.num_all_tasks: int = self.num_jobs * self.num_tasks
@@ -99,7 +114,7 @@ class Env(gym.Env):
         self.action_space: spaces.Discrete = spaces.Discrete(self.num_tasks)
 
         # initial observation
-        self._state_obs: List = self.reset()
+        self._state_obs = self.reset()
 
         # observation space
         observation_shape = np.array(self.state_obs).shape
@@ -125,13 +140,15 @@ class Env(gym.Env):
 
         self.critical_path = ([], 0)
 
+        #
+
     def reset(self) -> List[float]:
         """
         - Resets the episode information trackers
         - Updates the number of runs
         - Loads new instance
 
-        :return: First observation by calling the class function self.state_obs
+        # :return: First observation by calling the class function self.state_obs
 
         """
         # update runs (episodes passed so far)
@@ -156,7 +173,7 @@ class Env(gym.Env):
         self.data_idx = self.runs % len(self.data)
         # recompute self.num_tasks, self.max_runtime, self.max_deadline for asp case
         if self.sp_type == 'asp':
-            self.num_jobs, self.num_tasks, self.max_runtime, self.max_deadline, self.max_setup_time, self.max_sum_runtime_setup_pair = self.get_instance_info(self.data_idx)
+            self.num_jobs, self.num_tasks, self.max_runtime, self.max_deadline, self.max_sum_runtime_setup_pair = self.get_instance_info(self.data_idx)
             self.max_task_index: int = self.num_tasks - 1
             self.num_all_tasks: int = self.num_jobs * self.num_tasks
             self.tardiness: numpy.ndarray = np.zeros(self.num_all_tasks, dtype=int)
@@ -181,14 +198,15 @@ class Env(gym.Env):
         max_deadline = max([task.deadline for task in self.tasks])
         self.max_deadline = max_deadline if max_deadline > 0 else 1
         self.critical_path = ([], 0)
+        self.task_nodes_mapping = {}
+        self.machine_nodes_mapping = {}
 
         return self.state_obs
 
-    def step(self, action: Union[int, float], **kwargs) -> (List[float], Any, bool, Dict):
+    def step(self, action, **kwargs): #, action: Union[int, float], **kwargs):
         """
         Step Function
         :param action: Action to be performed on the current state of the environment
-        :return: Observation, reward, done, infos
         """
         # transform and store action
         selected_job_vector = self.to_one_hot(action, self.num_jobs)
@@ -234,18 +252,18 @@ class Env(gym.Env):
         """
         Retrieves info about the instance size and configuration from an instance sample
         """
-        num_jobs, num_tasks, max_runtime, max_deadline, max_setup_time, max_sum_runtime_setup_pair = 0, 0, 0, 0, 0, 0
+        num_jobs, num_tasks, max_runtime, max_deadline, max_sum_runtime_setup_pair = 0, 0, 0, 0, 0
         for task in self.data[index]:
             num_jobs = task.job_index if task.job_index > num_jobs else num_jobs
             num_tasks = task.task_index if task.task_index > num_tasks else num_tasks
             max_runtime = task.runtime if task.runtime > max_runtime else max_runtime
             max_deadline = task.deadline if task.deadline > max_deadline else max_deadline
-            max_setup_time = task.setup_time if task.setup_time else max_setup_time
+
             for machine_index in range(len(task.machines)):
                 if task.machines[machine_index] == 1:
                     max_sum_runtime_setup_pair = max(max_sum_runtime_setup_pair, task.execution_times[machine_index] + task.setup_times[machine_index])
 
-        return num_jobs + 1, num_tasks + 1, max_runtime, max_deadline, max_setup_time, max_sum_runtime_setup_pair
+        return num_jobs + 1, num_tasks + 1, max_runtime, max_deadline, max_sum_runtime_setup_pair
 
     @property
     def state_obs(self) -> List[float]:
@@ -323,7 +341,6 @@ class Env(gym.Env):
         selected_task = self.tasks[task_idx]
         return task_idx, selected_task
 
-    #  aici trebuie modificat pentru ASP: timpi diferiti: trebuie sa iau masina care incepe cel mai devreme si termina cel mai devreme
     def choose_machine(self, task: Task) -> int:
         """
         This function performs the logic, with which the machine is chosen (in the case of the flexible JSSP)
@@ -339,7 +356,7 @@ class Env(gym.Env):
         machine_times = np.where(possible_machines,
                                  self.ends_of_machine_occupancies,
                                  np.full(len(possible_machines), np.inf))
-        # choose machine with the earliest starting time and also shortest execution time
+        # choose machine with the earliest starting time and also the shortest execution time
         if self.sp_type == 'asp':
             earliest_finishing_time = np.inf
             machine_id = int(np.argmin(machine_times))
@@ -370,11 +387,9 @@ class Env(gym.Env):
         index:   index in the list of time intervals/machine
 
         """
-        if task.task_id == 832:
-            print('Task 832: ', task.task_id, 'Original completion time', original_completion_time)
 
         possible_machines = task.machines   # binary vector with {0,1}
-    
+
         # 4.5.1 Identify the latest available starting time  for operation Je (to verify constraint (2.6) of (PI».
         # 4.5.2 If latest available starting time Sc = Cc - tc, such that the machine is
         # available during (Sc, Cc); Sc, Cc are ideal starting and completion times,
@@ -408,13 +423,8 @@ class Env(gym.Env):
                         if latest_start_time < start_time or (latest_start_time == start_time and min_runtime > runtime):
                             latest_start_time, machine_id, index, min_runtime = start_time, machine, -1, runtime
                         found = True
-                        if (task.task_id == 832):
-                            print('Task 832 more:', 'machine_id', machine_id, 'latest_start_time', latest_start_time, 'completion_time', completion_time, 'index', index, 'min_runtime', min_runtime)
                         # print('Case 1: scheduling after last interval')
                     else:
-                        #  print('Case 2: scheduling between intervals')
-                        #  i decreasing if the time intervals are increasing
-                        #  i increasing if the time intervals are decreasing
                         for i in range(self.machines[machine].get_int_len() - 2, 0, -1):
                             #after_task = self.machines[machine].get_int(i + 1)
                             before_task = self.machines[machine].get_int(i + 1)  #BT.completion_time <= CT.start_time
@@ -422,16 +432,16 @@ class Env(gym.Env):
                             # indice i+1                         indice i
                             #BT.completion_time <= T.start_time<T.completion_time<=CT.start_time
                             #if start_time > self.tasks[current_task.task_index].finished and completion_time < self.tasks[after_task.task_index].started:
-                            if start_time >= self.tasks[before_task.task_index].finished and completion_time <= self.tasks[current_task.task_index].started: 
+                            if start_time >= self.tasks[before_task.task_index].finished and completion_time <= self.tasks[current_task.task_index].started:
                                 found = True # to insert between i and i+1 --> insert on i+1
                                 if latest_start_time < start_time or (latest_start_time == start_time and min_runtime > runtime):
                                     latest_start_time, machine_id, index, min_runtime = start_time, machine, i + 1, runtime
-                                break    
+                                break
                             else:  # for  decreasing
                                  #tentative_start_time = self.tasks[current_task.task_index].started - runtime
                                  if self.tasks[current_task.task_index].started - self.tasks[before_task.task_index].finished >= runtime:
                                      #tentative_start_time = self.tasks[after_task.task_index].started - runtime
-                                     if completion_time > self.tasks[current_task.task_index].started: 
+                                     if completion_time > self.tasks[current_task.task_index].started:
                                         tentative_start_time = self.tasks[current_task.task_index].started - runtime #tentative_start_time
                                         found = True
                                         if latest_start_time < tentative_start_time or (latest_start_time == tentative_start_time and min_runtime > runtime):
@@ -444,19 +454,15 @@ class Env(gym.Env):
                         #  Can schedule before first operation on current machine
                         if self.tasks[first_task.task_index].finished <= start_time and (latest_start_time < start_time or (latest_start_time == start_time and min_runtime > runtime)):
                         #if self.tasks[first_task.task_index].started > completion_time and (latest_start_time < start_time or (latest_start_time == start_time and min_runtime > runtime)):
-                            print('Case scheduling before first interval')
                             latest_start_time, machine_id, index, min_runtime = start_time, machine, 0, runtime
                         #  Can schedule before first operation on current machine with updated time
                         else: # add after the last interval
-                            print('Final case: scheduling after last interval')
-                            print('start_time', start_time, 'latest_start_time', 'tentaive_start_time', latest_start_time)
                             last_task = self.machines[machine].get_last_int()
                             tentative_start_time = min(self.tasks[last_task.task_index].started - runtime, completion_time - runtime)
                             if latest_start_time < tentative_start_time or (latest_start_time == tentative_start_time and min_runtime > runtime):
                                 latest_start_time, machine_id, index, min_runtime = tentative_start_time, machine, -1, runtime
-                    
+
         end_time = latest_start_time + task.setup_times[machine_id] + task.execution_times[machine_id]
-        print('Returning ', machine_id, latest_start_time, end_time)
         return machine_id, latest_start_time, end_time, index
 
     def get_action_mask(self) -> np.array:
@@ -575,9 +581,10 @@ class Env(gym.Env):
 
         """
         if self.reward_strategy == 'dense_makespan_reward':
+            new_makespan = self.get_makespan(use_letsa)
             # dense reward for makespan optimization according to https://arxiv.org/pdf/2010.12367.pdf
-            reward = self.makespan - self.get_makespan(use_letsa)
-            self.makespan = self.get_makespan(use_letsa)
+            reward = self.makespan - new_makespan
+            self.makespan = new_makespan
         elif self.reward_strategy == 'sparse_makespan_reward':
             reward = self.sparse_makespan_reward(use_letsa)
         elif self.reward_strategy == 'mr2_reward':
@@ -647,6 +654,9 @@ class Env(gym.Env):
         :return: True if all jobs are done, else False
 
         """
+        # for task in self.tasks:
+        #     print('in check_done --> task_index', task.task_index, 'done', task.done, 'started', task.started, 'task.finished', task.finished)
+
         sum_done = sum([task.done for task in self.tasks])
         return sum_done == self.num_all_tasks or self.num_steps == self.num_steps_max
 
@@ -686,10 +696,6 @@ class Env(gym.Env):
                     earliest_start_time = min(earliest_start_time, task.started)
                     latest_end_time = max(latest_end_time, task.finished)
 
-                    if task.parent_index is None:
-                        print('deadline', task.deadline, 'latest_end_time', latest_end_time)                       
-
-            print('earliest_start_time', earliest_start_time, 'latest_end_time', latest_end_time)  
             return latest_end_time - earliest_start_time
         return np.max(self.ends_of_machine_occupancies)
 
@@ -741,7 +747,7 @@ class Env(gym.Env):
                 if task.finished > task_successor.started:
                     print('Task', task.task_id, 'finishes after its parent. The parent is ', self.tasks[task_successor_index].task_id)
                     is_valid = False
-                
+
         return is_valid
 
     def intervals_info(self):
@@ -768,3 +774,6 @@ class Env(gym.Env):
             return GanttChartPlotter.get_gantt_chart_image(self.tasks)
         else:
             raise NotImplementedError(f"The Environment on which you called render doesn't support mode: {mode}")
+
+    def get_ends_of_machine_occupancies(self):
+        return self.ends_of_machine_occupancies

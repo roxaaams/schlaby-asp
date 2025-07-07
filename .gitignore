@@ -1,3 +1,6 @@
+ .idea/vcs.xml
+
+./data/own_data
 *.pyc
 *.pyo
 
@@ -44,18 +47,22 @@ venv.bak/
 wandb/*
 
 ## Generated data
-#data
-#
-#data/instances/*
-#!data/instances
-#!data/instances/jssp
-#!data/instances/fjssp
-#data/instances/jssp/*
-#data/instances/fjssp/*
-#!data/instances/jssp/config_job3_task4_tools0.pkl
-#!data/instances/fjssp/config_job3_task4_tools0.pkl
-#!data/benchmark_instances
-#!data/benchmark_instances/*
+data
+
+data/instances/*
+!data/instances
+!data/instances/jssp
+!data/instances/fjssp
+data/instances/jssp/*
+data/instances/fjssp/*
+!data/instances/jssp/config_job3_task4_tools0.pkl
+!data/instances/fjssp/config_job3_task4_tools0.pkl
+!data/benchmark_instances
+!data/benchmark_instances/*
+
+data/own_data/*/*/*
+
+data/own_data/tubes_asp_refacut_train/
 
 data/logs/*
 !data/logs/.gitkeep
